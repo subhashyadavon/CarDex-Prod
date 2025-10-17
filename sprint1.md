@@ -2,6 +2,11 @@
 
 </br>
 
+## NOTE!!
+We wrote an entire architecture breakdown document, please take a look at it to see the scope of our project and our planning processes. It is located [here](docs/architecture.md)
+
+</br>
+
 ## Testing Plan
 Our testing plan is written [here](docs/Testing-Plan.md)
 
