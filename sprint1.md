@@ -83,6 +83,10 @@ Our CLI UI is a simple market summary, showing recent and open trades. As such, 
 
 
 ### Top 3 Acceptance Tests
+#### 1. [Validate that a valid Card-for-Currency trade was successfully executed](https://github.com/VSHAH1210/CarDex/blob/b58ea1fb76f58b1c85f48c976c916c799b3903f3/CarDexFrontend/src/__tests__/logic/TradingEngine.test.ts#L58)
+- Acceptance criteria is that the trade was successful, given the proper User, Card, and currency context.
+#### 2. [Validate that a valid Card-for-Card trade was successfully executed](https://github.com/VSHAH1210/CarDex/blob/b58ea1fb76f58b1c85f48c976c916c799b3903f3/CarDexFrontend/src/__tests__/logic/TradingEngine.test.ts#L123)
+- Acceptance criteria is that the trade was successful, given the proper User and Card context.
 
 </br>
 </br>
