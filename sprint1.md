@@ -72,6 +72,15 @@ Our CLI UI is a simple market summary, showing recent and open trades. As such, 
 
 
 ### Top 3 Intergration Tests
+#### 1. [Test for GetAllCards with sorting](https://github.com/VSHAH1210/CarDex/blob/feature/sprint1-cleanup/CarDexBackend/tests/IntegrationTests/CarDexBackend.IntegrationTests.Services/CardServiceTest.cs#L146)
+- Tests the `GetAllCards_WithSorting` method to ensure it returns cards sorted in descending order by value.
+
+#### 2. [Test for ExecuteTrade](https://github.com/VSHAH1210/CarDex/blob/feature/sprint1-cleanup/CarDexBackend/tests/IntegrationTests/CarDexBackend.IntegrationTests.Services/TradeServiceTest.cs#L295)
+- Tests the `ExecuteTrade` method to ensure it completes the trade and transfers currency between the buyer and seller.
+
+#### 3. [Test for GetUserTrades](https://github.com/VSHAH1210/CarDex/blob/feature/sprint1-cleanup/CarDexBackend/tests/IntegrationTests/CarDexBackend.IntegrationTests.Services/UserServiceTest.cs#L138)
+- Tests the `GetUserTrades` method to ensure it returns the correct trades for a user based on the trade type.
+
 
 ### Top 3 Acceptance Tests
 
