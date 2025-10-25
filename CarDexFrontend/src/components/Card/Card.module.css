@@ -1,0 +1,33 @@
+.card{
+  width:340px;border-radius:18px;padding:16px;
+  background:var(--block-secondary);color:var(--content-primary);
+  box-shadow:0 6px 24px rgba(0,0,0,.35);display:grid;gap:12px;user-select:none;
+}
+.header{position:relative;}
+.preTitle{font-size:var(--card-3);letter-spacing:.18em;color:var(--content-secondary);}
+.title{margin:2px 0 0;font-size:var(--card-1);font-weight:700;}
+.crest{position:absolute;right:0;top:0;height:28px;border-radius:6px;}
+
+.mediaWrap{background:var(--block-tertiary);border-radius:12px;overflow:hidden;}
+.media{display:block;width:100%;height:180px;object-fit:cover;filter:saturate(.8) contrast(1.05);}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 12px;}
+.stat{text-align:center;}
+.statValue{font-size:24px;font-weight:800;line-height:1;}
+.statLabel{margin-top:4px;font-size:12px;letter-spacing:.22em;color:var(--content-secondary);}
+
+.footer{margin-top:6px;display:flex;justify-content:space-between;align-items:center;}
+.badge{padding:6px 10px;border-radius:8px;font-weight:700;font-size:12px;letter-spacing:.12em;
+  background:var(--block-tertiary);color:var(--content-primary);}
+
+.rarityFactory{}
+.rarityLimited{background:linear-gradient(180deg,var(--block-secondary),#3a1c1c 70%);}
+.rarityNismo{
+  border:2px solid transparent;
+  background:
+    linear-gradient(var(--block-secondary),var(--block-secondary)) padding-box,
+    linear-gradient(135deg,var(--gradient-light1),var(--gradient-light2)) border-box;
+}
+
+.price{display:inline-flex;align-items:center;gap:6px;font-weight:700;}
+.coin{filter:saturate(1.1);}
