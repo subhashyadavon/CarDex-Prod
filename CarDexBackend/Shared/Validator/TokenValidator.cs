@@ -22,21 +22,23 @@ namespace CarDexBackend.Shared.Validator
             // Get the endpoint metadata
             var endpoint = context.GetEndpoint();
 
-            // Check if endpoint allows anonymous access
+            // Check if endpoint allows anonymous third-person access
             if (endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute>() != null)
             {
                 await next(context);
                 return;
             }
 
-            // Check if endpoint requires authorization
-            var authorizeAttribute = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>();
-            if (authorizeAttribute == null)
+            // Allow auth endpoints (login/register) to pass through without validation
+            var path = context.Request.Path.Value?.ToLower();
+            if (path != null && (path.StartsWith("/auth/register") || path.StartsWith("/auth/login") || path.StartsWith("/auth/debug")))
             {
-                // No authorization required for this endpoint
                 await next(context);
                 return;
             }
+
+            // For all other endpoints, require token validation
+            // This ensures nothing is public except auth endpoints
 
             // For protected endpoints, validate the token
             var token = ExtractTokenFromHeader(context.Request.Headers["Authorization"]);

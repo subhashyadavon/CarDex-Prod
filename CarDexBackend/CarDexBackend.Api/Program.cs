@@ -73,9 +73,8 @@ builder.Services.AddCors(options =>
 
 
 // Register services
-// Note: Using MockAuthService for testing without database connection
-// Switch to AuthService when database is available
-// Using Singleton for MockAuthService to preserve in-memory data across requests
+// Using MockAuthService for now (database connection issue)
+// TODO: Switch to AuthService once database connectivity is resolved
 builder.Services.AddSingleton<IAuthService, MockAuthService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
