@@ -1,5 +1,6 @@
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
+using System.Linq;
 
 namespace CarDexBackend.Services
 {
@@ -100,6 +101,15 @@ namespace CarDexBackend.Services
         {
             // No action required for the mock — tokens aren't persisted.
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Gets all users stored in memory (for debugging purposes only).
+        /// </summary>
+        public Task<List<UserResponse>> GetAllUsers()
+        {
+            var users = _users.Values.Select(u => u.User).ToList();
+            return Task.FromResult(users);
         }
     }
 }
