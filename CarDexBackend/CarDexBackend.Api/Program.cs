@@ -3,6 +3,9 @@ using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
 using CarDexBackend.Domain.Enums;
 using Npgsql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,40 @@ var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<CarDexDbContext>(options =>
     options.UseNpgsql(dataSource)
 );
+
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+// Try to get secret key from environment variable first, fallback to configuration
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
+    ?? jwtSettings["SecretKey"];
+
+// Validate that we have a secret key
+if (string.IsNullOrEmpty(secretKey) || secretKey == "UseEnvironmentVariable")
+{
+    throw new InvalidOperationException(
+        "JWT_SECRET_KEY environment variable is not set. " +
+        "Please set it using: export JWT_SECRET_KEY='YourSecretKeyHere' " +
+        "or configure it in appsettings.Development.json for local development.");
+}
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+});
 
 // add services to the container
 builder.Services.AddControllers();
@@ -34,29 +71,22 @@ builder.Services.AddCors(options =>
 });
 
 
-// Environment switching for development and production
-if (builder.Environment.IsDevelopment())
-{
-    // Use PRODUCTION services with real database (Supabase PostgreSQL)
-    builder.Services.AddSingleton<IAuthService, MockAuthService>(); // Keep mock for now (no auth implemented yet)
-    builder.Services.AddScoped<ICardService, CardService>();
-    builder.Services.AddScoped<ICollectionService, CollectionService>();
-    builder.Services.AddScoped<IPackService, PackService>();
-    builder.Services.AddScoped<ITradeService, TradeService>();
-    builder.Services.AddScoped<IUserService, UserService>();
-}
-else
-{
-    // use real PRODUCTION services
-    builder.Services.AddScoped<IAuthService, AuthService>();
-    builder.Services.AddScoped<ICardService, CardService>();
-    builder.Services.AddScoped<ICollectionService, CollectionService>();
-    builder.Services.AddScoped<IPackService, PackService>();
-    builder.Services.AddScoped<ITradeService, TradeService>();
-    builder.Services.AddScoped<IUserService, UserService>();
-}
+// Register services
+// Note: Using MockAuthService for testing without database connection
+// Switch to AuthService when database is available
+// Using Singleton for MockAuthService to preserve in-memory data across requests
+builder.Services.AddSingleton<IAuthService, MockAuthService>();
+builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<ICollectionService, CollectionService>();
+builder.Services.AddScoped<IPackService, PackService>();
+builder.Services.AddScoped<ITradeService, TradeService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Add Authorization
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
 
 // Enable Swagger UI in development mode
 if (app.Environment.IsDevelopment())
@@ -67,6 +97,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
