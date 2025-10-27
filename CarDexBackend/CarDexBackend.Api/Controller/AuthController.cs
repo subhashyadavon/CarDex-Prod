@@ -123,7 +123,8 @@ namespace CarDexBackend.Api.Controllers
             await _authService.Logout(userId);
             return NoContent();
         }
-
+        
+        // Will delete this endpoint once we have a real database
         /// <summary>
         /// Gets all in-memory users (DEBUG ONLY - for MockAuthService).
         /// </summary>
