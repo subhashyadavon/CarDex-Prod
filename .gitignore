@@ -486,3 +486,11 @@ $RECYCLE.BIN/
 
 # Local HTTP test files
 *.http
+
+# CarDexBackend and CarDexDatabase specific files
+CarDexBackend/**/bin/
+CarDexBackend/**/obj/
+CarDexBackend/**/packages.lock.json
+CarDexDatabase/**/bin/
+CarDexDatabase/**/obj/
+CarDexDatabase/**/packages.lock.json
