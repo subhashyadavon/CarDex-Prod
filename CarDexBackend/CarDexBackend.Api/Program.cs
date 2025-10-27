@@ -1,4 +1,5 @@
 using CarDexBackend.Services;
+using CarDexBackend.Shared.Validator;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
 using CarDexBackend.Domain.Enums;
@@ -85,6 +86,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Add Authorization
 builder.Services.AddAuthorization();
 
+// Register Token Validator
+builder.Services.AddScoped<TokenValidator>();
+
 var app = builder.Build();
 
 
@@ -97,6 +101,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+
+// Add token validator to validate all API calls
+app.UseTokenValidator();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

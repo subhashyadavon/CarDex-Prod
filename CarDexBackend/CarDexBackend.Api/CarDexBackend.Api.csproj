@@ -26,5 +26,8 @@
     <ProjectReference Include="..\..\CarDexDatabase\CarDexDatabase.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\Validator\*.cs" />
+  </ItemGroup>
 
 </Project>
