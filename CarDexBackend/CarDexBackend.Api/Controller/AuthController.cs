@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexBackend.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarDexBackend.Api.Controllers
 {
@@ -28,7 +29,7 @@ namespace CarDexBackend.Api.Controllers
         }
 
         /// <summary>
-        /// Registers a new user account.
+        /// Registers a new user account and issues a JWT token.
         /// </summary>
         /// <param name="request">The registration request containing username and password.</param>
         /// <returns>
@@ -36,19 +37,35 @@ namespace CarDexBackend.Api.Controllers
         /// or 409 Conflict if the username already exists.
         /// </returns>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(UserResponse), 201)]
+        [ProducesResponseType(typeof(LoginResponse), 201)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 409)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                var user = await _authService.Register(request);
-                return CreatedAtAction(nameof(Register), new { id = user.Id }, user);
+                var response = await _authService.Register(request);
+                return CreatedAtAction(nameof(Register), new { id = response.User.Id }, response);
+            }
+            catch (DbUpdateException ex)
+            {
+                // Database-specific errors (transient failures, connection issues, etc.)
+                return StatusCode(503, new ErrorResponse 
+                { 
+                    Message = "Database error occurred. Please try again later." 
+                });
             }
             catch (InvalidOperationException ex)
             {
-                // Username already exists
+                // Check if this is actually a database connection error
+                if (ex.Message.Contains("transient failure") || ex.Message.Contains("exception has been raised"))
+                {
+                    return StatusCode(503, new ErrorResponse 
+                    { 
+                        Message = "Database connection failed. Please try again later." 
+                    });
+                }
+                // Username already exists or validation error
                 return Conflict(new ErrorResponse { Message = ex.Message });
             }
             catch (Exception ex)
@@ -86,8 +103,8 @@ namespace CarDexBackend.Api.Controllers
         /// Logs out the current user by invalidating their session/token.
         /// </summary>
         /// <remarks>
-        /// Currently a placeholder for mock environments.
-        /// The real implementation will extract the user ID from the authorization token.
+        /// Extracts the user ID from the JWT token claims.
+        /// For JWT, logout is primarily a client-side operation (removing the token).
         /// </remarks>
         /// <returns>204 No Content if logout is successful.</returns>
         [HttpPost("logout")]
@@ -95,8 +112,15 @@ namespace CarDexBackend.Api.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 401)]
         public async Task<IActionResult> Logout()
         {
-            // TODO: Replace Guid.Empty with real user ID when token authorization is added
-            await _authService.Logout(Guid.Empty);
+            // Extract user ID from JWT claim
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) 
+                ?? User.FindFirst("sub");
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(new ErrorResponse { Message = "Invalid token." });
+            }
+
+            await _authService.Logout(userId);
             return NoContent();
         }
     }
