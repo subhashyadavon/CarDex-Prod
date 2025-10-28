@@ -48,12 +48,10 @@ namespace CarDexDatabase
                 entity.Property(e => e.Currency)
                     .HasColumnName("currency")
                     .HasDefaultValue(0);
-
-                // Ignore navigation properties (arrays in database handled separately)
-                entity.Ignore(e => e.OwnedCards);
-                entity.Ignore(e => e.OwnedPacks);
-                entity.Ignore(e => e.OpenTrades);
-                entity.Ignore(e => e.TradeHistory);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
             });
 
             // Configure Card entity
@@ -86,6 +84,10 @@ namespace CarDexDatabase
                 entity.Property(e => e.Value)
                     .HasColumnName("value")
                     .HasDefaultValue(0);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
 
                 // Foreign keys
                 entity.HasOne<User>()
@@ -176,6 +178,10 @@ namespace CarDexDatabase
                 // Map Vehicles array to database array column
                 entity.Property(e => e.Vehicles)
                     .HasColumnName("vehicles");
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
             });
 
             // Configure Pack entity
@@ -199,6 +205,14 @@ namespace CarDexDatabase
                 entity.Property(e => e.Value)
                     .HasColumnName("value")
                     .HasDefaultValue(0);
+                
+                entity.Property(e => e.IsOpened)
+                    .HasColumnName("is_opened")
+                    .HasDefaultValue(false);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
 
                 // Foreign keys
                 entity.HasOne<User>()
@@ -241,6 +255,10 @@ namespace CarDexDatabase
                 
                 entity.Property(e => e.WantCardId)
                     .HasColumnName("want_card_id");
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
 
                 // Foreign keys
                 entity.HasOne<User>()
@@ -334,6 +352,10 @@ namespace CarDexDatabase
                 entity.Property(e => e.Amount)
                     .HasColumnName("amount")
                     .HasDefaultValue(0);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasDefaultValueSql("now()");
                 
                 entity.Property(e => e.ClaimedAt)
                     .HasColumnName("claimed_at");
