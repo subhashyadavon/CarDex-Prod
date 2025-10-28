@@ -10,12 +10,7 @@ namespace CarDexBackend.Domain.Entities
         public string Username { get; set; }
         public string Password { get; set; }  
         public int Currency { get; set; }
-
-        // Aggregated Entities (ignored in DbContext - arrays in database)
-        public List<Card> OwnedCards { get; private set; } = new List<Card>();
-        public List<Pack> OwnedPacks { get; private set; } = new List<Pack>();
-        public List<OpenTrade> OpenTrades { get; private set; } = new List<OpenTrade>();
-        public List<CompletedTrade> TradeHistory { get; private set; } = new List<CompletedTrade>();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Parameterless constructor for EF Core
         public User()
@@ -24,6 +19,7 @@ namespace CarDexBackend.Domain.Entities
             Username = string.Empty;
             Password = string.Empty;
             Currency = 0;
+            CreatedAt = DateTime.UtcNow;
         }
 
         // Constructor
@@ -33,6 +29,7 @@ namespace CarDexBackend.Domain.Entities
             Username = username;
             Password = password;
             Currency = 0;
+            CreatedAt = DateTime.UtcNow;
         }
 
         // Domain Behaviors
@@ -48,21 +45,6 @@ namespace CarDexBackend.Domain.Entities
         {
             if (amount > Currency) throw new InvalidOperationException("Insufficient currency");
             Currency -= amount;
-        }
-
-        // Card management
-        public void AddCard(Card card) => OwnedCards.Add(card);
-        public bool HasCard(Guid cardId) => OwnedCards.Exists(c => c.Id == cardId);
-
-        // Pack management
-        public void AddPack(Pack pack) => OwnedPacks.Add(pack);
-
-        // Trade management
-        public void AddOpenTrade(OpenTrade trade) => OpenTrades.Add(trade);
-        public void CompleteTrade(CompletedTrade trade)
-        {
-            TradeHistory.Add(trade);
-            OpenTrades.RemoveAll(t => t.Id == trade.Id);
         }
     }
 }
