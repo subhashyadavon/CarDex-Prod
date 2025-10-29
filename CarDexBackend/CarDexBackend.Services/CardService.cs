@@ -109,29 +109,26 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CardDetailedResponse> GetCardById(Guid cardId)
         {
-            // Use raw SQL query to work around enum mapping issues with Npgsql
-            var cardData = await _context.Database.SqlQueryRaw<CardRawData>(
-                @"SELECT c.id, c.user_id, c.vehicle_id, c.collection_id, c.grade::text as grade, c.value, c.created_at
-                   FROM card c
-                   WHERE c.id = @p0", cardId).FirstOrDefaultAsync();
+            var card = await _context.Cards
+                .FirstOrDefaultAsync(c => c.Id == cardId);
             
-            if (cardData == null)
+            if (card == null)
                 throw new KeyNotFoundException("Card not found");
 
-            var vehicle = await _context.Vehicles.FindAsync(cardData.vehicle_id);
+            var vehicle = await _context.Vehicles.FindAsync(card.VehicleId);
             var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
 
             return new CardDetailedResponse
             {
-                Id = cardData.id,
+                Id = card.Id,
                 Name = vehicleName,
-                Grade = cardData.grade,  
-                Value = cardData.value,
-                CreatedAt = DateTime.UtcNow,
+                Grade = card.Grade.ToString(),  
+                Value = card.Value,
+                CreatedAt = card.CreatedAt,
                 Description = vehicleName,
-                VehicleId = cardData.vehicle_id.ToString(),
-                CollectionId = cardData.collection_id.ToString(),
-                OwnerId = cardData.user_id.ToString()
+                VehicleId = card.VehicleId.ToString(),
+                CollectionId = card.CollectionId.ToString(),
+                OwnerId = card.UserId.ToString()
             };
         }
     }

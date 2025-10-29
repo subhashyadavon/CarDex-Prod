@@ -17,9 +17,9 @@ namespace CarDexBackend.Services
         /// Registers a new user account.
         /// </summary>
         /// <param name="request">The registration details including username and password.</param>
-        /// <returns>The newly created <see cref="UserResponse"/> representing the registered user.</returns>
+        /// <returns>A <see cref="LoginResponse"/> containing JWT token and user information.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the username is already taken.</exception>
-        Task<UserResponse> Register(RegisterRequest request);
+        Task<LoginResponse> Register(RegisterRequest request);
 
         /// <summary>
         /// Authenticates a user with provided credentials.
