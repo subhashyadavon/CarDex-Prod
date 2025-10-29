@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Database Context with PostgreSQL and register enum types
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("CarDexDatabase"));
+// Map enums to their database types (specify the PostgreSQL enum type name)
 dataSourceBuilder.MapEnum<GradeEnum>("grade_enum");
 dataSourceBuilder.MapEnum<TradeEnum>("trade_enum");
 dataSourceBuilder.MapEnum<RewardEnum>("reward_enum");

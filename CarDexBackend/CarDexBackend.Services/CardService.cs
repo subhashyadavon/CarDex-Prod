@@ -4,6 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarDexBackend.Services
 {
+    // Helper class for raw SQL queries
+    public class CardRawData
+    {
+        public Guid id { get; set; }
+        public Guid user_id { get; set; }
+        public Guid vehicle_id { get; set; }
+        public Guid collection_id { get; set; }
+        public string grade { get; set; } = string.Empty;
+        public int value { get; set; }
+        public DateTime created_at { get; set; }
+    }
+
     /// <summary>
     /// Production implementation of <see cref="ICardService"/> using Entity Framework Core and PostgreSQL.
     /// </summary>
@@ -97,24 +109,29 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CardDetailedResponse> GetCardById(Guid cardId)
         {
-            var card = await _context.Cards.FindAsync(cardId);
-            if (card == null)
+            // Use raw SQL query to work around enum mapping issues with Npgsql
+            var cardData = await _context.Database.SqlQueryRaw<CardRawData>(
+                @"SELECT c.id, c.user_id, c.vehicle_id, c.collection_id, c.grade::text as grade, c.value, c.created_at
+                   FROM card c
+                   WHERE c.id = @p0", cardId).FirstOrDefaultAsync();
+            
+            if (cardData == null)
                 throw new KeyNotFoundException("Card not found");
 
-            var vehicle = await _context.Vehicles.FindAsync(card.VehicleId);
+            var vehicle = await _context.Vehicles.FindAsync(cardData.vehicle_id);
             var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
 
             return new CardDetailedResponse
             {
-                Id = card.Id,
+                Id = cardData.id,
                 Name = vehicleName,
-                Grade = card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
-                Value = card.Value,
-                CreatedAt = DateTime.UtcNow,  // Not in DB, using current time
+                Grade = cardData.grade,  
+                Value = cardData.value,
+                CreatedAt = DateTime.UtcNow,
                 Description = vehicleName,
-                VehicleId = card.VehicleId.ToString(),
-                CollectionId = card.CollectionId.ToString(),
-                OwnerId = card.UserId.ToString()
+                VehicleId = cardData.vehicle_id.ToString(),
+                CollectionId = cardData.collection_id.ToString(),
+                OwnerId = cardData.user_id.ToString()
             };
         }
     }

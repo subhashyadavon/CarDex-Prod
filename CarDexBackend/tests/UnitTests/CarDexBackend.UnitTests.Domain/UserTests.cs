@@ -41,72 +41,23 @@ namespace CarDexBackend.Domain.Tests
             Assert.Throws<InvalidOperationException>(() => user.DeductCurrency(50));
         }
 
+        // NOTE: Card ownership, pack ownership, and trade management are now handled
+        // via foreign keys in the database (card.user_id, pack.user_id, trade.seller_user_id).
+        // These relationships are managed by the Service layer and database queries,
+        // not by the User entity itself.
+        
         [Fact]
-        public void AddCard_ShouldAddCardToOwnedCards()
+        public void Constructor_ShouldInitializeWithZeroCurrency()
         {
             var user = new User(Guid.NewGuid(), "TestUser", "pass");
-            // use an existing GradeEnum value (Factory, LimitedRun, or NISMO)
-            var card = new Card(Guid.NewGuid(), user.Id, Guid.NewGuid(), Guid.NewGuid(), GradeEnum.FACTORY, 100);
-
-            user.AddCard(card);
-            Assert.Contains(card, user.OwnedCards);
+            Assert.Equal(0, user.Currency);
         }
 
         [Fact]
-        public void HasCard_ShouldReturnTrue_WhenCardExists()
+        public void Constructor_ShouldSetUsername()
         {
             var user = new User(Guid.NewGuid(), "TestUser", "pass");
-            var card = new Card(Guid.NewGuid(), user.Id, Guid.NewGuid(), Guid.NewGuid(), GradeEnum.FACTORY, 100);
-            user.AddCard(card);
-
-            Assert.True(user.HasCard(card.Id));
-        }
-
-
-        [Fact]
-        public void AddPack_ShouldAddPackToOwnedPacks()
-        {
-            var user = new User(Guid.NewGuid(), "TestUser", "pass");
-            var pack = new Pack(Guid.NewGuid(), user.Id, Guid.NewGuid(), 50);
-
-            user.AddPack(pack);
-            Assert.Contains(pack, user.OwnedPacks);
-        }
-
-        [Fact]
-        public void AddOpenTrade_ShouldAddTradeToOpenTrades()
-        {
-            var user = new User(Guid.NewGuid(), "TestUser", "pass");
-            var trade = new OpenTrade(Guid.NewGuid(), TradeEnum.FOR_PRICE, user.Id, Guid.NewGuid(), 100);
-
-            user.AddOpenTrade(trade);
-            Assert.Contains(trade, user.OpenTrades);
-        }
-
-        [Fact]
-        public void CompleteTrade_ShouldMoveTradeFromOpenToHistory()
-        {
-            var user = new User(Guid.NewGuid(), "TestUser", "pass");
-            var tradeId = Guid.NewGuid();
-
-            var openTrade = new OpenTrade(tradeId, TradeEnum.FOR_PRICE, user.Id, Guid.NewGuid(), 100);
-            user.AddOpenTrade(openTrade);
-
-            
-            var completedTrade = new CompletedTrade(
-                tradeId,
-                TradeEnum.FOR_PRICE,
-                user.Id,          // sellerUserId
-                Guid.NewGuid(),   // sellerCardId
-                Guid.NewGuid(),   // buyerUserId
-                100,              // price
-                null              // buyerCardId
-            );
-
-            user.CompleteTrade(completedTrade);
-
-            Assert.Contains(completedTrade, user.TradeHistory);
-            Assert.DoesNotContain(openTrade, user.OpenTrades);
+            Assert.Equal("TestUser", user.Username);
         }
 
     }
