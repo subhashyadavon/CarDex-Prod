@@ -73,9 +73,7 @@ builder.Services.AddCors(options =>
 
 
 // Register services
-// Using MockAuthService for now (database connection issue)
-// TODO: Switch to AuthService once database connectivity is resolved
-builder.Services.AddSingleton<IAuthService, MockAuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IPackService, PackService>();
@@ -107,5 +105,20 @@ app.UseTokenValidator();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Create database tables if they don't exist (for development)
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CarDexDbContext>();
+    try
+    {
+        context.Database.EnsureCreated();
+        Console.WriteLine("✓ Database connection established successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"✗ Database connection failed: {ex.Message}");
+    }
+}
 
 app.Run();
