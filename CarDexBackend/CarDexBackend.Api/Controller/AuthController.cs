@@ -47,7 +47,7 @@ namespace CarDexBackend.Api.Controllers
                 var response = await _authService.Register(request);
                 return CreatedAtAction(nameof(Register), new { id = response.User.Id }, response);
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
                 // Database-specific errors (transient failures, connection issues, etc.)
                 return StatusCode(503, new ErrorResponse 
