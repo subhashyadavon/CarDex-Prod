@@ -31,7 +31,14 @@ namespace CarDexBackend.Shared.Validator
 
             // Allow auth endpoints (login/register) to pass through without validation
             var path = context.Request.Path.Value?.ToLower();
-            if (path != null && (path.StartsWith("/auth/register") || path.StartsWith("/auth/login") || path.StartsWith("/auth/debug")))
+            if (path != null && (
+                path.StartsWith("/auth/register") || 
+                path.StartsWith("/auth/login") || 
+                path.StartsWith("/auth/debug") ||
+                path == "/" ||
+                path == "/favicon.ico" ||
+                path.StartsWith("/swagger") ||
+                path.StartsWith("/swagger-ui")))
             {
                 await next(context);
                 return;
@@ -45,7 +52,8 @@ namespace CarDexBackend.Shared.Validator
 
             if (string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("Missing authentication token for protected endpoint: {Method} {Path}", 
+                // Use debug level instead of warning for expected missing tokens
+                _logger.LogDebug("Missing authentication token for protected endpoint: {Method} {Path}", 
                     context.Request.Method, context.Request.Path);
                 context.Response.StatusCode = 401;
                 await context.Response.WriteAsJsonAsync(new
@@ -58,7 +66,8 @@ namespace CarDexBackend.Shared.Validator
 
             if (!ValidateToken(token))
             {
-                _logger.LogWarning("Invalid authentication token for protected endpoint: {Method} {Path}", 
+                // Use debug level instead of warning for expected invalid tokens
+                _logger.LogDebug("Invalid authentication token for protected endpoint: {Method} {Path}", 
                     context.Request.Method, context.Request.Path);
                 context.Response.StatusCode = 401;
                 await context.Response.WriteAsJsonAsync(new

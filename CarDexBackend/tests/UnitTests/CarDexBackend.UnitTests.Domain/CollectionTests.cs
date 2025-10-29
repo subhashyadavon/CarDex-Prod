@@ -32,7 +32,7 @@ namespace CarDexBackend.Tests.UnitTests.Domain.Entities
         public void Constructor_ShouldInitializeEmptyVehicleList_WhenNullIsPassed()
         {
             // Act
-            var collection = new Collection(Guid.NewGuid(), "Modern Cars", "modern.png", 400, null);
+            var collection = new Collection(Guid.NewGuid(), "Modern Cars", "modern.png", 400, null!);
 
             // Assert
             Assert.NotNull(collection.Vehicles);
