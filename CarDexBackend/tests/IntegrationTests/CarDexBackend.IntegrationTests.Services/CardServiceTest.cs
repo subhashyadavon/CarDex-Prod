@@ -99,7 +99,7 @@ namespace DefaultNamespace
         public async Task GetAllCards_ShouldReturnCorrectCards()
         {
             // Act
-            var result = await _cardService.GetAllCards(limit: 10, offset: 0);
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, null, 10, 0);
 
             // Assert
             Assert.NotNull(result);
@@ -135,7 +135,7 @@ namespace DefaultNamespace
         public async Task GetAllCards_WithFilters_ShouldReturnFilteredCards()
         {
             // Act: Filter by grade
-            var result = await _cardService.GetAllCards(grade: "FACTORY", limit: 10, offset: 0);
+            var result = await _cardService.GetAllCards(null, null, null, "FACTORY", null, null, null, 10, 0);
 
             // Assert: Only one card should be returned (Tesla Model S)
             Assert.NotNull(result);
@@ -148,7 +148,7 @@ namespace DefaultNamespace
         public async Task GetAllCards_WithSorting_ShouldReturnSortedCards()
         {
             // Act: Sort by value descending
-            var result = await _cardService.GetAllCards(sortBy: "value_desc", limit: 10, offset: 0);
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, "value_desc", 10, 0);
 
             // Assert: The first card should be the one with the higher value
             Assert.NotNull(result);

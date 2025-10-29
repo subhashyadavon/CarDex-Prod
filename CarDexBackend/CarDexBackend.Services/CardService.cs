@@ -1,4 +1,5 @@
 using CarDexBackend.Shared.Dtos.Responses;
+using CarDexBackend.Domain.Enums;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
@@ -72,7 +73,51 @@ namespace CarDexBackend.Services
             };
 
             var totalCount = await query.CountAsync();
-            var cards = await query.Skip(offset).Take(limit).ToListAsync();
+            
+            // Try to execute query, catch enum mapping errors for PostgreSQL
+            List<CarDexBackend.Domain.Entities.Card> cards;
+            try
+            {
+                cards = await query.Skip(offset).Take(limit).ToListAsync();
+            }
+            catch (InvalidCastException)
+            {
+                // If enum mapping fails, use raw SQL for cards with grade as text
+                try
+                {
+                    var cardRawData = await _context.Database
+                        .SqlQueryRaw<CardRawData>(
+                            @"SELECT c.id, c.user_id as user_id, c.vehicle_id, c.collection_id, c.grade::text as grade, c.value, c.created_at 
+                              FROM card c 
+                              ORDER BY c.created_at DESC 
+                              LIMIT {0} OFFSET {1}",
+                            limit, offset)
+                        .ToListAsync();
+
+                    // Convert raw data to entities manually
+                    cards = new List<CarDexBackend.Domain.Entities.Card>();
+                    foreach (var raw in cardRawData)
+                    {
+                            if (Enum.TryParse<GradeEnum>(raw.grade, true, out var gradeEnum))
+                        {
+                            cards.Add(new Domain.Entities.Card
+                            {
+                                Id = raw.id,
+                                UserId = raw.user_id,
+                                VehicleId = raw.vehicle_id,
+                                CollectionId = raw.collection_id,
+                                Grade = gradeEnum,
+                                Value = raw.value,
+                                CreatedAt = raw.created_at
+                            });
+                        }
+                    }
+                }
+                catch
+                {
+                    throw new InvalidOperationException("Unable to retrieve cards from database");
+                }
+            }
 
             var cardResponses = new List<CardResponse>();
             foreach (var card in cards)
@@ -104,30 +149,64 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CardDetailedResponse> GetCardById(Guid cardId)
         {
-            // Use SqlQueryRaw to get grade as text, avoiding enum mapping issues
-            var cardData = await _context.Database
-                .SqlQueryRaw<CardRawData>(
-                    "SELECT id, user_id, vehicle_id, collection_id, grade::text as grade, value, created_at FROM card WHERE id = {0}",
-                    cardId)
-                .FirstOrDefaultAsync();
+            // Check if we're using a relational database provider
+            bool isRelational = _context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory";
+            
+            if (isRelational)
+            {
+                // For PostgreSQL, use raw SQL to avoid enum mapping issues
+                try
+                {
+                    var cardData = await _context.Database
+                        .SqlQueryRaw<CardRawData>(
+                            "SELECT id, user_id, vehicle_id, collection_id, grade::text as grade, value, created_at FROM card WHERE id = {0}",
+                            cardId)
+                        .FirstOrDefaultAsync();
 
-            if (cardData == null)
+                    if (cardData != null)
+                    {
+                        var vehicle = await _context.Vehicles.FindAsync(cardData.vehicle_id);
+                        var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
+
+                        return new CardDetailedResponse
+                        {
+                            Id = cardData.id,
+                            Name = vehicleName,
+                            Grade = cardData.grade,
+                            Value = cardData.value,
+                            CreatedAt = cardData.created_at,
+                            Description = vehicleName,
+                            VehicleId = cardData.vehicle_id.ToString(),
+                            CollectionId = cardData.collection_id.ToString(),
+                            OwnerId = cardData.user_id.ToString()
+                        };
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // Fall through to standard query if raw SQL fails
+                }
+            }
+
+            // For in-memory database or as fallback, use standard EF query
+            var card = await _context.Cards.FindAsync(cardId);
+            if (card == null)
                 throw new KeyNotFoundException("Card not found");
 
-            var vehicle = await _context.Vehicles.FindAsync(cardData.vehicle_id);
-            var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
+            var vehicleStandard = await _context.Vehicles.FindAsync(card.VehicleId);
+            var vehicleNameStandard = vehicleStandard != null ? $"{vehicleStandard.Year} {vehicleStandard.Make} {vehicleStandard.Model}" : "Unknown Vehicle";
 
             return new CardDetailedResponse
             {
-                Id = cardData.id,
-                Name = vehicleName,
-                Grade = cardData.grade,
-                Value = cardData.value,
-                CreatedAt = cardData.created_at,
-                Description = vehicleName,
-                VehicleId = cardData.vehicle_id.ToString(),
-                CollectionId = cardData.collection_id.ToString(),
-                OwnerId = cardData.user_id.ToString()
+                Id = card.Id,
+                Name = vehicleNameStandard,
+                Grade = card.Grade.ToString(),
+                Value = card.Value,
+                CreatedAt = card.CreatedAt,
+                Description = vehicleNameStandard,
+                VehicleId = card.VehicleId.ToString(),
+                CollectionId = card.CollectionId.ToString(),
+                OwnerId = card.UserId.ToString()
             };
         }
     }
