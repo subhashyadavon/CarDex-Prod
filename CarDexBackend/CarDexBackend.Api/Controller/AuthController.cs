@@ -123,30 +123,5 @@ namespace CarDexBackend.Api.Controllers
             await _authService.Logout(userId);
             return NoContent();
         }
-        
-        // Will delete this endpoint once we have a real database
-        /// <summary>
-        /// Gets all in-memory users (DEBUG ONLY - for MockAuthService).
-        /// </summary>
-        /// <remarks>
-        /// This endpoint only works with MockAuthService. It shows all users currently stored in memory.
-        /// </remarks>
-        [HttpGet("debug/users")]
-        [ProducesResponseType(typeof(List<UserResponse>), 200)]
-        public async Task<IActionResult> GetInMemoryUsers()
-        {
-            // Only works with MockAuthService
-            if (_authService is MockAuthService mockService)
-            {
-                var users = await mockService.GetAllUsers();
-                return Ok(new { 
-                    count = users.Count,
-                    users = users,
-                    note = "This is in-memory data from MockAuthService. Data will be lost on server restart."
-                });
-            }
-            
-            return BadRequest(new ErrorResponse { Message = "This endpoint only works with MockAuthService" });
-        }
     }
 }
