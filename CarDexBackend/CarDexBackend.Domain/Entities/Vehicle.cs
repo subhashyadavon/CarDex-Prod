@@ -9,48 +9,14 @@ namespace CarDexBackend.Domain.Entities
     /// </summary>
     public class Vehicle
     {
-        /// <summary>
-        /// Unique identifier for the vehicle.
-        /// </summary>
+       
         public Guid Id { get; set; }
-
-        /// <summary>
-        /// Year of manufacture for the vehicle.
-        /// </summary>
         public string Year { get; set; }
-
-        /// <summary>
-        /// Manufacturer or brand of the vehicle (e.g., "Nissan", "Toyota", "Ferrari").
-        /// </summary>
         public string Make { get; set; }
-
-        /// <summary>
-        /// Specific model name of the vehicle (e.g., "GT-R", "Skyline", "Supra").
-        /// </summary>
         public string Model { get; set; }
-
-        /// <summary>
-        /// First performance statistic or collectible metric for the vehicle.
-        /// Represents a customizable numerical attribute (e.g., speed, power, rarity).
-        /// </summary>
         public int Stat1 { get; set; }
-
-        /// <summary>
-        /// Second performance statistic or collectible metric for the vehicle.
-        /// Represents a customizable numerical attribute (e.g., acceleration, handling).
-        /// </summary>
         public int Stat2 { get; set; }
-
-        /// <summary>
-        /// Third performance statistic or collectible metric for the vehicle.
-        /// Represents a customizable numerical attribute (e.g., design, exclusivity).
-        /// </summary>
         public int Stat3 { get; set; }
-
-        /// <summary>
-        /// Market or rarity value of the vehicle in in-game currency.
-        /// Determines the base value when cards of this vehicle are created.
-        /// </summary>
         public int Value { get; set; }
 
         /// <summary>
