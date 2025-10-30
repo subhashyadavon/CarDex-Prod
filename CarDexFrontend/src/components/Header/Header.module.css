@@ -1,0 +1,141 @@
+/* Header Component - Layout & Structure */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 48px;
+  background: linear-gradient(45deg, var(--gradient-dark1), var(--gradient-dark2));
+  min-height: 80px;
+}
+
+/* Logo Section */
+.logo {
+  flex: 0 0 auto;
+}
+
+.logoImage {
+  height: 48px;
+  width: auto;
+}
+
+.logoText {
+  /* Typography comes from header-2 class */
+  display: block;
+}
+
+/* Navigation Section */
+.nav {
+  display: flex;
+  gap: 64px;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.navButton {
+  /* Typography comes from header-3 class */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.navButton::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--content-primary);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.navButton:hover::after {
+  transform: scaleX(1);
+}
+
+.navActive {
+  color: var(--content-primary);
+}
+
+.navActive::after {
+  transform: scaleX(1);
+}
+
+.navInactive {
+  color: var(--content-secondary) !important;
+}
+
+.navInactive:hover {
+  color: var(--color-white) !important;
+}
+
+/* User Info Section */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 0 0 auto;
+}
+
+.balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--content-primary);
+}
+
+.coinIcon {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  filter: saturate(1.1);
+}
+
+.coinImage {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.level {
+  /* Typography comes from header-2 class */
+  color: var(--content-primary);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .header {
+    padding: 20px 32px;
+  }
+  
+  .nav {
+    gap: 40px;
+  }
+  
+  .userInfo {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 16px 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 32px;
+  }
+}

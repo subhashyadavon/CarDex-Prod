@@ -1,0 +1,67 @@
+import React, { useState } from "react";
+import styles from "./Header.module.css";
+
+export type NavItem = "OPEN" | "GARAGE" | "TRADE";
+
+export type HeaderProps = {
+  activeNav: NavItem;
+  onNavChange: (nav: NavItem) => void;
+  coinBalance: number;
+  userLevel: number;
+  logoUrl?: string;
+  coinIconUrl?: string;
+};
+
+export default function Header({
+  activeNav,
+  onNavChange,
+  coinBalance,
+  userLevel,
+  logoUrl,
+  coinIconUrl,
+}: HeaderProps) {
+  const navItems: NavItem[] = ["OPEN", "GARAGE", "TRADE"];
+
+  return (
+    <header className={styles.header}>
+      {/* Logo Section */}
+      <div className={styles.logo}>
+        {logoUrl ? (
+          <img src={logoUrl} alt="no img" className={styles.logoImage} />
+        ) : (
+          <span className={`${styles.logoText} header-2`}>CARDEX</span>
+        )}
+      </div>
+
+      {/* Navigation Section */}
+      <nav className={styles.nav}>
+        {navItems.map((item) => (
+          <button
+            key={item}
+            onClick={() => onNavChange(item)}
+            className={`${styles.navButton} ${
+              activeNav === item ? styles.navActive : styles.navInactive
+            } header-1`}
+          >
+            {item}
+          </button>
+        ))}
+      </nav>
+
+      {/* User Info Section */}
+      <div className={styles.userInfo}>
+        <div className={styles.balance}>
+          <span className={styles.coinIcon} aria-hidden>
+            {coinIconUrl ? (
+              <img src={coinIconUrl} alt="" className={styles.coinImage} />
+            ) : (
+              "🪙"
+            )}
+          </span>
+          <span className="header-2">{coinBalance.toLocaleString()}</span>
+        </div>
+        <div className={`${styles.level} header-2`}>{userLevel}</div>
+      </div>
+    </header>
+  );
+}
