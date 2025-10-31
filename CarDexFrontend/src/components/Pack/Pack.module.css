@@ -1,0 +1,152 @@
+/* Pack Component - 200px x 300px */
+
+.pack {
+  width: 200px;
+  height: 300px;
+  border-radius: 6px;
+  border-style: inset;
+  border-top: solid 16px rgba(255, 255, 255, 0.08);
+  border-bottom: solid 16px rgba(255, 255, 255, 0.08);
+  border-left: solid 8px rgba(255, 255, 255, 0.08);
+  border-right: solid 8px rgba(255, 255, 255, 0.08);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    200deg,
+    var(--gradient-light1) 0%,
+    var(--gradient-light2) 15%,
+    var(--block-tertiary) 40%,
+    #000000 62%,
+    var(--gradient-light2) 90%
+  );
+  background-origin: border-box;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pack:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(224, 31, 95, 0.3);
+}
+
+/* .pack::after {
+  content: '';
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gradient-light2),
+    transparent
+  );
+  opacity: 0.5;
+} */
+
+/* Header Section */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  z-index: 1;
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.packType {
+  /* Typography from card-4: 10px, bold, white-50 */
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.name {
+  /* Typography from card-2: 16px, bold, white */
+  line-height: 1.1;
+  word-wrap: break-word;
+}
+
+/* Main Image Section */
+.imageWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  z-index: 1;
+}
+
+.image {
+  width: 180px;
+  height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+.pack:hover .image {
+  transform: rotate(-4deg) scale(1.05);
+}
+
+
+
+/* Footer Section */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  /* background: rgba(0, 0, 0, 0.4); */
+  /* backdrop-filter: blur(8px); */
+  z-index: 1;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gradient-light2),
+    transparent
+  );
+  opacity: 0.5;
+}
+
+.coinIcon {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  filter: saturate(1.1);
+}
+
+.coinImage {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+
+
+.price {
+  /* Typography from card-2: 16px, bold, white */
+  line-height: 1;
+  color: var(--color-white);
+}
