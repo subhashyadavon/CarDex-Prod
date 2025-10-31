@@ -1,33 +1,181 @@
-.card{
-  width:340px;border-radius:18px;padding:16px;
-  background:var(--block-secondary);color:var(--content-primary);
-  box-shadow:0 6px 24px rgba(0,0,0,.35);display:grid;gap:12px;user-select:none;
-}
-.header{position:relative;}
-.preTitle{font-size:var(--card-3);letter-spacing:.18em;color:var(--content-secondary);}
-.title{margin:2px 0 0;font-size:var(--card-1);font-weight:700;}
-.crest{position:absolute;right:0;top:0;height:28px;border-radius:6px;}
-
-.mediaWrap{background:var(--block-tertiary);border-radius:12px;overflow:hidden;}
-.media{display:block;width:100%;height:180px;object-fit:cover;filter:saturate(.8) contrast(1.05);}
-
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 12px;}
-.stat{text-align:center;}
-.statValue{font-size:24px;font-weight:800;line-height:1;}
-.statLabel{margin-top:4px;font-size:12px;letter-spacing:.22em;color:var(--content-secondary);}
-
-.footer{margin-top:6px;display:flex;justify-content:space-between;align-items:center;}
-.badge{padding:6px 10px;border-radius:8px;font-weight:700;font-size:12px;letter-spacing:.12em;
-  background:var(--block-tertiary);color:var(--content-primary);}
-
-.rarityFactory{}
-.rarityLimited{background:linear-gradient(180deg,var(--block-secondary),#3a1c1c 70%);}
-.rarityNismo{
-  border:2px solid transparent;
-  background:
-    linear-gradient(var(--block-secondary),var(--block-secondary)) padding-box,
-    linear-gradient(135deg,var(--gradient-light1),var(--gradient-light2)) border-box;
+/* Base card */
+.card {
+  width: 200px;
+  height: 300px;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* 1px #FFFFFF @ 20% */
+  background: rgba(24, 3, 3, 0.35);
 }
 
-.price{display:inline-flex;align-items:center;gap:6px;font-weight:700;}
-.coin{filter:saturate(1.1);}
+/* --- Rarities (from screenshot) --- */
+
+/* Left card – Factory (blue-ish) */
+.factory {
+  background: #304156; /* you can tweak to match your exact figma */
+}
+
+/* Middle card – Limited Run (brown) */
+.limited {
+  background: #7b3b35;
+}
+
+/* Right card – Nismo (red/pink) */
+.nismo {
+  background: linear-gradient(160deg, #e01f5f 0%, #e05720 60%);
+}
+
+/* --- Header --- */
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* COLLECTION BADGE */
+.collectionBadge {
+  width: 60px;
+  height: 30px;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+
+.makeModel {
+  /* C4 <make model> */
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5); /* Card 3 = 50% */
+  letter-spacing: 0.08em;
+}
+
+.cardName {
+  /* C2 <name> */
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+/* --- Image --- */
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  height: 135px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 🔥 Universal tint overlay setup */
+.imageWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.3s ease;
+  mix-blend-mode: multiply; /* tints while keeping image detail */
+}
+
+/* 🎯 Factory rarity — cool muted blue tint */
+.factory .imageWrapper::after {
+  background: rgba(48, 65, 86, 0.65); /* dark bluish tone */
+}
+
+/* 🎯 Limited rarity — warm orange tint */
+.limited .imageWrapper::after {
+  background: rgba(224, 87, 32, 0.65); /* subtle warm tone */
+}
+
+/* 🎯 Nismo rarity — hot pink/red tint */
+.nismo .imageWrapper::after {
+  background: rgba(255, 115, 0, 0.635); /* red-pink highlight */
+}
+/* --- Stats --- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.stat {
+  background: rgba(255, 255, 255, 0.0);
+  border-radius: 4px;
+  padding: 6px 6px 5px 6px;
+
+  display: flex;
+  flex-direction: column; /* 🔥 reverses label + value order */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+
+  min-height: 46px;
+}
+
+
+.statLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5); /* card 3 (50%) */
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff; /* card 1/2 (100%) */
+  line-height: 1;
+}
+
+/* --- Footer --- */
+.footer {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.083); /* block footer */
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.grade {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.valueIcon {
+  width: 14px;           /* adjust size to match your design */
+  height: 14px;
+  object-fit: contain;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+

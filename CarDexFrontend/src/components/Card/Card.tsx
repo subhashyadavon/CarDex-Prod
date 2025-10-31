@@ -1,63 +1,101 @@
+// src/components/Card/Card.tsx
 import React from "react";
 import styles from "./Card.module.css";
+import coinIcon from "../../assets/coin.png";
 
-export type Rarity = "FACTORY" | "LIMITED_RUN" | "NISMO";
 
-export type CarCardProps = {
-  makeModel: string;   // "LEXUS LC 500"
-  title: string;       // "The Daily"
+export type CardRarity = "factory" | "limited" | "nismo";
+
+export interface CarCardProps {
+  makeModel: string;
+  cardName: string;
   imageUrl: string;
-  stats: { label: string; value: number }[]; // expects 4 items
-  rarity: Rarity;
-  price: number;
-  crestUrl?: string;   // small JDM badge image
-  onClick?: () => void;
-};
+  stat1Label?: string;
+  stat1Value?: string;
+  stat2Label?: string;
+  stat2Value?: string;
+  stat3Label?: string;
+  stat3Value?: string;
+  stat4Label?: string;
+  stat4Value?: string;
+  grade?: string;
+  value?: string;
+  rarity?: CardRarity;
+  collectionImageUrl?: string; // ✅ new prop
+}
 
-const rarityClass: Record<Rarity, string> = {
-  FACTORY: styles.rarityFactory,
-  LIMITED_RUN: styles.rarityLimited,
-  NISMO: styles.rarityNismo,
-};
-
-export default function CarCard({
+const Card: React.FC<CarCardProps> = ({
   makeModel,
-  title,
+  cardName,
   imageUrl,
-  stats,
-  rarity,
-  price,
-  crestUrl,
-  onClick,
-}: CarCardProps) {
+  stat1Label = "POWER",
+  stat1Value = "471",
+  stat2Label = "WEIGHT",
+  stat2Value = "1345",
+  stat3Label = "BRAKING",
+  stat3Value = "471",
+  stat4Label = "TORQUE",
+  stat4Value = "1345",
+  grade = "FACTORY",
+  value = "115,999",
+  rarity = "factory",
+  collectionImageUrl,
+}) => {
   return (
-    <article className={`${styles.card} ${rarityClass[rarity]}`} onClick={onClick}>
-      <header className={styles.header}>
-        <div className={styles.preTitle}>{makeModel}</div>
-        <h3 className={styles.title}>{title}</h3>
-        {crestUrl && <img className={styles.crest} src={crestUrl} alt="" />}
-      </header>
+    <div className={`${styles.card} ${styles[rarity]}`}>
+      {/* HEADER */}
+      <div className={styles.header}>
+        <div>
+          <div className={styles.makeModel}>{makeModel}</div>
+          <div className={styles.cardName}>{cardName}</div>
+        </div>
 
-      <div className={styles.mediaWrap}>
-        <img className={styles.media} src={imageUrl} alt={title} />
+        {/* ✅ COLLECTION BADGE */}
+        {collectionImageUrl && (
+          <img
+            src={collectionImageUrl}
+            alt="Collection badge"
+            className={styles.collectionBadge}
+          />
+        )}
       </div>
 
-      <section className={styles.stats}>
-        {stats.slice(0,4).map((s) => (
-          <div key={s.label} className={styles.stat}>
-            <div className={styles.statValue}>{s.value}</div>
-            <div className={styles.statLabel}>{s.label}</div>
-          </div>
-        ))}
-      </section>
+      {/* IMAGE */}
+      <div className={styles.imageWrapper}>
+        <img src={imageUrl} alt={cardName} className={styles.image} />
+      </div>
 
-      <footer className={styles.footer}>
-        <span className={styles.badge}>{rarity.replace("_"," ")}</span>
-        <span className={styles.price}>
-          <span className={styles.coin} aria-hidden>🪙</span>
-          {price.toLocaleString()}
-        </span>
-      </footer>
-    </article>
+      {/* STATS */}
+      <div className={styles.stats}>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{stat1Value}</div>
+          <div className={styles.statLabel}>{stat1Label}</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{stat2Value}</div>
+          <div className={styles.statLabel}>{stat2Label}</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{stat3Value}</div>
+          <div className={styles.statLabel}>{stat3Label}</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{stat4Value}</div>
+          <div className={styles.statLabel}>{stat4Label}</div>
+        </div>
+      </div>
+
+    {/* FOOTER */}
+    <div className={styles.footer}>
+      <div className={styles.grade}>{grade}</div>
+      <div className={styles.value}>
+        <img src={coinIcon} alt="Coin icon" className={styles.valueIcon} /> 
+        <span>{value}</span>
+      </div>
+    </div>
+
+    </div>
   );
-}
+};
+
+export default Card;
