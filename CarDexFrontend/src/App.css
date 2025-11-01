@@ -27,6 +27,15 @@
   --color-white-50: rgba(255, 255, 255, 0.5);
   --color-white-20: rgba(255, 255, 255, 0.2);
   --color-white-8: rgba(255, 255, 255, 0.08);
+  --color-black: #000000;
+
+  --rarity-factory-bg: #232030; 
+  --rarity-limited-bg: #5d2b2a; 
+  --rarity-nismo-bg: #952a2e;   
+
+  --rarity-factory-tint: rgba(48, 65, 86, 0.75);
+  --rarity-limited-tint: rgba(93, 43, 43, 0.75);
+  --rarity-nismo-tint: rgba(149, 42, 46, 0.75);
 }
 
 /* BASE STYLES */

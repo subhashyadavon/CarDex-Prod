@@ -3,6 +3,8 @@ import Header, { NavItem } from "./components/Header/Header";
 import "./App.css";
 
 import logo from "./assets/logo_full.png";
+import coinIcon from "./assets/coin.png";
+
 
 function App() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
@@ -15,7 +17,7 @@ function App() {
         coinBalance={115999}
         userLevel={22}
         logoUrl={logo}
-        // coinIconUrl="/path/to/coin.png" // Optional: if you have a coin icon
+        coinIconUrl={coinIcon}
       />
       
       {/* Main content area */}

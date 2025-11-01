@@ -1,8 +1,8 @@
 // src/components/Card/Card.tsx
 import React from "react";
 import styles from "./Card.module.css";
+import "../../App.css"; // make sure global typography is available
 import coinIcon from "../../assets/coin.png";
-
 
 export type CardRarity = "factory" | "limited" | "nismo";
 
@@ -21,7 +21,7 @@ export interface CarCardProps {
   grade?: string;
   value?: string;
   rarity?: CardRarity;
-  collectionImageUrl?: string; // ✅ new prop
+  collectionImageUrl?: string;
 }
 
 const Card: React.FC<CarCardProps> = ({
@@ -46,11 +46,10 @@ const Card: React.FC<CarCardProps> = ({
       {/* HEADER */}
       <div className={styles.header}>
         <div>
-          <div className={styles.makeModel}>{makeModel}</div>
-          <div className={styles.cardName}>{cardName}</div>
+          <div className={`card-4 ${styles.makeModel}`}>{makeModel}</div>
+          <div className={`card-2 ${styles.cardName}`}>{cardName}</div>
         </div>
 
-        {/* ✅ COLLECTION BADGE */}
         {collectionImageUrl && (
           <img
             src={collectionImageUrl}
@@ -65,35 +64,33 @@ const Card: React.FC<CarCardProps> = ({
         <img src={imageUrl} alt={cardName} className={styles.image} />
       </div>
 
-      {/* STATS */}
       <div className={styles.stats}>
         <div className={styles.stat}>
-          <div className={styles.statValue}>{stat1Value}</div>
-          <div className={styles.statLabel}>{stat1Label}</div>
+          <div className="card-1">{stat1Value}</div>
+          <div className="card-4">{stat1Label}</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statValue}>{stat2Value}</div>
-          <div className={styles.statLabel}>{stat2Label}</div>
+          <div className="card-1">{stat2Value}</div>
+          <div className="card-4">{stat2Label}</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statValue}>{stat3Value}</div>
-          <div className={styles.statLabel}>{stat3Label}</div>
+          <div className="card-1">{stat3Value}</div>
+          <div className="card-4">{stat3Label}</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statValue}>{stat4Value}</div>
-          <div className={styles.statLabel}>{stat4Label}</div>
+          <div className="card-1">{stat4Value}</div>
+          <div className="card-4">{stat4Label}</div>
         </div>
       </div>
 
-    {/* FOOTER */}
-    <div className={styles.footer}>
-      <div className={styles.grade}>{grade}</div>
-      <div className={styles.value}>
-        <img src={coinIcon} alt="Coin icon" className={styles.valueIcon} /> 
-        <span>{value}</span>
+      {/* FOOTER */}
+      <div className={styles.footer}>
+        <div className="card-4">{grade}</div>
+        <div className={styles.value}>
+          <img src={coinIcon} alt="Coin icon" className={styles.valueIcon} />
+          <span className="card-3">{value}</span>
+        </div>
       </div>
-    </div>
-
     </div>
   );
 };
