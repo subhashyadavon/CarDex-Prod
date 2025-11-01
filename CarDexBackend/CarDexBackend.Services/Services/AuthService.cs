@@ -96,7 +96,7 @@ namespace CarDexBackend.Services
                     Username = user.Username,
                     Currency = user.Currency,
                     CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.CreatedAt // User entity doesn't have UpdatedAt, using CreatedAt
+                    UpdatedAt = user.CreatedAt 
                 }
             };
         }
@@ -133,7 +133,7 @@ namespace CarDexBackend.Services
                     Username = user.Username,
                     Currency = user.Currency,
                     CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.CreatedAt // User entity doesn't have UpdatedAt, using CreatedAt
+                    UpdatedAt = DateTime.UtcNow
                 }
             };
         }
