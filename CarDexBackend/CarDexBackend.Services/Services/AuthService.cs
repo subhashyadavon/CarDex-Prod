@@ -1,6 +1,5 @@
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexBackend.Services;
 using CarDexDatabase;
 using CarDexBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
