@@ -10,54 +10,14 @@ namespace CarDexBackend.Domain.Entities
     /// </summary>
     public class CompletedTrade
     {
-        /// <summary>
-        /// Unique identifier for the completed trade record.
-        /// </summary>
+        
         public Guid Id { get; set; }
-
-        /// <summary>
-        /// Type of trade that was completed.
-        /// FOR_CARD: Trade involved exchanging cards between users.
-        /// FOR_PRICE: Trade involved selling a card for in-game currency.
-        /// </summary>
         public TradeEnum Type { get; set; }
-
-        /// <summary>
-        /// Unique identifier of the user who initiated the trade (seller).
-        /// This user owned the card that was offered for trade.
-        /// </summary>
         public Guid SellerUserId { get; set; }
-
-        /// <summary>
-        /// Unique identifier of the card that was offered and sold by the seller.
-        /// This card changes ownership from SellerUserId to BuyerUserId.
-        /// </summary>
         public Guid SellerCardId { get; set; }
-
-        /// <summary>
-        /// Unique identifier of the user who accepted and completed the trade (buyer).
-        /// This user receives the card from the seller.
-        /// </summary>
         public Guid BuyerUserId { get; set; }
-
-        /// <summary>
-        /// Unique identifier of the card received by the seller (only for FOR_CARD trades).
-        /// When Type is FOR_CARD, this is the card given to the seller in exchange.
-        /// When Type is FOR_PRICE, this is null.
-        /// </summary>
         public Guid? BuyerCardId { get; set; }
-
-        /// <summary>
-        /// Price paid in in-game currency (only for FOR_PRICE trades).
-        /// When Type is FOR_PRICE, this is the amount the buyer paid for the card.
-        /// When Type is FOR_CARD, this is typically 0.
-        /// </summary>
         public int Price { get; set; }
-
-        /// <summary>
-        /// Timestamp indicating when the trade was completed and executed.
-        /// Used for trade history and audit purposes.
-        /// </summary>
         public DateTime ExecutedDate { get; set; }
 
         /// <summary>

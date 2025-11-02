@@ -53,7 +53,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero // No tolerance for expired tokens
     };
 });
 
@@ -122,6 +123,9 @@ builder.Services.AddAuthorization();
 // Register Token Validator
 builder.Services.AddScoped<TokenValidator>();
 
+// Register Rate Limiter
+builder.Services.AddSingleton<RateLimiter>();
+
 var app = builder.Build();
 
 
@@ -144,6 +148,10 @@ app.UseTokenValidator();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add rate limiter after authentication to track requests per user
+app.UseUserRateLimiter();
+
 app.MapControllers();
 
 // Create database tables if they don't exist (for development)

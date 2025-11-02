@@ -1,6 +1,5 @@
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexBackend.Services;
 using CarDexDatabase;
 using CarDexBackend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +76,9 @@ namespace CarDexBackend.Services
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
+            // Reload user to get the database-set CreatedAt timestamp
+            await _db.Entry(user).ReloadAsync();
+
             // Generate JWT token for the newly registered user
             var token = GenerateJwtToken(user);
 
@@ -93,8 +95,8 @@ namespace CarDexBackend.Services
                     Id = user.Id,
                     Username = user.Username,
                     Currency = user.Currency,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.CreatedAt 
                 }
             };
         }
@@ -117,7 +119,7 @@ namespace CarDexBackend.Services
             // Generate JWT token
             var token = GenerateJwtToken(user);
 
-            // Return login response
+            // Return login response with actual database values
             return new LoginResponse
             {
                 AccessToken = token,
@@ -130,7 +132,7 @@ namespace CarDexBackend.Services
                     Id = user.Id,
                     Username = user.Username,
                     Currency = user.Currency,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = user.CreatedAt,
                     UpdatedAt = DateTime.UtcNow
                 }
             };

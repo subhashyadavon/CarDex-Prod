@@ -136,22 +136,29 @@ namespace CarDexBackend.Shared.Validator
             }
             catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
             {
-                _logger.LogWarning(ex, "JWT token has expired");
+                _logger.LogDebug(ex, "JWT token has expired");
                 return false;
             }
             catch (Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException ex)
             {
-                _logger.LogWarning(ex, "JWT token signature is invalid");
+                _logger.LogDebug(ex, "JWT token signature is invalid");
+                return false;
+            }
+            catch (Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException ex)
+            {
+                // Malformed tokens (e.g., invalid format) are expected for invalid requests
+                _logger.LogDebug(ex, "JWT token is malformed or not well-formed");
                 return false;
             }
             catch (Microsoft.IdentityModel.Tokens.SecurityTokenValidationException ex)
             {
-                _logger.LogWarning(ex, "JWT token validation failed: {Message}", ex.Message);
+                _logger.LogDebug(ex, "JWT token validation failed: {Message}", ex.Message);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error during token validation");
+                // Only log unexpected errors at Error level
+                _logger.LogWarning(ex, "Unexpected error during token validation");
                 return false;
             }
         }

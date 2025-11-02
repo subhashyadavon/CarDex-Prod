@@ -14,6 +14,15 @@ namespace CarDexBackend.Shared.Validator
         {
             return builder.UseMiddleware<TokenValidator>();
         }
+
+        /// <summary>
+        /// Adds the user rate limiter middleware to the application pipeline.
+        /// </summary>
+        /// <param name="builder">The application builder.</param>
+        /// <returns>The application builder for chaining.</returns>
+        public static IApplicationBuilder UseUserRateLimiter(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<RateLimiter>();
+        }
     }
 }
-
