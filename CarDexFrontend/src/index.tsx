@@ -7,7 +7,7 @@ import CardDemo from "./components/Card/CardDemo";
 import InputDemo from "./components/TextInput/Demo";
 import Login from "./pages/Login/Login";
 
-const DEMO_MODE = false;
+const DEMO_MODE = true;
 
 /* -------------------- Mount -------------------- */
 const root = document.getElementById("root");
