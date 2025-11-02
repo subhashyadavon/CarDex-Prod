@@ -9,24 +9,17 @@
 }
 
 /* LABEL */
-/* 
-.label
-{
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--content-primary);
-  letter-spacing: 0.02em;
-} */
 
-.required {
-  color: #ff6b6b;
+.required 
+{
+  color: var(--color-error);
   margin-left: 4px;
 }
 
 /* INPUT CONTAINER */
 
-.inputContainer {
+.inputContainer
+{
   position: relative;
   display: flex;
   align-items: center;
