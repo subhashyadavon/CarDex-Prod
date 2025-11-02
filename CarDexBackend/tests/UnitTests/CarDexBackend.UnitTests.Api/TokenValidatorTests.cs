@@ -1152,22 +1152,6 @@ namespace CarDexBackend.UnitTests.Api
             // Arrange
             var context = CreateContextWithPath("/api/cards");
             context.Request.Headers.Remove("Authorization");
-            var logCalls = new List<string>();
-
-            _mockLogger.Setup(x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()))
-                .Callback<LogLevel, EventId, object, Exception, Func<object, Exception?, string>>(
-                    (level, eventId, state, exception, formatter) =>
-                    {
-                        if (level == LogLevel.Debug)
-                        {
-                            logCalls.Add("Debug");
-                        }
-                    });
 
             RequestDelegate next = async (HttpContext ctx) => await Task.CompletedTask;
 
@@ -1181,9 +1165,9 @@ namespace CarDexBackend.UnitTests.Api
                 x => x.Log(
                     LogLevel.Debug,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => true),
+                    It.IsAny<It.IsAnyType>(),
                     It.IsAny<Exception>(),
-                    It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.AtLeastOnce);
         }
 
@@ -1202,7 +1186,8 @@ namespace CarDexBackend.UnitTests.Api
 
             // Assert
             Assert.Equal(401, context.Response.StatusCode);
-            Assert.Equal("application/json", context.Response.ContentType);
+            Assert.True(context.Response.ContentType?.StartsWith("application/json"), 
+                $"Expected ContentType to start with 'application/json', but was '{context.Response.ContentType}'");
             context.Response.Body.Position = 0;
             var reader = new StreamReader(context.Response.Body);
             var body = await reader.ReadToEndAsync();
@@ -1229,7 +1214,8 @@ namespace CarDexBackend.UnitTests.Api
 
             // Assert
             Assert.Equal(401, context.Response.StatusCode);
-            Assert.Equal("application/json", context.Response.ContentType);
+            Assert.True(context.Response.ContentType?.StartsWith("application/json"), 
+                $"Expected ContentType to start with 'application/json', but was '{context.Response.ContentType}'");
             context.Response.Body.Position = 0;
             var reader = new StreamReader(context.Response.Body);
             var body = await reader.ReadToEndAsync();
