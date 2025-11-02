@@ -36,6 +36,27 @@ jobs:
             --results-directory TestResults \
             /p:CoverletOutputFormat=cobertura
 
+      - name: Run regression tests
+        run: |
+          echo "========================================="
+          echo "Running Critical Regression Tests"
+          echo "========================================="
+          dotnet test CarDexBackend/CarDexBackend.sln \
+            --no-build \
+            --configuration Debug \
+            --filter "Category=Regression" \
+            --verbosity normal \
+            --logger "trx;LogFileName=regression-tests.trx" \
+            --results-directory TestResults/Regression
+        continue-on-error: false
+
+      - name: Upload regression test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-test-results
+          path: TestResults/Regression/**/*.trx
+
       - name: Generate HTML coverage report
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
