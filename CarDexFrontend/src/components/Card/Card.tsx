@@ -1,7 +1,7 @@
 // src/components/Card/Card.tsx
 import React from "react";
 import styles from "./Card.module.css";
-import "../../App.css"; // make sure global typography is available
+import "../../App.css"; 
 import coinIcon from "../../assets/coin.png";
 
 export type CardRarity = "factory" | "limited" | "nismo";

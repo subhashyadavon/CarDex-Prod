@@ -7,6 +7,8 @@ import "./App.css";
 import PackDemo from "./components/Pack/Demo";
 import CardDemo from "./components/Card/CardDemo";
 import InputDemo from "./components/TextInput/Demo";
+// if you actually need the Login page directly later, you can keep this:
+import Login from "./pages/Login/Login";
 
 const DEMO_MODE = true;
 
@@ -14,21 +16,18 @@ const DEMO_MODE = true;
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element #root not found");
 
-if(DEMO_MODE)
-{
+if (DEMO_MODE) {
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
-        <PackDemo/>
-        <CardDemo/>
-        <InputDemo/>
+      <PackDemo />
+      <CardDemo />
+      <InputDemo />
     </React.StrictMode>
   );
-}
-else
-{
+} else {
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
-        <InputDemo/>
+      <App />
     </React.StrictMode>
   );
 }
