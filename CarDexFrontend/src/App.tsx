@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import Header, { NavItem } from "./components/Header/Header";
+import { AuthProvider } from "./context/AuthContext";
+import { GameProvider } from "./context/GameContext";
+import { TradeProvider } from "./context/TradeContext";
 import "./App.css";
 
 import logo from "./assets/logo_full.png";
 import coinIcon from "./assets/coin.png";
 
 
-function App() {
+function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
 
   return (
@@ -34,6 +37,18 @@ function App() {
         </p>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <GameProvider>
+        <TradeProvider>
+          <AppContent />
+        </TradeProvider>
+      </GameProvider>
+    </AuthProvider>
   );
 }
 
