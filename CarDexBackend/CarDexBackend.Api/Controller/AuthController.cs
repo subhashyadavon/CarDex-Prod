@@ -33,11 +33,11 @@ namespace CarDexBackend.Api.Controllers
         /// </summary>
         /// <param name="request">The registration request containing username and password.</param>
         /// <returns>
-        /// 201 Created on success, 400 Bad Request for invalid input,
+        /// 200 Ok on success, 400 Bad Request for invalid input,
         /// or 409 Conflict if the username already exists.
         /// </returns>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(LoginResponse), 201)]
+        [ProducesResponseType(typeof(LoginResponse), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 409)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -45,7 +45,7 @@ namespace CarDexBackend.Api.Controllers
             try
             {
                 var response = await _authService.Register(request);
-                return CreatedAtAction(nameof(Register), new { id = response.User.Id }, response);
+                return Ok(response);
             }
             catch (DbUpdateException)
             {
