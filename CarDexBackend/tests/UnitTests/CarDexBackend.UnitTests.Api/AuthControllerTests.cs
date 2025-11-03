@@ -48,7 +48,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             var result = await _controller.Register(request);
 
-            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            var createdResult = Assert.IsType<OkObjectResult>(result);
             var value = Assert.IsType<LoginResponse>(createdResult.Value);
             Assert.Equal(user.Username, value.User.Username);
         }
