@@ -5,11 +5,17 @@ import Button from "../../components/Button/Button";
 import Input from "../../components/TextInput/TextInput";
 import logo from "../../assets/logo_full.png";
 import { UserIcon, LockIcon } from "../../components/Icons";
+import { useNavigate } from "react-router-dom";
+
+
+
+
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showErrors, setShowErrors] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     if (!username || !password) {
@@ -17,6 +23,7 @@ const Login: React.FC = () => {
       return;
     }
 
+    navigate("/app");
     console.log("Login:", { username, password });
     setShowErrors(false);
   };
