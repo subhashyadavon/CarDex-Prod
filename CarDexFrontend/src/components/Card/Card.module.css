@@ -11,6 +11,9 @@
   gap: 8px;
   border: 1px solid var(--color-white-20);
   background: var(--block-tertiary);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
 /* ===== Rarities ===== */
@@ -61,7 +64,7 @@
   height: 135px;
   border-radius: 4px;
   overflow: hidden;
-  background: var(--color-black);
+  background: var(--color-black, #000);
   margin: 0 auto;
 }
 
