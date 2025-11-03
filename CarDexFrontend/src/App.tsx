@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import Header, { NavItem } from "./components/Header/Header";
+import { AuthProvider } from "./context/AuthContext";
+import { GameProvider } from "./context/GameContext";
+import { TradeProvider } from "./context/TradeContext";
 import "./App.css";
 import PackShop from "./components/Pack/PackShop"; // ✅ use YOUR real path
 import logo from "./assets/logo_full.png";
@@ -7,7 +10,7 @@ import coinIcon from "./assets/coin.png";
 import packsData from "./data/packs.json";
 import Garage from "./components/Garage/Garage"
 
-function App() {
+function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
 
   return (
@@ -55,6 +58,19 @@ function App() {
         )}
       </main>
     </div>
+  );
+}
+
+
+function App() {
+  return (
+    <AuthProvider>
+      <GameProvider>
+        <TradeProvider>
+          <AppContent />
+        </TradeProvider>
+      </GameProvider>
+    </AuthProvider>
   );
 }
 
