@@ -1,5 +1,6 @@
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
+using System.Linq;
 
 namespace CarDexBackend.Services
 {
@@ -18,8 +19,9 @@ namespace CarDexBackend.Services
         /// <remarks>
         /// The dictionary maps usernames to their corresponding password and user profile.
         /// This is volatile data that resets whenever the API restarts.
+        /// Using static to persist across service instances (for testing).
         /// </remarks>
-        private readonly Dictionary<string, (string Password, UserResponse User)> _users = new();
+        private static readonly Dictionary<string, (string Password, UserResponse User)> _users = new();
 
         /// <summary>
         /// Registers a new user with the provided credentials.
@@ -29,7 +31,7 @@ namespace CarDexBackend.Services
         /// A <see cref="UserResponse"/> object representing the newly registered user.
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
-        public Task<UserResponse> Register(RegisterRequest request)
+        public Task<LoginResponse> Register(RegisterRequest request)
         {
             if (_users.ContainsKey(request.Username))
             {
@@ -45,7 +47,15 @@ namespace CarDexBackend.Services
             };
 
             _users[request.Username] = (request.Password, user);
-            return Task.FromResult(user);
+            
+            var response = new LoginResponse
+            {
+                AccessToken = Guid.NewGuid().ToString(), // mock token; no real JWT generation
+                ExpiresIn = 3600, // mock expiry time (1 hour)
+                User = user
+            };
+            
+            return Task.FromResult(response);
         }
 
         /// <summary>
@@ -58,7 +68,13 @@ namespace CarDexBackend.Services
         /// <exception cref="UnauthorizedAccessException">Thrown when credentials are invalid.</exception>
         public Task<LoginResponse> Login(LoginRequest request)
         {
-            if (!_users.TryGetValue(request.Username, out var record) || record.Password != request.Password)
+            if (!_users.TryGetValue(request.Username, out var record))
+            {
+                throw new UnauthorizedAccessException("Invalid credentials.");
+            }
+            
+            // Simple password comparison (since mock stores plain password)
+            if (record.Password != request.Password)
             {
                 throw new UnauthorizedAccessException("Invalid credentials.");
             }

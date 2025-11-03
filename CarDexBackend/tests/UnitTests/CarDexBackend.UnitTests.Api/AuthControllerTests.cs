@@ -7,6 +7,7 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using System;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace CarDexBackend.UnitTests.Api.Controllers
 {
@@ -37,14 +38,19 @@ namespace CarDexBackend.UnitTests.Api.Controllers
         {
             var request = new RegisterRequest { Username = "testuser", Password = "password" };
             var user = new UserResponse { Id = Guid.NewGuid(), Username = "testuser" };
+            var loginResponse = new LoginResponse 
+            { 
+                AccessToken = "mock-token",
+                User = user
+            };
 
-            _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ReturnsAsync(user);
+            _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ReturnsAsync(loginResponse);
 
             var result = await _controller.Register(request);
 
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var value = Assert.IsType<UserResponse>(createdResult.Value);
-            Assert.Equal(user.Username, value.Username);
+            var value = Assert.IsType<LoginResponse>(createdResult.Value);
+            Assert.Equal(user.Username, value.User.Username);
         }
 
         /// <summary>
@@ -71,6 +77,22 @@ namespace CarDexBackend.UnitTests.Api.Controllers
         [Fact]
         public async Task Logout_Succeeds()
         {
+            var userId = Guid.NewGuid();
+            var claims = new[]
+            {
+                new Claim("sub", userId.ToString()),
+                new Claim("unique_name", "testuser")
+            };
+            var identity = new ClaimsIdentity(claims, "Test");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
+                {
+                    User = principal
+                }
+            };
+
             _mockAuthService.Setup(s => s.Logout(It.IsAny<Guid>())).Returns(Task.CompletedTask);
 
             var result = await _controller.Logout();

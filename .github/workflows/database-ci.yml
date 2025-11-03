@@ -22,9 +22,9 @@ jobs:
           dotnet-version: 8.0.414
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore CarDexDatabase/CarDexDatabase.sln
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build CarDexDatabase/CarDexDatabase.sln --configuration Release --no-restore
 
 

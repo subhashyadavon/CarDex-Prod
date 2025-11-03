@@ -92,7 +92,6 @@ namespace CarDexBackend.Services
                 throw new KeyNotFoundException("Collection not found");
             
             // Get preview cards (first 3 vehicles from this collection)
-            // Use the Vehicles array from the collection
             var previewCards = await _context.Vehicles
                 .Where(v => collection.Vehicles.Contains(v.Id))
                 .Take(3)
@@ -111,8 +110,8 @@ namespace CarDexBackend.Services
                 Id = pack.Id,
                 CollectionId = pack.CollectionId,
                 CollectionName = collection.Name,
-                PurchasedAt = DateTime.UtcNow, // Pack doesn't have PurchasedAt field
-                IsOpened = false, // TODO: Add IsOpened field to Pack entity
+                PurchasedAt = pack.CreatedAt,
+                IsOpened = pack.IsOpened,
                 PreviewCards = previewCards,
                 EstimatedValue = pack.Value
             };
@@ -173,8 +172,8 @@ namespace CarDexBackend.Services
             // Add cards to database
             _context.Cards.AddRange(cards);
 
-            // TODO: Mark pack as opened instead of deleting (need IsOpened field in Pack entity)
-            _context.Packs.Remove(pack);
+            // Mark pack as opened
+            pack.Open(); // Use domain behavior
 
             await _context.SaveChangesAsync();
 
@@ -187,8 +186,8 @@ namespace CarDexBackend.Services
                     Id = pack.Id,
                     CollectionId = pack.CollectionId,
                     CollectionName = collection?.Name ?? "Unknown",
-                    PurchasedAt = DateTime.UtcNow,
-                    IsOpened = true
+                    PurchasedAt = pack.CreatedAt,
+                    IsOpened = pack.IsOpened
                 }
             };
         }

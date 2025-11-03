@@ -10,7 +10,7 @@ namespace CarDexBackend.Domain.Entities
         public RewardEnum Type { get; set; }
         public Guid? ItemId { get; set; } 
         public int Amount { get; set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ClaimedAt { get; set; } // Null until claimed
 
         // Parameterless constructor for EF Core
@@ -21,6 +21,7 @@ namespace CarDexBackend.Domain.Entities
             Type = RewardEnum.PACK;
             Amount = 0;
             ItemId = null;
+            CreatedAt = DateTime.UtcNow;
             ClaimedAt = null;
         }
 
@@ -32,6 +33,7 @@ namespace CarDexBackend.Domain.Entities
             Type = type;
             Amount = amount;
             ItemId = itemId;
+            CreatedAt = DateTime.UtcNow;
             ClaimedAt = null;
         }
 

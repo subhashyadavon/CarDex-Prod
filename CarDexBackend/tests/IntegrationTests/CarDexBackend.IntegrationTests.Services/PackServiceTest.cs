@@ -161,7 +161,7 @@ namespace DefaultNamespace
 
         // Test for OpenPack
         [Fact]
-        public async Task OpenPack_ShouldGenerateCardsAndRemovePack()
+        public async Task OpenPack_ShouldGenerateCardsAndMarkPackAsOpened()
         {
             // Arrange - Create pack with existing collection and user
             var collection = _context.Collections.First();
@@ -181,8 +181,12 @@ namespace DefaultNamespace
             // Assert
             Assert.NotNull(result);
             Assert.Equal(5, result.Cards.Count()); 
-            Assert.True(result.Pack.IsOpened); 
-            Assert.DoesNotContain(pack, _context.Packs); 
+            Assert.True(result.Pack.IsOpened);
+            
+            // Verify pack is still in database but marked as opened
+            var openedPack = await _context.Packs.FindAsync(pack.Id);
+            Assert.NotNull(openedPack);
+            Assert.True(openedPack.IsOpened);
         }
     }
 }

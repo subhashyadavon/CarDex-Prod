@@ -11,6 +11,7 @@ namespace CarDexBackend.Domain.Entities
         public Guid CollectionId { get; set; }  // Collection associated with the card
         public GradeEnum Grade { get; set; }    // Rarity/grade
         public int Value { get; set; }          // Current market value
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Parameterless constructor for EF Core
         public Card()
@@ -21,6 +22,7 @@ namespace CarDexBackend.Domain.Entities
             CollectionId = Guid.Empty;
             Grade = GradeEnum.FACTORY;
             Value = 0;
+            CreatedAt = DateTime.UtcNow;
         }
 
         // Constructor
@@ -32,6 +34,7 @@ namespace CarDexBackend.Domain.Entities
             CollectionId = collectionId;
             Grade = grade;
             Value = value;
+            CreatedAt = DateTime.UtcNow;
         }
 
         // Domain behavior: update value (e.g., based on market)

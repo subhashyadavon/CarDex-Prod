@@ -11,6 +11,7 @@ namespace CarDexBackend.Domain.Entities
         public Guid CardId { get; set; }       // Card offered in the trade
         public int Price { get; set; }         // Used if Type == FOR_PRICE
         public Guid? WantCardId { get; set; }  // Used if Type == FOR_CARD
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Parameterless constructor for EF Core
         public OpenTrade()
@@ -21,6 +22,7 @@ namespace CarDexBackend.Domain.Entities
             CardId = Guid.Empty;
             Price = 0;
             WantCardId = null;
+            CreatedAt = DateTime.UtcNow;
         }
 
         // Constructor
@@ -32,6 +34,7 @@ namespace CarDexBackend.Domain.Entities
             CardId = cardId;
             Price = price;
             WantCardId = wantCardId;
+            CreatedAt = DateTime.UtcNow;
 
             ValidateTrade();
         }
