@@ -2,7 +2,7 @@
 
 This document describes the API integration layer and state management infrastructure for the CarDex frontend application.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -27,7 +27,7 @@ src/
     └── collectionService.ts  # Collection API calls
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Backend Setup
 Make sure the backend API is running on `http://localhost:5083`
@@ -38,7 +38,7 @@ The `.env` file is configured with:
 REACT_APP_API_URL=http://localhost:5083
 ```
 
-## 🔐 Authentication
+## Authentication
 
 ### Using Auth in Your Pages
 
@@ -84,7 +84,7 @@ const {
 } = useAuth();
 ```
 
-## 🎮 Game State Management
+## Game State Management
 
 ### Using Game State in Your Pages
 
@@ -146,7 +146,7 @@ function OpenPackPage() {
 
   const handleOpenPack = async (packId: number) => {
     try {
-      const result = await openPack(packId);
+      const result = await openPsack(packId);
       console.log('Received cards:', result.cards);
       
       // Refresh user's inventory after opening pack
@@ -162,7 +162,7 @@ function OpenPackPage() {
 }
 ```
 
-## 🔄 Trade Management
+## Trade Management
 
 ### Using Trade State in Your Pages
 
@@ -236,7 +236,7 @@ const {
 } = useTrade();
 ```
 
-## 🛠️ Direct API Service Usage
+## Direct API Service Usage
 
 If you need to call API endpoints directly without using hooks:
 
@@ -252,86 +252,3 @@ async function fetchCardDetails(cardId: number) {
   }
 }
 ```
-
-## 📝 Important Notes
-
-### For Page Developers
-
-1. **Always use hooks in your pages** - Don't import services directly unless necessary
-2. **Check authentication** - Use `isAuthenticated` before showing protected content
-3. **Handle loading states** - Use `isLoading` to show spinners/skeletons
-4. **Handle errors** - Wrap API calls in try-catch blocks
-5. **Refresh data after mutations** - Call refresh functions after creating/updating data
-
-### State Updates
-
-State updates happen automatically when you call context functions:
-- `login()` → Updates `user` and `token`
-- `openPack()` → Returns new cards (you should call `refreshInventory()`)
-- `acceptTrade()` → Removes trade from `trades` list
-- `createTrade()` → Adds trade to `trades` list
-
-### Authentication Flow
-
-1. User logs in via `login()` function
-2. Token is stored in `localStorage` and added to all API requests
-3. If token expires (401 error), user is automatically logged out
-4. Token persists across page refreshes
-
-## 🔧 API Endpoint Reference
-
-All endpoints are configured in `src/config/api.config.ts`:
-
-### Auth Endpoints
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/logout` - Logout user
-
-### Card Endpoints
-- `GET /api/cards` - Get all cards
-- `GET /api/cards/:id` - Get card by ID
-- `GET /api/cards/user/:userId` - Get user's cards
-
-### Pack Endpoints
-- `GET /api/packs` - Get all packs
-- `GET /api/packs/:id` - Get pack by ID
-- `POST /api/packs/:id/open` - Open a pack
-
-### Trade Endpoints
-- `GET /api/trades` - Get all open trades
-- `GET /api/trades/:id` - Get trade by ID
-- `GET /api/trades/user/:userId` - Get user's trades
-- `POST /api/trades` - Create new trade
-- `POST /api/trades/:id/accept` - Accept trade
-- `DELETE /api/trades/:id/cancel` - Cancel trade
-
-### User Endpoints
-- `GET /api/users/:id` - Get user profile
-- `PUT /api/users/:id` - Update user profile
-- `GET /api/users/:id/rewards` - Get user rewards
-
-### Collection Endpoints
-- `GET /api/collections/:userId` - Get user collection
-- `PUT /api/collections/:userId` - Update collection
-
-## 🧪 Testing Your Pages
-
-1. Start the backend: Navigate to `CarDexBackend` and run the API
-2. Start the frontend: `npm start` in `CarDexFrontend`
-3. Open `http://localhost:3000`
-4. Your pages can now use the hooks to interact with the backend
-
-## 💡 Tips
-
-- **Don't worry about tokens** - They're automatically added to requests
-- **Use TypeScript** - All types are defined in `src/types/types.ts`
-- **Check network tab** - Use browser DevTools to debug API calls
-- **Console errors** - All API errors are logged to console automatically
-
-## 🤝 Questions?
-
-If you have questions about using the infrastructure:
-1. Check this README first
-2. Look at the inline documentation in the files
-3. Check the types in `src/types/types.ts`
-4. Ask your teammate who built the infrastructure!
