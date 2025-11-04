@@ -8,6 +8,7 @@ using CarDexBackend.Shared.Dtos.Responses;
 using System;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarDexBackend.UnitTests.Api.Controllers
 {
@@ -151,6 +152,108 @@ namespace CarDexBackend.UnitTests.Api.Controllers
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
             Assert.Equal("Invalid credentials.", error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that Register returns 503 for DbUpdateException.
+        /// </summary>
+        [Fact]
+        public async Task Register_DbUpdateException()
+        {
+            var request = new RegisterRequest { Username = "test", Password = "password" };
+
+            _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new DbUpdateException("Database error"));
+
+            var result = await _controller.Register(request);
+
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(503, statusResult.StatusCode);
+            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
+            Assert.Contains("Database error", error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that Register returns 503 for transient failure.
+        /// </summary>
+        [Fact]
+        public async Task Register_TransientFailure()
+        {
+            var request = new RegisterRequest { Username = "test", Password = "password" };
+
+            _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new InvalidOperationException("transient failure occurred"));
+
+            var result = await _controller.Register(request);
+
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(503, statusResult.StatusCode);
+            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
+            Assert.Contains("Database connection failed", error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that Register returns 503 for exception has been raised.
+        /// </summary>
+        [Fact]
+        public async Task Register_ExceptionHasBeenRaised()
+        {
+            var request = new RegisterRequest { Username = "test", Password = "password" };
+
+            _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new InvalidOperationException("exception has been raised"));
+
+            var result = await _controller.Register(request);
+
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(503, statusResult.StatusCode);
+            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
+            Assert.Contains("Database connection failed", error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that Logout returns 401 when user claim is missing.
+        /// </summary>
+        [Fact]
+        public async Task Logout_UnauthorizedWhenNoClaim()
+        {
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity())
+                }
+            };
+
+            var result = await _controller.Logout();
+
+            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+            var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
+            Assert.Equal("Invalid token.", error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that Logout returns 401 when user ID claim is invalid.
+        /// </summary>
+        [Fact]
+        public async Task Logout_UnauthorizedWhenInvalidClaim()
+        {
+            var claims = new[]
+            {
+                new Claim("sub", "not-a-guid")
+            };
+            var identity = new ClaimsIdentity(claims, "Test");
+            var principal = new ClaimsPrincipal(identity);
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
+                {
+                    User = principal
+                }
+            };
+
+            var result = await _controller.Logout();
+
+            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+            var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
+            Assert.Equal("Invalid token.", error.Message);
         }
     }
 }

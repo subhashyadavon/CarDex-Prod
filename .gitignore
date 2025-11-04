@@ -494,3 +494,11 @@ CarDexBackend/**/packages.lock.json
 CarDexDatabase/**/bin/
 CarDexDatabase/**/obj/
 CarDexDatabase/**/packages.lock.json
+# SonarQube
+.sonarqube/
+.sonar/
+**/.sonarqube/
+**/.sonar/
+**/TestResults/
+coverage.opencover.xml
+coverage.xml
