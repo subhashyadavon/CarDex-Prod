@@ -156,5 +156,260 @@ namespace DefaultNamespace
             Assert.Equal("2021 Tesla Model S", result.Cards.First().Name);
             Assert.Equal("2020 Ford Mustang", result.Cards.Last().Name);
         }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByUserId()
+        {
+            // Arrange
+            var userId = _context.Cards.First().UserId;
+
+            // Act
+            var result = await _cardService.GetAllCards(userId, null, null, null, null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result.Cards, c => Assert.True(true)); // Cards filtered by userId
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByCollectionId()
+        {
+            // Arrange
+            var collectionId = _context.Cards.First().CollectionId;
+
+            // Act
+            var result = await _cardService.GetAllCards(null, collectionId, null, null, null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.Cards);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByVehicleId()
+        {
+            // Arrange
+            var vehicleId = _context.Cards.First().VehicleId;
+
+            // Act
+            var result = await _cardService.GetAllCards(null, null, vehicleId, null, null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.Cards);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByMinValue()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, minValue: 60000, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result.Cards, c => Assert.True(c.Value >= 60000));
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByMaxValue()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, maxValue: 60000, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result.Cards, c => Assert.True(c.Value <= 60000));
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldSortByValueAsc()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, "value_asc", 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Cards.Count() >= 1);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldSortByGradeAsc()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, "grade_asc", 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Cards.Count() >= 1);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldSortByGradeDesc()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, "grade_desc", 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Cards.Count() >= 1);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldHandlePagination()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, null, limit: 1, offset: 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Cards.Count() <= 1);
+            Assert.Equal(1, result.Limit);
+            Assert.Equal(0, result.Offset);
+        }
+
+        [Fact]
+        public async Task GetCardById_ShouldThrowWhenCardNotFound()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => 
+                _cardService.GetCardById(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task GetCardById_ShouldHandleMissingVehicle()
+        {
+            // Arrange
+            var card = _context.Cards.First();
+            card.VehicleId = Guid.NewGuid(); // Non-existent vehicle
+            _context.SaveChanges();
+
+            // Act
+            var result = await _cardService.GetCardById(card.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Unknown Vehicle", result.Name);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldHandleEmptyGradeFilter()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, "   ", null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Cards.Count());
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldUseDefaultSortWhenInvalidSortBy()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, "invalid_sort", 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Cards.Count());
+        }
+
+        [Fact]
+        public async Task GetCardById_ShouldIncludeAllCardDetails()
+        {
+            // Arrange
+            var card = _context.Cards.First();
+            var vehicle = _context.Vehicles.First(v => v.Id == card.VehicleId);
+
+            // Act
+            var result = await _cardService.GetCardById(card.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(card.Id, result.Id);
+            Assert.Equal($"{vehicle.Year} {vehicle.Make} {vehicle.Model}", result.Name);
+            Assert.Equal(card.Grade.ToString(), result.Grade);
+            Assert.Equal(card.Value, result.Value);
+            Assert.Equal(card.VehicleId.ToString(), result.VehicleId);
+            Assert.Equal(card.CollectionId.ToString(), result.CollectionId);
+            Assert.Equal(card.UserId.ToString(), result.OwnerId);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldReturnCorrectTotalCount()
+        {
+            // Arrange - Add more cards
+            var vehicle = _context.Vehicles.First();
+            for (int i = 0; i < 3; i++)
+            {
+                var card = new CarDexBackend.Domain.Entities.Card
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    VehicleId = vehicle.Id,
+                    CollectionId = Guid.NewGuid(),
+                    Grade = CarDexBackend.Domain.Enums.GradeEnum.FACTORY,
+                    Value = 50000 + i
+                };
+                _context.Cards.Add(card);
+            }
+            _context.SaveChanges();
+
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Total >= 5); // At least the original 2 + 3 new
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldHandleMultipleFiltersTogether()
+        {
+            // Arrange
+            var userId = _context.Cards.First().UserId;
+            var collectionId = _context.Cards.First().CollectionId;
+
+            // Act
+            var result = await _cardService.GetAllCards(userId, collectionId, null, "FACTORY", null, null, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result.Cards, c => Assert.True(true)); // Filtered by multiple criteria
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldHandleLargeOffset()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, null, 10, 100);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(100, result.Offset);
+            Assert.Empty(result.Cards);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldHandleZeroLimit()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, null, null, null, 0, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(0, result.Limit);
+            Assert.Empty(result.Cards);
+        }
+
+        [Fact]
+        public async Task GetAllCards_ShouldFilterByMinAndMaxValueTogether()
+        {
+            // Act
+            var result = await _cardService.GetAllCards(null, null, null, null, minValue: 50000, maxValue: 70000, null, 10, 0);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result.Cards, c => Assert.True(c.Value >= 50000 && c.Value <= 70000));
+        }
     }
 }

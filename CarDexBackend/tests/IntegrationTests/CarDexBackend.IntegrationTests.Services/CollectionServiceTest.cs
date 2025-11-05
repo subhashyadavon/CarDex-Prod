@@ -128,5 +128,77 @@ namespace DefaultNamespace
             // Act & Assert
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _collectionService.GetCollectionById(Guid.NewGuid())); 
         }
+
+        [Fact]
+        public async Task GetCollectionById_ShouldReturnCollectionWithCards()
+        {
+            // Arrange
+            var collection = _context.Collections.First();
+            var vehicle = _context.Vehicles.First();
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = Guid.NewGuid(),
+                Username = "TestUser",
+                Password = "Password123",
+                Currency = 100
+            };
+            _context.Users.Add(user);
+            
+            var card = new CarDexBackend.Domain.Entities.Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                VehicleId = vehicle.Id,
+                CollectionId = collection.Id,
+                Grade = GradeEnum.FACTORY,
+                Value = 70000
+            };
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _collectionService.GetCollectionById(collection.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(1, result.CardCount);
+            Assert.Single(result.Cards);
+        }
+
+        [Fact]
+        public async Task GetAllCollections_ShouldReturnCorrectCardCounts()
+        {
+            // Arrange
+            var collection = _context.Collections.First();
+            var vehicle = _context.Vehicles.First();
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = Guid.NewGuid(),
+                Username = "TestUser",
+                Password = "Password123",
+                Currency = 100
+            };
+            _context.Users.Add(user);
+            
+            var card = new CarDexBackend.Domain.Entities.Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                VehicleId = vehicle.Id,
+                CollectionId = collection.Id,
+                Grade = GradeEnum.FACTORY,
+                Value = 70000
+            };
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _collectionService.GetAllCollections();
+
+            // Assert
+            Assert.NotNull(result);
+            var collectionWithCards = result.Collections.First(c => c.Id == collection.Id);
+            Assert.Equal(1, collectionWithCards.CardCount);
+        }
     }
 }

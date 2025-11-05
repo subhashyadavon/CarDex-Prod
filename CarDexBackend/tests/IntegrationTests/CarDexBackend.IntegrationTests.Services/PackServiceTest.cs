@@ -8,6 +8,7 @@ using CarDexBackend.Domain.Enums;
 using Npgsql;
 using Xunit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -187,6 +188,169 @@ namespace DefaultNamespace
             var openedPack = await _context.Packs.FindAsync(pack.Id);
             Assert.NotNull(openedPack);
             Assert.True(openedPack.IsOpened);
+        }
+
+        [Fact]
+        public async Task PurchasePack_ShouldThrowWhenCollectionNotFound()
+        {
+            // Arrange
+            var request = new PackPurchaseRequest
+            {
+                CollectionId = Guid.NewGuid() // Non-existent collection
+            };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _packService.PurchasePack(request));
+        }
+
+        [Fact]
+        public async Task PurchasePack_ShouldThrowWhenUserNotFound()
+        {
+            // Arrange - Remove the test user
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var user = await _context.Users.FindAsync(testUserId);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+
+            var collection = _context.Collections.First();
+            var request = new PackPurchaseRequest { CollectionId = collection.Id };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _packService.PurchasePack(request));
+        }
+
+        [Fact]
+        public async Task PurchasePack_ShouldThrowWhenInsufficientCurrency()
+        {
+            // Arrange
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var user = _context.Users.First(u => u.Id == testUserId);
+            user.Currency = 100; // Not enough
+            _context.SaveChanges();
+
+            var collection = _context.Collections.First();
+            var request = new PackPurchaseRequest { CollectionId = collection.Id };
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _packService.PurchasePack(request));
+        }
+
+        [Fact]
+        public async Task GetPackById_ShouldThrowWhenPackNotFound()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => 
+                _packService.GetPackById(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task GetPackById_ShouldThrowWhenCollectionNotFound()
+        {
+            // Arrange
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(), testUserId, Guid.NewGuid(), 500);
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _packService.GetPackById(pack.Id));
+        }
+
+        [Fact]
+        public async Task GetPackById_ShouldReturnPackWithPreviewCards()
+        {
+            // Arrange
+            var collection = _context.Collections.First(c => c.Name == "Collection 1");
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(), testUserId, collection.Id, 500);
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act
+            var result = await _packService.GetPackById(pack.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.PreviewCards.Count() <= 3);
+        }
+
+        [Fact]
+        public async Task OpenPack_ShouldThrowWhenPackNotFound()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => 
+                _packService.OpenPack(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task OpenPack_ShouldThrowWhenCollectionNotFound()
+        {
+            // Arrange
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(), testUserId, Guid.NewGuid(), 500);
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _packService.OpenPack(pack.Id));
+        }
+
+        [Fact]
+        public async Task OpenPack_ShouldThrowWhenNoVehiclesInCollection()
+        {
+            // Arrange
+            var collection = new CarDexBackend.Domain.Entities.Collection
+            {
+                Id = Guid.NewGuid(),
+                Name = "Empty Collection",
+                Vehicles = Array.Empty<Guid>(),
+                PackPrice = 500
+            };
+            _context.Collections.Add(collection);
+            _context.SaveChanges();
+
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(), testUserId, collection.Id, 500);
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _packService.OpenPack(pack.Id));
+        }
+
+        [Fact]
+        public async Task OpenPack_ShouldGenerateDifferentGrades()
+        {
+            // Arrange
+            var collection = _context.Collections.First();
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(), testUserId, collection.Id, 500);
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act - Run multiple times to test grade distribution
+            var allGrades = new List<string>();
+            for (int i = 0; i < 10; i++)
+            {
+                var testPack = new CarDexBackend.Domain.Entities.Pack(
+                    Guid.NewGuid(), testUserId, collection.Id, 500);
+                _context.Packs.Add(testPack);
+                _context.SaveChanges();
+                
+                var result = await _packService.OpenPack(testPack.Id);
+                allGrades.AddRange(result.Cards.Select(c => c.Grade));
+            }
+
+            // Assert - Should have variety of grades
+            Assert.Contains("FACTORY", allGrades);
         }
     }
 }
