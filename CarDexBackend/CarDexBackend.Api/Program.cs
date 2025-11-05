@@ -1,6 +1,7 @@
 using CarDexBackend.Api.Extensions;
 using CarDexBackend.Services;
 using CarDexBackend.Shared.Validator;
+using CarDexBackend.Api.GlobalExceptionHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
