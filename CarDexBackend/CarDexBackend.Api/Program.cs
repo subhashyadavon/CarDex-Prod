@@ -1,5 +1,6 @@
 using CarDexBackend.Services;
 using CarDexBackend.Shared.Validator;
+using CarDexBackend.Api.GlobalExceptionHandler;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
 using CarDexBackend.Domain.Enums;
@@ -10,6 +11,9 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Configure Database Context with PostgreSQL and register enum types
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("CarDexDatabase"));
@@ -145,6 +149,8 @@ app.UseCors();
 
 // Add token validator to validate all API calls
 app.UseTokenValidator();
+
+app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
