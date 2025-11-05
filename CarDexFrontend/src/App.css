@@ -1,0 +1,155 @@
+/* CARDEX Global Styles */
+
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+
+/* VARIABLES */
+:root
+{
+  /* Gradient Colors */
+  --gradient-light1: #E01F5F;
+  --gradient-light2: #E05720;
+  --gradient-dark1: #381010;
+  --gradient-dark2: #2C1818;
+  
+  /* Content Colors */
+  --content-primary: #FFD8D7;
+  --content-secondary: #A37271;
+  
+  /* Block Colors */
+  --block-primary: #2B0202;
+  --block-secondary: #5D2B2A;
+  --block-tertiary: #180303;
+  
+  /* Text Colors (for convenience) */
+  --color-white: #FFFFFF;
+  --color-white-50: rgba(255, 255, 255, 0.5);
+  --color-white-20: rgba(255, 255, 255, 0.2);
+  --color-white-8: rgba(255, 255, 255, 0.08);
+  --color-black: #000000;
+
+  --rarity-factory-bg: #232030; 
+  --rarity-limited-bg: #5d2b2a; 
+  --rarity-nismo-bg: #952a2e;   
+
+  --rarity-factory-tint: rgba(48, 65, 86, 0.75);
+  --rarity-limited-tint: rgba(93, 43, 43, 0.75);
+  --rarity-nismo-tint: rgba(149, 42, 46, 0.75);
+
+  --color-error: #FF6B6B;
+}
+
+/* BASE STYLES */
+*
+{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body
+{
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.2;
+}
+
+
+/* TYPOGRAPHY */
+
+/* > HEADERS
+/* >> Titlecase */
+.titlecase
+{
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--content-primary);
+}
+
+/* >> Header 1*/
+.header-1
+{
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--content-primary);
+}
+
+/* >> Header 2 */
+.header-2
+{
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--content-primary);
+}
+
+/* >> Header 3 */
+.header-3
+{
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-secondary);
+  text-transform: uppercase;
+}
+
+/* > BODY
+/* >> Body 1 */
+.body-1
+{
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--content-primary);
+}
+
+/* >> Body 2 */
+.body-2
+{
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-secondary);
+}
+
+/* > CARD
+/* >> Card 1 */
+.card-1
+{
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+/* >> Card 2 */
+.card-2
+{
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+/* >> Card 3*/
+.card-3
+{
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+/* >> Card 4 */
+.card-4
+{
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-white-50);
+}
+
+
+/* UTILITY */
+/* >> Background Colors */
+.bg-gradient-dark { background: linear-gradient(45deg, var(--gradient-dark1), var(--gradient-dark2)); }
+.bg-gradient-hero { background: linear-gradient(45deg, var(--gradient-light1), var(--gradient-light2)); }
+.bg-block-primary { background-color: var(--block-primary); }
+.bg-block-secondary { background-color: var(--block-secondary); }
+.bg-block-tertiary { background-color: var(--block-tertiary); }
