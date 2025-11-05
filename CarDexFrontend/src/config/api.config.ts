@@ -22,7 +22,7 @@ export const API_CONFIG = {
    * - Falls back to localhost:5083 if not set
    * - Change .env to switch between dev/prod without changing code
    */
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5083',
+  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5090',
   
   /**
    * ENDPOINTS: All API endpoint paths organized by resource
@@ -39,46 +39,46 @@ export const API_CONFIG = {
   ENDPOINTS: {
     // Authentication endpoints
     AUTH: {
-      LOGIN: '/api/auth/login',           // POST: Log in with email/password
-      REGISTER: '/api/auth/register',     // POST: Create new account
-      LOGOUT: '/api/auth/logout',         // POST: End session
+      LOGIN: 'auth/login',           // POST: Log in with email/password
+      REGISTER: 'auth/register',     // POST: Create new account
+      LOGOUT: 'auth/logout',         // POST: End session
     },
     
     // Card management endpoints
     CARDS: {
-      GET_ALL: '/api/cards',                                    // GET: Fetch all cards
-      GET_BY_ID: (id: number) => `/api/cards/${id}`,           // GET: Fetch specific card
-      GET_USER_CARDS: (userId: number) => `/api/cards/user/${userId}`, // GET: User's cards
+      GET_ALL: '/cards',                                    // GET: Fetch all cards
+      GET_BY_ID: (id: number) => `/cards/${id}`,           // GET: Fetch specific card
+      GET_USER_CARDS: (userId: number) => `/cards/user/${userId}`, // GET: User's cards
     },
     
     // Pack management endpoints
     PACKS: {
-      GET_ALL: '/api/packs',                                    // GET: Fetch all packs
-      GET_BY_ID: (id: number) => `/api/packs/${id}`,           // GET: Fetch specific pack
-      OPEN_PACK: (packId: number) => `/api/packs/${packId}/open`, // POST: Open pack, get cards
+      GET_ALL: '/packs',                                    // GET: Fetch all packs
+      GET_BY_ID: (id: number) => `/packs/${id}`,           // GET: Fetch specific pack
+      OPEN_PACK: (packId: number) => `/packs/${packId}/open`, // POST: Open pack, get cards
     },
     
     // Trade management endpoints
     TRADES: {
-      GET_ALL: '/api/trades',                                   // GET: All open trades
-      GET_BY_ID: (id: number) => `/api/trades/${id}`,          // GET: Specific trade
-      GET_USER_TRADES: (userId: number) => `/api/trades/user/${userId}`, // GET: User's trades
-      CREATE: '/api/trades',                                    // POST: Create new trade
-      ACCEPT: (tradeId: number) => `/api/trades/${tradeId}/accept`,  // POST: Accept trade
-      CANCEL: (tradeId: number) => `/api/trades/${tradeId}/cancel`,  // DELETE: Cancel trade
+      GET_ALL: '/trades',                                   // GET: All open trades
+      GET_BY_ID: (id: number) => `/trades/${id}`,          // GET: Specific trade
+      GET_USER_TRADES: (userId: number) => `/trades/user/${userId}`, // GET: User's trades
+      CREATE: '/trades',                                    // POST: Create new trade
+      ACCEPT: (tradeId: number) => `/trades/${tradeId}/accept`,  // POST: Accept trade
+      CANCEL: (tradeId: number) => `/trades/${tradeId}/cancel`,  // DELETE: Cancel trade
     },
     
     // User profile endpoints
     USERS: {
-      GET_PROFILE: (userId: number) => `/api/users/${userId}`,         // GET: User profile
-      UPDATE_PROFILE: (userId: number) => `/api/users/${userId}`,      // PUT: Update profile
-      GET_REWARDS: (userId: number) => `/api/users/${userId}/rewards`, // GET: User rewards
+      GET_PROFILE: (userId: number) => `/users/${userId}`,         // GET: User profile
+      UPDATE_PROFILE: (userId: number) => `/users/${userId}`,      // PUT: Update profile
+      GET_REWARDS: (userId: number) => `/users/${userId}/rewards`, // GET: User rewards
     },
     
     // Collection management endpoints
     COLLECTIONS: {
-      GET_COLLECTION: (userId: number) => `/api/collections/${userId}`,    // GET: User collection
-      UPDATE_COLLECTION: (userId: number) => `/api/collections/${userId}`, // PUT: Update collection
+      GET_COLLECTION: (userId: number) => `/collections/${userId}`,    // GET: User collection
+      UPDATE_COLLECTION: (userId: number) => `/collections/${userId}`, // PUT: Update collection
     },
   },
   

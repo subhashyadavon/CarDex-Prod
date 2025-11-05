@@ -24,7 +24,6 @@ const Login: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async () => {
-    
     if (!username || !password) {
       setShowErrors(true);
       setAuthError(null);
@@ -35,7 +34,7 @@ const Login: React.FC = () => {
       setShowErrors(false);
       setAuthError(null);
 
-      await login({ email: username, password });
+      await login({ username, password });
       navigate("/app");
     } catch (err: any) {
       const backendMessage =
