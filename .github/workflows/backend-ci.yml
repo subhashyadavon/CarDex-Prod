@@ -61,9 +61,11 @@ jobs:
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
           reportgenerator \
-            -reports:TestResults/**/coverage.cobertura.xml \
-            -targetdir:CoverageReport \
-            -reporttypes:Html
+            -reports:"**/coverage.cobertura.xml" \
+            -targetdir:"coveragereport" \
+            -reporttypes:Html \
+            -filefilters:"-*/Migrations/*;-*CarDexBackend.Api/Extensions/*"
+
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

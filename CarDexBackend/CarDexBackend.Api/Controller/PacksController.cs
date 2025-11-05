@@ -87,7 +87,7 @@ namespace CarDexBackend.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                // Pack not found in mock data
+                // Pack not found in database
                 return NotFound(new ErrorResponse { Message = ex.Message });
             }
         }
@@ -117,7 +117,7 @@ namespace CarDexBackend.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                // Pack ID not found
+                // Pack ID not found in database
                 return NotFound(new ErrorResponse { Message = ex.Message });
             }
             catch (InvalidOperationException ex)
