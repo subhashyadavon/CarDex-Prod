@@ -22,50 +22,58 @@ class CarDexCLI:
         return self.api_client.connect()
     
     def show_welcome(self):
+
         """Display welcome message and ASCII art"""
         self.display.show_cardex_logo()
         print("\nWelcome to CarDex Live Market!")
         print("Type 'help' for available commands or 'exit' to quit.\n")
     
     def show_help(self):
+
         """Display available commands"""
         help_text = """
 Available Commands:
-  trades      - Show the top 5 latest completed trades
   open        - Show the top 5 latest open trades
-  vroom       - Show a cool car (vroom vroom!)
+  trades      - Show the top 5 latest completed trades
   shop        - View all available packs and their prices
   collections - View all available collections and their prices
+  vroom       - Show a cool car (vroom vroom!)
   help        - Show this help message
   exit        - Exit the application
 """
         print(help_text)
     
     def handle_trades(self):
+
         """Handle the 'trades' command"""
         trades = self.api_client.get_completed_trades(limit=5)
         self.display.show_completed_trades(trades)
     
     def handle_open(self):
+
         """Handle the 'open' command"""
         trades = self.api_client.get_open_trades(limit=5)
         self.display.show_open_trades(trades)
     
     def handle_vroom(self):
+
         """Handle the 'vroom' command"""
         self.display.show_car()
     
     def handle_shop(self):
+
         """Handle the 'shop' command"""
         packs = self.api_client.get_available_packs()
         self.display.show_packs(packs)
     
     def handle_collections(self):
+
         """Handle the 'collections' command"""
         collections = self.api_client.get_collections()
         self.display.show_collections(collections)
     
     def process_command(self, command):
+
         """Process a user command and return True to continue, False to exit"""
         command = command.strip().lower()
         
