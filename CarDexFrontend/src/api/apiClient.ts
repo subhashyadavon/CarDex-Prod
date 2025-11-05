@@ -24,11 +24,11 @@ import { API_CONFIG } from '../config/api.config';
 
 // Create axios instance with base configuration
 // This is like creating a customized version of axios with our defaults
-const apiClient = axios.create({
-  baseURL: API_CONFIG.BASE_URL, // All requests will be prefixed with this URL
-  timeout: API_CONFIG.TIMEOUT,   // Requests will fail if they take longer than this
+export const apiClient = axios.create({
+  baseURL: API_CONFIG.BASE_URL,       // ← connects to your backend (http://localhost:5090)
+  timeout: API_CONFIG.TIMEOUT,        // ← 10 seconds default
   headers: {
-    'Content-Type': 'application/json', // Tell the backend we're sending JSON
+    'Content-Type': 'application/json',
   },
 });
 
@@ -95,10 +95,6 @@ apiClient.interceptors.response.use(
       // Clear all auth data from localStorage
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      
-      // Redirect to login page so user can re-authenticate
-      // Note: In a real app with routing, you'd use navigate() instead
-      window.location.href = '/login';
     }
 
     // Handle network errors (no response from server at all)

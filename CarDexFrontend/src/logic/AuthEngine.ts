@@ -77,17 +77,17 @@ export function useAuthEngine() {
    *   - { ok: false, field, message } on failure with a sensible error message
    */
   async function validateAndLogin(
-    email: string,
+    username: string,
     password: string
   ): Promise<LoginAttemptResult> {
     // 1) Client-side input validation
-    const inputCheck = validateInputs(email, password);
+    const inputCheck = validateInputs(username, password);
     if (!inputCheck.ok) {
       return inputCheck;
     }
 
     // 2) Build payload expected by your authService/login
-    const payload: LoginRequest = { email, password };
+    const payload: LoginRequest = { username, password };
 
     // 3) Attempt server/DB validation via context.login()
     try {

@@ -39,7 +39,7 @@ import { User } from '../types/types';
  * - Backend expects exactly these fields
  */
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -50,7 +50,6 @@ export interface LoginRequest {
  */
 export interface RegisterRequest {
   username: string;
-  email: string;
   password: string;
 }
 
@@ -104,6 +103,7 @@ export const authService = {
     // - Make a POST request
     // - Expect response data to match AuthResponse type
     // - TypeScript will check that response.data has user and token
+
     const response = await apiClient.post<AuthResponse>(
       API_CONFIG.ENDPOINTS.AUTH.LOGIN, // URL: /api/auth/login
       credentials                      // Body: { email, password }
