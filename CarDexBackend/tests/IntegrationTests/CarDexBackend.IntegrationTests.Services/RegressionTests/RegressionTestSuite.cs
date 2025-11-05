@@ -11,6 +11,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using BCrypt.Net;
+using CarDexBackend.Services.Resources;
 
 namespace DefaultNamespace.RegressionTests
 {
@@ -54,12 +55,12 @@ namespace DefaultNamespace.RegressionTests
             var authLogger = loggerFactory.CreateLogger<AuthService>();
 
             // Initialize services
-            _authService = new AuthService(_context, configuration, authLogger);
-            _tradeService = new TradeService(_context);
-            _packService = new PackService(_context);
-            _cardService = new CardService(_context);
-            _userService = new UserService(_context);
-            _collectionService = new CollectionService(_context);
+            _authService = new AuthService(_context, configuration, authLogger, new NullStringLocalizer<SharedResources>());
+            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>());
+            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>());
+            _cardService = new CardService(_context, new NullStringLocalizer<SharedResources>());
+            _userService = new UserService(_context, new NullStringLocalizer<SharedResources>());
+            _collectionService = new CollectionService(_context, new NullStringLocalizer<SharedResources>());
 
             // Seed critical test data
             SeedRegressionTestData();

@@ -1,6 +1,8 @@
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
@@ -9,11 +11,13 @@ namespace CarDexBackend.Services
     /// </summary>
     public class CollectionService : ICollectionService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
 
-        public CollectionService(CarDexDbContext context)
+        public CollectionService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
         {
             _context = context;
+            _sr = sr;
         }
 
         /// <summary>
@@ -46,7 +50,7 @@ namespace CarDexBackend.Services
         {
             var collection = await _context.Collections.FindAsync(collectionId);
             if (collection == null)
-                throw new KeyNotFoundException("Collection not found");
+                throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
 
             // Get all cards in this collection
             var cards = await _context.Cards

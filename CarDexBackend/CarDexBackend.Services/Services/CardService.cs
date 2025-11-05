@@ -4,9 +4,14 @@ using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 using System.Data;
+using Microsoft.Win32.SafeHandles;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
+
+
     // Helper class for raw SQL queries
     public class CardRawData
     {
@@ -24,11 +29,13 @@ namespace CarDexBackend.Services
     /// </summary>
     public class CardService : ICardService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
 
-        public CardService(CarDexDbContext context)
+        public CardService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
         {
             _context = context;
+            _sr = sr;
         }
 
         /// <summary>
@@ -115,7 +122,7 @@ namespace CarDexBackend.Services
                 }
                 catch
                 {
-                    throw new InvalidOperationException("Unable to retrieve cards from database");
+                    throw new InvalidOperationException(_sr["DatabaseErrorUnableToRetrieveCards"]);
                 }
             }
 
@@ -123,7 +130,7 @@ namespace CarDexBackend.Services
             foreach (var card in cards)
             {
                 var vehicle = await _context.Vehicles.FindAsync(card.VehicleId);
-                var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
+                var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : _sr["UnknownVehicle"];
 
                 cardResponses.Add(new CardResponse
                 {
@@ -166,7 +173,7 @@ namespace CarDexBackend.Services
                     if (cardData != null)
                     {
                         var vehicle = await _context.Vehicles.FindAsync(cardData.vehicle_id);
-                        var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown Vehicle";
+                        var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : _sr["UnknownVehicle"];
 
                         return new CardDetailedResponse
                         {
@@ -191,10 +198,10 @@ namespace CarDexBackend.Services
             // For in-memory database or as fallback, use standard EF query
             var card = await _context.Cards.FindAsync(cardId);
             if (card == null)
-                throw new KeyNotFoundException("Card not found");
+                throw new KeyNotFoundException(_sr["CardNotFoundError"]);
 
             var vehicleStandard = await _context.Vehicles.FindAsync(card.VehicleId);
-            var vehicleNameStandard = vehicleStandard != null ? $"{vehicleStandard.Year} {vehicleStandard.Make} {vehicleStandard.Model}" : "Unknown Vehicle";
+            var vehicleNameStandard = vehicleStandard != null ? $"{vehicleStandard.Year} {vehicleStandard.Make} {vehicleStandard.Model}" : _sr["UnknownVehicle"];
 
             return new CardDetailedResponse
             {

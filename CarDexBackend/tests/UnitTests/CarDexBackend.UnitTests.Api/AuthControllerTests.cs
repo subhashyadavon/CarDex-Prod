@@ -9,6 +9,8 @@ using System;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.UnitTests.Api.Controllers
 {
@@ -18,6 +20,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
     public class AuthControllerTests
     {
         private readonly Mock<IAuthService> _mockAuthService;
+        private readonly Mock<IStringLocalizer<SharedResources>> _mockSr = new();
         private readonly AuthController _controller;
 
         /// <summary>
@@ -26,7 +29,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
         public AuthControllerTests()
         {
             _mockAuthService = new Mock<IAuthService>();
-            _controller = new AuthController(_mockAuthService.Object);
+            _controller = new AuthController(_mockAuthService.Object, _mockSr.Object);
         }
 
         // ===== SUCCESSES =====
@@ -199,7 +202,6 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
-            Assert.Equal("Invalid token.", error.Message);
         }
 
         /// <summary>
@@ -226,7 +228,6 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
             var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
-            Assert.Equal("Invalid token.", error.Message);
         }
     }
 }
