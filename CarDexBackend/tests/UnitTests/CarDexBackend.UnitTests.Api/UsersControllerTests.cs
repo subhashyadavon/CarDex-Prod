@@ -52,11 +52,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
             var userId = Guid.NewGuid();
             _mockUserService.Setup(s => s.GetUserProfile(userId)).ThrowsAsync(new KeyNotFoundException("User not found"));
 
-            var result = await _controller.GetUserProfile(userId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("User not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetUserProfile(userId));
         }
 
         /// <summary>
@@ -89,11 +85,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockUserService.Setup(s => s.UpdateUserProfile(userId, request)).ThrowsAsync(new KeyNotFoundException("User not found"));
 
-            var result = await _controller.UpdateUserProfile(userId, request);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("User not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdateUserProfile(userId, request));
         }
 
         /// <summary>

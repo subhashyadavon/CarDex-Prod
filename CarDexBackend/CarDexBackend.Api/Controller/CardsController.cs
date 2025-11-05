@@ -42,8 +42,8 @@ namespace CarDexBackend.Controllers
         /// Returns 400 Bad Request if pagination parameters are invalid.
         /// </returns>
         [HttpGet]
-        [ProducesResponseType(typeof(CardListResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(CardListResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllCards(
             [FromQuery] Guid? userId,
             [FromQuery] Guid? collectionId,
@@ -55,10 +55,6 @@ namespace CarDexBackend.Controllers
             [FromQuery] int limit = 50,
             [FromQuery] int offset = 0)
         {
-            // Ensure pagination parameters are within acceptable range
-            if (limit < 1 || limit > 100 || offset < 0)
-                return BadRequest(new ErrorResponse { Message = "Invalid pagination parameters" });
-
             var cards = await _cardService.GetAllCards(userId, collectionId, vehicleId, grade, minValue, maxValue, sortBy, limit, offset);
             return Ok(cards);
         }
@@ -72,20 +68,12 @@ namespace CarDexBackend.Controllers
         /// Returns 404 Not Found if the card does not exist.
         /// </returns>
         [HttpGet("{cardId:guid}")]
-        [ProducesResponseType(typeof(CardDetailedResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(CardDetailedResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCardById(Guid cardId)
         {
-            try
-            {
-                var card = await _cardService.GetCardById(cardId);
-                return Ok(card);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Card not found in the mock service or data source
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            var card = await _cardService.GetCardById(cardId);
+            return Ok(card);
         }
     }
 }

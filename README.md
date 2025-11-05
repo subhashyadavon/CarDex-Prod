@@ -46,9 +46,18 @@ Players can:
 
 ## Repository Structure
 
-    CarDexBackend/      # API (ASP.NET Core 8)
-    CarDexFrontend/     # Web client (React)
-    docs/               # Documentation
+    CarDex/
+    ├── assets/                        # Images, design assets, and other media
+    ├── CarDexBackend/                 # Backend (ASP.NET Core)
+    │   ├── CarDexBackend.Api/         # API layer – controllers, request/response models
+    │   ├── CarDexBackend.Domain/      # Domain layer – core entities, enums, and domain logic
+    │   ├── CarDexBackend.Services/    # Service layer – business logic, interfaces, and implementations
+    │   ├── Shared/                    # Shared DTOs, constants, and localization files
+    │   ├── scripts/                   # Utility or setup scripts (regression testing)
+    │   ├── tests/                     # Unit and integration tests
+    ├── CarDexDatabase/                # Database project
+    ├── CarDexFrontend/                # Frontend project (React frontend, CLI frontend)
+    ├── docs/                          # Documentation (reports, architecture diagrams, etc.)
 
 </br>
 </br>
@@ -167,3 +176,4 @@ Specifically, AI assistance was used to:
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
 - Helping with writing documentation markdown (md) files.  
+

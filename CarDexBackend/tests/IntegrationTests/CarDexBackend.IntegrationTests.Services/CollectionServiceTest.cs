@@ -9,6 +9,7 @@ using Xunit;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CarDexBackend.Services.Resources;
 
 namespace DefaultNamespace
 {
@@ -26,7 +27,7 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _collectionService = new CollectionService(_context);
+            _collectionService = new CollectionService(_context, new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

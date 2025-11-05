@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CarDexBackend.Services.Resources;
 
 namespace DefaultNamespace
 {
@@ -28,7 +29,7 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _packService = new PackService(_context);
+            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

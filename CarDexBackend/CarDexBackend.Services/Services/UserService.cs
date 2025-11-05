@@ -2,6 +2,8 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
@@ -13,15 +15,17 @@ namespace CarDexBackend.Services
     /// </remarks>
     public class UserService : IUserService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="context">The database context for accessing user data.</param>
-        public UserService(CarDexDbContext context)
+        public UserService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
         {
             _context = context;
+            _sr = sr;
         }
 
         /// <summary>
@@ -43,7 +47,7 @@ namespace CarDexBackend.Services
                 .FirstOrDefaultAsync();
 
             if (user == null)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             return user;
         }
@@ -59,7 +63,7 @@ namespace CarDexBackend.Services
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             if (!string.IsNullOrWhiteSpace(request.Username))
                 user.Username = request.Username;
@@ -90,7 +94,7 @@ namespace CarDexBackend.Services
             // Verify user exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
             if (!userExists)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             var query = _context.Cards
                 .Where(c => c.UserId == userId);
@@ -136,7 +140,7 @@ namespace CarDexBackend.Services
             // Verify user exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
             if (!userExists)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             var query = _context.Packs
                 .Where(p => p.UserId == userId);
@@ -171,7 +175,7 @@ namespace CarDexBackend.Services
             // Verify user exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
             if (!userExists)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             var query = _context.OpenTrades
                 .Where(t => t.UserId == userId);
@@ -254,7 +258,7 @@ namespace CarDexBackend.Services
             // Verify user exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
             if (!userExists)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             var query = _context.Rewards
                 .Where(r => r.UserId == userId);

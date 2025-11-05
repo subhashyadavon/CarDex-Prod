@@ -1,105 +1,28 @@
+using CarDexBackend.Api.Extensions;
 using CarDexBackend.Services;
 using CarDexBackend.Shared.Validator;
-using CarDexDatabase;
-using Microsoft.EntityFrameworkCore;
-using CarDexBackend.Domain.Enums;
-using Npgsql;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
+using CarDexBackend.Api.GlobalExceptionHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Database Context with PostgreSQL and register enum types
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("CarDexDatabase"));
-// Map enums to their database types (specify the PostgreSQL enum type name)
-dataSourceBuilder.MapEnum<GradeEnum>("grade_enum");
-dataSourceBuilder.MapEnum<TradeEnum>("trade_enum");
-dataSourceBuilder.MapEnum<RewardEnum>("reward_enum");
-var dataSource = dataSourceBuilder.Build();
+// Configure database
+builder.Services.ConfigureDatabase(builder.Configuration);
 
-builder.Services.AddDbContext<CarDexDbContext>(options =>
-    options.UseNpgsql(dataSource)
-);
+// Configure JWT authentication and authorization
+builder.Services.ConfigureJwtAuthentication(builder.Configuration);
+builder.Services.ConfigureAuthorization();
 
-// Configure JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-// Try to get secret key from environment variable first, fallback to configuration
-var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
-    ?? jwtSettings["SecretKey"];
+// Add ExceptionHandler
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-// Validate that we have a secret key
-if (string.IsNullOrEmpty(secretKey) || secretKey == "UseEnvironmentVariable")
-{
-    throw new InvalidOperationException(
-        "JWT_SECRET_KEY environment variable is not set. " +
-        "Please set it using: export JWT_SECRET_KEY='YourSecretKeyHere' " +
-        "or configure it in appsettings.Development.json for local development.");
-}
+// Configure Swagger/OpenAPI
+builder.Services.ConfigureSwagger();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero // No tolerance for expired tokens
-    };
-});
-
-// add services to the container
+// Add controllers
 builder.Services.AddControllers();
 
-// register Swagger to test endpoints
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "CarDex API",
-        Version = "v1",
-        Description = "CarDex Trading Card Game API"
-    });
-
-    // Add JWT Bearer authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter your JWT token (Bearer will be added automatically)",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
-
-// add CORS for our frontend(s)
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -108,8 +31,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add localization
+builder.Services.AddLocalization();
 
-// Register services
+// Register business services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
@@ -117,56 +42,38 @@ builder.Services.AddScoped<IPackService, PackService>();
 builder.Services.AddScoped<ITradeService, TradeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Add Authorization
-builder.Services.AddAuthorization();
-
-// Register Token Validator
+// Register custom middleware
 builder.Services.AddScoped<TokenValidator>();
-
-// Register Rate Limiter
 builder.Services.AddSingleton<RateLimiter>();
 
 var app = builder.Build();
 
+// Configure supported languages
+var supportedCultures = new[] { "en" };
+app.UseRequestLocalization(options => options.SetDefaultCulture("end").AddSupportedCultures(supportedCultures).AddSupportedUICultures(supportedCultures));
 
-// Enable Swagger UI in development mode
+// Configure middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// Only use HTTPS redirection in production
-if (!app.Environment.IsDevelopment())
+else
 {
     app.UseHttpsRedirection();
 }
-app.UseCors();
 
-// Add token validator to validate all API calls
+app.UseCors();
 app.UseTokenValidator();
+
+app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Add rate limiter after authentication to track requests per user
 app.UseUserRateLimiter();
-
 app.MapControllers();
 
-// Create database tables if they don't exist (for development)
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<CarDexDbContext>();
-    try
-    {
-        context.Database.EnsureCreated();
-        Console.WriteLine("✓ Database connection established successfully!");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"✗ Database connection failed: {ex.Message}");
-    }
-}
+// Ensure database is created
+app.EnsureDatabaseCreated();
 
 app.Run();

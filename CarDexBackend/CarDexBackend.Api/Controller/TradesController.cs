@@ -41,7 +41,7 @@ namespace CarDexBackend.Controllers
         /// <param name="offset">Number of results to skip for pagination.</param>
         /// <returns>A paginated list of open trades.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(TradeListResponse), 200)]
+        [ProducesResponseType(typeof(TradeListResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetOpenTrades(
             [FromQuery] string? type, [FromQuery] Guid? collectionId, [FromQuery] string? grade,
             [FromQuery] int? minPrice, [FromQuery] int? maxPrice, [FromQuery] Guid? vehicleId,
@@ -58,20 +58,12 @@ namespace CarDexBackend.Controllers
         /// <param name="tradeId">The unique identifier of the trade.</param>
         /// <returns>Detailed information about the specified trade.</returns>
         [HttpGet("{tradeId:guid}")]
-        [ProducesResponseType(typeof(TradeDetailedResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(TradeDetailedResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetOpenTradeById(Guid tradeId)
         {
-            try
-            {
-                var trade = await _tradeService.GetOpenTradeById(tradeId);
-                return Ok(trade);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Trade not found in open trades
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            var trade = await _tradeService.GetOpenTradeById(tradeId);
+            return Ok(trade);
         }
 
         /// <summary>
@@ -80,20 +72,12 @@ namespace CarDexBackend.Controllers
         /// <param name="request">Trade creation details (offered card, trade type, price or wanted card).</param>
         /// <returns>201 Created with trade details if successful, 400 Bad Request if invalid input.</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(TradeResponse), 201)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(TradeResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateTrade([FromBody] TradeCreateRequest request)
         {
-            try
-            {
-                var result = await _tradeService.CreateTrade(request);
-                return CreatedAtAction(nameof(GetOpenTradeById), new { tradeId = result.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                // Invalid trade request or missing required field
-                return BadRequest(new ErrorResponse { Message = ex.Message });
-            }
+            var result = await _tradeService.CreateTrade(request);
+            return CreatedAtAction(nameof(GetOpenTradeById), new { tradeId = result.Id }, result);
         }
 
         /// <summary>
@@ -102,20 +86,12 @@ namespace CarDexBackend.Controllers
         /// <param name="tradeId">The unique identifier of the trade to cancel.</param>
         /// <returns>204 No Content if successful, 404 Not Found if trade does not exist.</returns>
         [HttpDelete("{tradeId:guid}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CancelTrade(Guid tradeId)
         {
-            try
-            {
-                await _tradeService.DeleteTrade(tradeId);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Trade not found or already completed
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            await _tradeService.DeleteTrade(tradeId);
+            return NoContent();
         }
 
         /// <summary>
@@ -129,31 +105,18 @@ namespace CarDexBackend.Controllers
         /// 404 Not Found if the trade no longer exists.
         /// </returns>
         [HttpPost("{tradeId:guid}/execute")]
-        [ProducesResponseType(typeof(object), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ExecuteTrade(Guid tradeId, [FromBody] TradeExecuteRequest? request)
         {
-            try
+            var result = await _tradeService.ExecuteTrade(tradeId, request);
+            return Ok(new
             {
-                var result = await _tradeService.ExecuteTrade(tradeId, request);
-                return Ok(new
-                {
-                    completed_trade = result.CompletedTrade,
-                    seller_reward = result.SellerReward,
-                    buyer_reward = result.BuyerReward
-                });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Trade ID not found or already executed
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                // Invalid execution request (e.g. buyer card missing for FOR_CARD trade)
-                return BadRequest(new ErrorResponse { Message = ex.Message });
-            }
+                completed_trade = result.CompletedTrade,
+                seller_reward = result.SellerReward,
+                buyer_reward = result.BuyerReward
+            });
         }
 
         /// <summary>
@@ -164,7 +127,7 @@ namespace CarDexBackend.Controllers
         /// <param name="offset">Number of results to skip for pagination.</param>
         /// <returns>A paginated list of completed trades.</returns>
         [HttpGet("history")]
-        [ProducesResponseType(typeof(TradeHistoryResponse), 200)]
+        [ProducesResponseType(typeof(TradeHistoryResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTradeHistory([FromQuery] Guid? userId, [FromQuery] int limit = 50, [FromQuery] int offset = 0)
         {
             var result = await _tradeService.GetTradeHistory(userId, limit, offset);
@@ -177,20 +140,12 @@ namespace CarDexBackend.Controllers
         /// <param name="tradeId">The unique identifier of the completed trade.</param>
         /// <returns>Detailed information about the completed trade.</returns>
         [HttpGet("history/{tradeId:guid}")]
-        [ProducesResponseType(typeof(CompletedTradeResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(CompletedTradeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCompletedTrade(Guid tradeId)
         {
-            try
-            {
-                var trade = await _tradeService.GetCompletedTradeById(tradeId);
-                return Ok(trade);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Completed trade record not found
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            var trade = await _tradeService.GetCompletedTradeById(tradeId);
+            return Ok(trade);
         }
     }
 }

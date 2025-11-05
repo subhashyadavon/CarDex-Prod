@@ -39,28 +39,15 @@ namespace CarDexBackend.Controllers
         /// 409 Conflict if the user has insufficient currency.
         /// </returns>
         [HttpPost("purchase")]
-        [ProducesResponseType(typeof(PackPurchaseResponse), 201)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
-        [ProducesResponseType(typeof(ErrorResponse), 401)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
-        [ProducesResponseType(typeof(ErrorResponse), 409)]
+        [ProducesResponseType(typeof(PackPurchaseResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> PurchasePack([FromBody] PackPurchaseRequest request)
         {
-            try
-            {
-                var result = await _packService.PurchasePack(request);
-                return CreatedAtAction(nameof(GetPackById), new { packId = result.Pack.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                // Invalid input (e.g. missing collection ID)
-                return BadRequest(new ErrorResponse { Message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Conflict — insufficient funds or purchase constraint
-                return Conflict(new ErrorResponse { Message = ex.Message });
-            }
+            var result = await _packService.PurchasePack(request);
+            return CreatedAtAction(nameof(GetPackById), new { packId = result.Pack.Id }, result);
         }
 
         /// <summary>
@@ -74,22 +61,14 @@ namespace CarDexBackend.Controllers
         /// 404 Not Found if the pack does not exist.
         /// </returns>
         [HttpGet("{packId:guid}")]
-        [ProducesResponseType(typeof(PackDetailedResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 401)]
-        [ProducesResponseType(typeof(ErrorResponse), 403)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(PackDetailedResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPackById(Guid packId)
         {
-            try
-            {
-                var pack = await _packService.GetPackById(packId);
-                return Ok(pack);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Pack not found in mock data
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            var pack = await _packService.GetPackById(packId);
+            return Ok(pack);
         }
 
         /// <summary>
@@ -104,27 +83,14 @@ namespace CarDexBackend.Controllers
         /// 409 Conflict if the pack has already been opened.
         /// </returns>
         [HttpPost("{packId:guid}/open")]
-        [ProducesResponseType(typeof(PackOpenResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 401)]
-        [ProducesResponseType(typeof(ErrorResponse), 403)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(PackOpenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> OpenPack(Guid packId)
         {
-            try
-            {
-                var response = await _packService.OpenPack(packId);
-                return Ok(response);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Pack ID not found
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Conflict — pack already opened or invalid state
-                return Conflict(new ErrorResponse { Message = ex.Message });
-            }
+            var response = await _packService.OpenPack(packId);
+            return Ok(response);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace CarDexBackend.Controllers
         /// </remarks>
         /// <returns>A list of collections with their basic information.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(CollectionListResponse), 200)]
+        [ProducesResponseType(typeof(CollectionListResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllCollections()
         {
             var result = await _collectionService.GetAllCollections();
@@ -50,20 +50,12 @@ namespace CarDexBackend.Controllers
         /// Returns 404 Not Found if the collection does not exist.
         /// </returns>
         [HttpGet("{collectionId:guid}")]
-        [ProducesResponseType(typeof(CollectionDetailedResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(CollectionDetailedResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCollectionById(Guid collectionId)
         {
-            try
-            {
-                var collection = await _collectionService.GetCollectionById(collectionId);
-                return Ok(collection);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                // Collection ID not found in mock service
-                return NotFound(new ErrorResponse { Message = ex.Message });
-            }
+            var collection = await _collectionService.GetCollectionById(collectionId);
+            return Ok(collection);
         }
     }
 }

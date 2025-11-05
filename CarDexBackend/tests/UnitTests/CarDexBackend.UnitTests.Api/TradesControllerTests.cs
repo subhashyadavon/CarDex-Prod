@@ -239,11 +239,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.GetOpenTradeById(tradeId)).ThrowsAsync(new KeyNotFoundException("Trade not found"));
 
-            var result = await _controller.GetOpenTradeById(tradeId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Trade not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetOpenTradeById(tradeId));
         }
 
         [Fact]
@@ -253,11 +249,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.CreateTrade(It.IsAny<TradeCreateRequest>())).ThrowsAsync(new ArgumentException("Invalid trade request."));
 
-            var result = await _controller.CreateTrade(request);
-
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(badRequest.Value);
-            Assert.Equal("Invalid trade request.", error.Message);
+            await Assert.ThrowsAsync<ArgumentException>(() => _controller.CreateTrade(request));
         }
 
         [Fact]
@@ -267,11 +259,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.DeleteTrade(tradeId)).ThrowsAsync(new KeyNotFoundException("Trade not found"));
 
-            var result = await _controller.CancelTrade(tradeId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Trade not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.CancelTrade(tradeId));
         }
 
         [Fact]
@@ -281,11 +269,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.ExecuteTrade(tradeId, It.IsAny<TradeExecuteRequest?>())).ThrowsAsync(new KeyNotFoundException("Trade not found"));
 
-            var result = await _controller.ExecuteTrade(tradeId, new TradeExecuteRequest());
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Trade not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.ExecuteTrade(tradeId, new TradeExecuteRequest()));
         }
 
         [Fact]
@@ -295,11 +279,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.ExecuteTrade(tradeId, It.IsAny<TradeExecuteRequest?>())).ThrowsAsync(new ArgumentException("Invalid execution request."));
 
-            var result = await _controller.ExecuteTrade(tradeId, new TradeExecuteRequest());
-
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(badRequest.Value);
-            Assert.Equal("Invalid execution request.", error.Message);
+            await Assert.ThrowsAsync<ArgumentException>(() => _controller.ExecuteTrade(tradeId, new TradeExecuteRequest()));
         }
 
         [Fact]
@@ -309,11 +289,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockTradeService.Setup(s => s.GetCompletedTradeById(tradeId)).ThrowsAsync(new KeyNotFoundException("Completed trade not found"));
 
-            var result = await _controller.GetCompletedTrade(tradeId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Completed trade not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetCompletedTrade(tradeId));
         }
     }
 }

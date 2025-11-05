@@ -10,6 +10,7 @@ using System;
 using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using CarDexBackend.Services.Resources;
 
 namespace DefaultNamespace
 {
@@ -41,7 +42,7 @@ namespace DefaultNamespace
 
             _logger = new LoggerFactory().CreateLogger<AuthService>();
 
-            _authService = new AuthService(_context, _configuration, _logger);
+            _authService = new AuthService(_context, _configuration, _logger, new NullStringLocalizer<SharedResources>());
         }
 
         public void Dispose()
