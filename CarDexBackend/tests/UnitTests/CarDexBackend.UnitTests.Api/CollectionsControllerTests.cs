@@ -101,11 +101,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockCollectionService.Setup(s => s.GetCollectionById(collectionId)).ThrowsAsync(new KeyNotFoundException("Collection not found"));
 
-            var result = await _controller.GetCollectionById(collectionId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Collection not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetCollectionById(collectionId));
         }
     }
 }

@@ -112,11 +112,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new InvalidOperationException("Username already exists."));
 
-            var result = await _controller.Register(request);
-
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(conflict.Value);
-            Assert.Equal("Username already exists.", error.Message);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.Register(request));
         }
 
         /// <summary>
@@ -129,11 +125,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new Exception("Bad request"));
 
-            var result = await _controller.Register(request);
-
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(badRequest.Value);
-            Assert.Equal("Bad request", error.Message);
+            await Assert.ThrowsAsync<Exception>(() => _controller.Register(request));
         }
 
         /// <summary>
@@ -146,11 +138,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Login(It.IsAny<LoginRequest>())).ThrowsAsync(new UnauthorizedAccessException("Invalid credentials."));
 
-            var result = await _controller.Login(request);
-
-            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(unauthorized.Value);
-            Assert.Equal("Invalid credentials.", error.Message);
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.Login(request));
         }
     }
 }
