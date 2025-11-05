@@ -1,6 +1,7 @@
 using CarDexBackend.Api.Extensions;
 using CarDexBackend.Services;
 using CarDexBackend.Shared.Validator;
+using CarDexBackend.Api.GlobalExceptionHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.Services.ConfigureDatabase(builder.Configuration);
 // Configure JWT authentication and authorization
 builder.Services.ConfigureJwtAuthentication(builder.Configuration);
 builder.Services.ConfigureAuthorization();
+
+// Add ExceptionHandler
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Configure Swagger/OpenAPI
 builder.Services.ConfigureSwagger();
@@ -53,6 +58,9 @@ else
 
 app.UseCors();
 app.UseTokenValidator();
+
+app.UseExceptionHandler();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseUserRateLimiter();

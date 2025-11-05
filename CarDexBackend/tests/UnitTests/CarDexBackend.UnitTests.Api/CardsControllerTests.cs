@@ -94,33 +94,15 @@ namespace CarDexBackend.UnitTests.Api.Controllers
         // ===== FAILURES =====
 
         /// <summary>
-        /// Ensures that <see cref="CardsController.GetAllCards"/> returns a <see cref="BadRequestObjectResult"/> when pagination parameters are invalid.
-        /// </summary>
-        [Fact]
-        public async Task GetAllCards_Fails()
-        {
-            var result = await _controller.GetAllCards(null, null, null, null, null, null, "value_asc", 0, -1);
-
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(badRequest.Value);
-            Assert.Equal("Invalid pagination parameters", error.Message);
-        }
-
-        /// <summary>
         /// Ensures that <see cref="CardsController.GetCardById"/> returns a <see cref="NotFoundObjectResult"/> when the card does not exist.
         /// </summary>
         [Fact]
         public async Task GetCardById_Fails()
         {
-            var cardId = Guid.NewGuid();
+            var id = Guid.NewGuid();
+            _mockCardService.Setup(s => s.GetCardById(id)).ThrowsAsync(new KeyNotFoundException("Card not found"));
 
-            _mockCardService.Setup(s => s.GetCardById(cardId)).ThrowsAsync(new KeyNotFoundException("Card not found"));
-
-            var result = await _controller.GetCardById(cardId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Card not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetCardById(id));
         }
     }
 }

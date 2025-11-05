@@ -33,46 +33,17 @@ namespace CarDexBackend.Api.Controllers
         /// </summary>
         /// <param name="request">The registration request containing username and password.</param>
         /// <returns>
-        /// 201 Created on success, 400 Bad Request for invalid input,
+        /// 200 Ok on success, 400 Bad Request for invalid input,
         /// or 409 Conflict if the username already exists.
         /// </returns>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(LoginResponse), 201)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
-        [ProducesResponseType(typeof(ErrorResponse), 409)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            try
-            {
-                var response = await _authService.Register(request);
-                return CreatedAtAction(nameof(Register), new { id = response.User.Id }, response);
-            }
-            catch (DbUpdateException)
-            {
-                // Database-specific errors (transient failures, connection issues, etc.)
-                return StatusCode(503, new ErrorResponse 
-                { 
-                    Message = "Database error occurred. Please try again later." 
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Check if this is actually a database connection error
-                if (ex.Message.Contains("transient failure") || ex.Message.Contains("exception has been raised"))
-                {
-                    return StatusCode(503, new ErrorResponse 
-                    { 
-                        Message = "Database connection failed. Please try again later." 
-                    });
-                }
-                // Username already exists or validation error
-                return Conflict(new ErrorResponse { Message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                // Invalid input or unknown error
-                return BadRequest(new ErrorResponse { Message = ex.Message });
-            }
+            var response = await _authService.Register(request);
+            return Ok(response);
         }
         
         /// <summary>
@@ -83,20 +54,12 @@ namespace CarDexBackend.Api.Controllers
         /// 200 OK with login response on success, or 401 Unauthorized if credentials are invalid.
         /// </returns>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(LoginResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            try
-            {
-                var response = await _authService.Login(request);
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                // Invalid credentials
-                return Unauthorized(new ErrorResponse { Message = ex.Message });
-            }
+            var response = await _authService.Login(request);
+            return Ok(response);
         }
 
         /// <summary>
@@ -108,8 +71,8 @@ namespace CarDexBackend.Api.Controllers
         /// </remarks>
         /// <returns>204 No Content if logout is successful.</returns>
         [HttpPost("logout")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout()
         {
             // Extract user ID from JWT claim

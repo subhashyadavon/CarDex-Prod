@@ -130,11 +130,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockPackService.Setup(s => s.PurchasePack(It.IsAny<PackPurchaseRequest>())).ThrowsAsync(new ArgumentException("Invalid collection ID."));
 
-            var result = await _controller.PurchasePack(request);
-
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(badRequest.Value);
-            Assert.Equal("Invalid collection ID.", error.Message);
+            await Assert.ThrowsAsync<ArgumentException>(() => _controller.PurchasePack(request));
         }
 
         /// <summary>
@@ -147,11 +143,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockPackService.Setup(s => s.PurchasePack(It.IsAny<PackPurchaseRequest>())).ThrowsAsync(new InvalidOperationException("Insufficient funds."));
 
-            var result = await _controller.PurchasePack(request);
-
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(conflict.Value);
-            Assert.Equal("Insufficient funds.", error.Message);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.PurchasePack(request));
         }
 
         /// <summary>
@@ -164,11 +156,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockPackService.Setup(s => s.GetPackById(packId)).ThrowsAsync(new KeyNotFoundException("Pack not found"));
 
-            var result = await _controller.GetPackById(packId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Pack not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetPackById(packId));
         }
 
         /// <summary>
@@ -181,11 +169,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockPackService.Setup(s => s.OpenPack(packId)).ThrowsAsync(new KeyNotFoundException("Pack not found"));
 
-            var result = await _controller.OpenPack(packId);
-
-            var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(notFound.Value);
-            Assert.Equal("Pack not found", error.Message);
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.OpenPack(packId));
         }
 
         /// <summary>
@@ -198,11 +182,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockPackService.Setup(s => s.OpenPack(packId)).ThrowsAsync(new InvalidOperationException("Pack already opened."));
 
-            var result = await _controller.OpenPack(packId);
-
-            var conflict = Assert.IsType<ConflictObjectResult>(result);
-            var error = Assert.IsType<ErrorResponse>(conflict.Value);
-            Assert.Equal("Pack already opened.", error.Message);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.OpenPack(packId));
         }
     }
 }
