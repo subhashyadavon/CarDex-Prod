@@ -152,12 +152,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new DbUpdateException("Database error"));
 
-            var result = await _controller.Register(request);
-
-            var statusResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(503, statusResult.StatusCode);
-            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
-            Assert.Contains("Database error", error.Message);
+            await Assert.ThrowsAsync<DbUpdateException>(() => _controller.Register(request));
         }
 
         /// <summary>
@@ -170,12 +165,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new InvalidOperationException("transient failure occurred"));
 
-            var result = await _controller.Register(request);
-
-            var statusResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(503, statusResult.StatusCode);
-            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
-            Assert.Contains("Database connection failed", error.Message);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.Register(request));
         }
 
         /// <summary>
@@ -188,12 +178,7 @@ namespace CarDexBackend.UnitTests.Api.Controllers
 
             _mockAuthService.Setup(s => s.Register(It.IsAny<RegisterRequest>())).ThrowsAsync(new InvalidOperationException("exception has been raised"));
 
-            var result = await _controller.Register(request);
-
-            var statusResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(503, statusResult.StatusCode);
-            var error = Assert.IsType<ErrorResponse>(statusResult.Value);
-            Assert.Contains("Database connection failed", error.Message);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.Register(request));
         }
 
         /// <summary>
