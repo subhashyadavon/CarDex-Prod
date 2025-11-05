@@ -61,7 +61,7 @@ namespace CarDexBackend.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                // Collection ID not found in mock service
+                // Collection ID not found in database
                 return NotFound(new ErrorResponse { Message = ex.Message });
             }
         }
