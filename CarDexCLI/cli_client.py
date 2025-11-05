@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import sys
-from api_client import APIClient
-from display import Display
+from api_client  import APIClient
+from cli_display import Display
 
 
-class CarDexCLI:
+class CLIClient:
 
     """Main CLI application for CarDex"""
     
@@ -21,14 +21,14 @@ class CarDexCLI:
         """Connect to the CarDex server"""
         return self.api_client.connect()
     
-    def show_welcome(self):
+    def showWelcome(self):
 
         """Display welcome message and ASCII art"""
-        self.display.show_cardex_logo()
+        self.display.showCardexLogo()
         print("\nWelcome to CarDex Live Market!")
         print("Type 'help' for available commands or 'exit' to quit.\n")
     
-    def show_help(self):
+    def showHelp(self):
 
         """Display available commands"""
         help_text = """
@@ -43,36 +43,36 @@ Available Commands:
 """
         print(help_text)
     
-    def handle_trades(self):
+    def handleTrades(self):
 
         """Handle the 'trades' command"""
-        trades = self.api_client.get_completed_trades(limit=5)
-        self.display.show_completed_trades(trades)
+        trades = self.api_client.getCompletedTrades(limit=5)
+        self.display.showCompletedTrades(trades)
     
-    def handle_open(self):
+    def handleOpen(self):
 
         """Handle the 'open' command"""
-        trades = self.api_client.get_open_trades(limit=5)
-        self.display.show_open_trades(trades)
+        trades = self.api_client.getOpenTrades(limit=5)
+        self.display.showOpenTrades(trades)
     
-    def handle_vroom(self):
+    def handleVroom(self):
 
         """Handle the 'vroom' command"""
-        self.display.show_car()
+        self.display.showCar()
     
-    def handle_shop(self):
+    def handleShop(self):
 
         """Handle the 'shop' command"""
-        packs = self.api_client.get_available_packs()
-        self.display.show_packs(packs)
+        packs = self.api_client.getAvailablePacks()
+        self.display.showPacks(packs)
     
-    def handle_collections(self):
+    def handleCollections(self):
 
         """Handle the 'collections' command"""
-        collections = self.api_client.get_collections()
-        self.display.show_collections(collections)
+        collections = self.api_client.getCollections()
+        self.display.showCollections(collections)
     
-    def process_command(self, command):
+    def processCommand(self, command):
 
         """Process a user command and return True to continue, False to exit"""
         command = command.strip().lower()
@@ -80,17 +80,17 @@ Available Commands:
         if command == 'exit':
             return False
         elif command == 'help':
-            self.show_help()
+            self.showHelp()
         elif command == 'trades':
-            self.handle_trades()
+            self.handleTrades()
         elif command == 'open':
-            self.handle_open()
+            self.handleOpen()
         elif command == 'vroom':
-            self.handle_vroom()
+            self.handleVroom()
         elif command == 'shop':
-            self.handle_shop()
+            self.handleShop()
         elif command == 'collections':
-            self.handle_collections()
+            self.handleCollections()
         elif command == '':
             pass  # Ignore empty commands
         else:
@@ -106,14 +106,14 @@ Available Commands:
             return
         
         # Show welcome screen
-        self.show_welcome()
+        self.showWelcome()
         
         # Main command loop
         self.running = True
         while self.running:
             try:
                 command = input("cardex> ").strip()
-                self.running = self.process_command(command)
+                self.running = self.processCommand(command)
             except KeyboardInterrupt:
                 print("\n\nExiting CarDex CLI. Thanks for playing!")
                 break
@@ -127,7 +127,7 @@ Available Commands:
 # Run the app.
 def main():
 
-    cli = CarDexCLI()
+    cli = CLIClient()
     cli.run()
 
 if __name__ == "__main__":

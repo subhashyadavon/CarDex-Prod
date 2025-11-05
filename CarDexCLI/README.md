@@ -2,17 +2,63 @@
 
 A command-line interface that shows realtime market data for CarDex.
 
+> **NOTE**  
+> We have a section near the bottom which addresses which **User Stories** and acceptance criteria this CLI currently meets.
+
 </br>
 
-## Project Structure
+## Frontend Brief
+
+### File Structure
 ```bash
 CarDexCLI/
-├── cardex_cli.py      # Main CLI application
 ├── api_client.py      # API client wrapper (with dummy data)
-├── display.py         # Display and formatting utilities
-├── test_cardex_cli.py # Unit tests
+├── cli_client.py      # Main CLI application
+├── cli_display.py     # Display and formatting utilities
+├── test_suite.py      # Unit tests with coverage
 ├── requirements.txt   # Python dependencies
-└── README.md         # This file
+└── README.md          # This file!!
+```
+
+### How to Run
+While we develop a Makefile for single-command running, you can run this frontend using:
+```bash
+# While inside /CarDexCLI
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the CLI
+python cli_client.py
+
+# Run tests
+pytest test_suite.py -v --cov=.
+```
+
+### Test Coverage
+This CLI currently has ~99% code test coverage, as shown by the `pytest` coverage report:
+```bash
+===================== test session starts ===============================================
+cachedir: .pytest_cache
+plugins: cov-4.1.0
+collected 54
+items
+
+test_suite.py::TestApiClient::TestInitialization::test_initializes_with_default_server_url PASSED    [1%]
+test_suite.py::TestApiClient::TestInitialization::test_initializes_with_custom_server_url  PASSED    [3%]
+...
+test_suite.py::TestCarDexCLI::TestApplicationFlow::test_handles_eof_error_gracefully       PASSED  [100%]
+
+
+-- coverage: platform win32, python 3.13.1-final-0 --
+Name                              Stmts   Miss  Cover
+-----------------------------------------------------
+api_client.py                        21      0   100%
+cli_client.py                        73      3    96%
+cli_display.py                      120      0   100%
+test_suite.py                       354      0   100%
+-----------------------------------------------------
+TOTAL                               568      3    99%
 ```
 
 </br>
@@ -135,213 +181,20 @@ Stop the CLI.
 ### `vroom`
 What could this secret command do...?
 
-## Features
+</br>
+</br>
 
-- 🚗 View completed and open trades
-- 🛍️ Browse available packs in the shop
-- 📚 Explore all card collections
-- 🎨 ASCII art and formatted output
-- 🧪 Comprehensive test coverage (>80%)
+# Sprint Progress
+As mentioned above, this CLI currently relates to the following **User Stores**; this list will grow over the next sprint.
 
+## 1. [Pack Purchases](https://github.com/VSHAH1210/CarDex/issues/4)
+- User can browse available packs from different collections (JDM, Muscle, Supercars, etc.)
+- Each pack displays its collection name and currency cost
 
+## 2. [Listing Card for Sale](https://github.com/VSHAH1210/CarDex/issues/7)
+- User can view active listings, up to 5 at a time.
 
-## Installation & Quick Start
+## 3. [Completing Marketplace Transactions](https://github.com/VSHAH1210/CarDex/issues/9)
+- User can browse active marketplace listings (both currency sales and card trades)
+- Trade history is recorded with execution date and details, as shown by recently executed trades
 
-### Option 1: Using Make (Recommended)
-
-If you have `make` installed (most Linux/Mac systems):
-
-```bash
-# See all available commands
-make
-
-# Install dependencies
-make install
-
-# Run the CLI
-make run
-
-# Run tests
-make test
-
-# Run tests with coverage
-make coverage
-
-# Clean up generated files
-make clean
-```
-
-### Option 2: Using the Bash Script
-
-If you don't have `make` installed:
-
-```bash
-# See all available commands
-./run.sh
-
-# Install dependencies
-./run.sh install
-
-# Run the CLI
-./run.sh run
-
-# Run tests
-./run.sh test
-
-# Run tests with coverage
-./run.sh coverage
-
-# Clean up generated files
-./run.sh clean
-```
-
-### Option 3: Manual Commands
-
-You can also run commands directly:
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the CLI
-python cardex_cli.py
-
-# Run tests
-pytest test_cardex_cli.py -v --cov=.
-```
-
-## Available Commands
-
-Once the CLI is running, you can use the following commands:
-
-- `trades` - Show the top 5 latest completed trades
-- `open` - Show the top 5 latest open trades
-- `vroom` - Display a cool ASCII car (beep beep!)
-- `shop` - View all available packs and their prices
-- `collections` - View all available collections and their prices
-- `help` - Show help message with all commands
-- `exit` - Exit the application
-
-## Running Tests
-
-### Quick Way
-
-```bash
-# Run tests
-make test
-
-# Or using bash script
-./run.sh test
-```
-
-### With Coverage Report
-
-```bash
-# Run tests with coverage
-make coverage
-
-# Or using bash script
-./run.sh coverage
-```
-
-### Manual Way
-
-Run all tests with coverage report:
-
-```bash
-pytest test_cardex_cli.py -v --cov=. --cov-report=term-missing
-```
-
-Generate HTML coverage report:
-
-```bash
-pytest test_cardex_cli.py -v --cov=. --cov-report=html
-```
-
-Then open `htmlcov/index.html` in your browser to view the detailed coverage report.
-
-## Code Architecture
-
-### API Client (`api_client.py`)
-
-The `APIClient` class handles all server communication. Currently uses dummy data, but is structured for easy API integration:
-
-```python
-# Current dummy implementation
-def get_completed_trades(self, limit: int = 5) -> List[Dict]:
-    # TODO: Replace with actual API call
-    # return requests.get(f"{self.base_url}/api/trades/completed?limit={limit}").json()
-    return dummy_trades[:limit]
-```
-
-To integrate with a real API:
-1. Add `requests` to requirements.txt
-2. Replace the dummy data returns with actual HTTP calls
-3. Add error handling and authentication as needed
-
-### Display (`display.py`)
-
-The `Display` class handles all output formatting:
-- ASCII art logos and graphics
-- Formatted tables and lists
-- Time formatting utilities
-- Grade/rarity indicators
-
-### Main CLI (`cardex_cli.py`)
-
-The `CarDexCLI` class manages:
-- Command processing and routing
-- User input handling
-- Application flow control
-- Integration between API client and display
-
-## Integrating the Real API
-
-When your API is ready, update these files:
-
-1. **api_client.py**: Replace dummy functions with real API calls
-2. **requirements.txt**: Add `requests` or your HTTP client of choice
-3. Update base_url in initialization as needed
-
-Example API integration:
-
-```python
-import requests
-
-def get_completed_trades(self, limit: int = 5) -> List[Dict]:
-    try:
-        response = requests.get(
-            f"{self.base_url}/api/trades/completed",
-            params={"limit": limit}
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error fetching trades: {e}")
-        return []
-```
-
-## Test Coverage
-
-The project includes comprehensive unit tests covering:
-- ✅ API client methods
-- ✅ Display formatting functions
-- ✅ CLI command processing
-- ✅ Error handling
-- ✅ Edge cases
-
-Target coverage: **>80%**
-
-## Future Enhancements
-
-Potential improvements for the CLI:
-- User authentication
-- Interactive trade creation
-- Pack opening simulation
-- Collection browsing with filtering
-- User inventory management
-- Trade notifications
-
-## License
-
-This is a project component for the CarDex card game.

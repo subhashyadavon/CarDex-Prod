@@ -41,17 +41,17 @@ class Display:
     """Handles all display and formatting for the CLI"""
     
     @staticmethod
-    def show_cardex_logo():
+    def showCardexLogo():
         """Display CARDEX logo"""
         print(D_LOGO)
     
     @staticmethod
-    def show_car():
+    def showCar():
         """Display easter egg art"""
         print(D_VROOM)
     
     @staticmethod
-    def format_time_ago(dt: datetime) -> str:
+    def formatTimeAgo(dt: datetime) -> str:
         """Format a datetime as a relative time string"""
         now = datetime.now()
         diff = now - dt
@@ -69,7 +69,7 @@ class Display:
             return f"{days} day{'s' if days != 1 else ''} ago"
     
     @staticmethod
-    def format_grade(grade: str) -> str:
+    def formatGrade(grade: str) -> str:
         """Format a card grade with visual indicator"""
         grade_symbols = {
             "FACTORY": "★",
@@ -78,7 +78,7 @@ class Display:
         }
         return f"{grade_symbols.get(grade, '?')}"
     
-    def show_completed_trades(self, trades: List[Dict]):
+    def showCompletedTrades(self, trades: List[Dict]):
         """Display completed trades in card-like box format"""
         if not trades:
             print("No completed trades found.\n")
@@ -89,8 +89,8 @@ class Display:
         print("=" * 80 + "\n")
         
         for i, trade in enumerate(trades, 1):
-            stars = self.format_grade(trade['grade'])
-            time_ago = self.format_time_ago(trade['executed_date'])
+            stars = self.formatGrade(trade['grade'])
+            time_ago = self.formatTimeAgo(trade['executed_date'])
             buyer = trade['buyer_username']
             
             # Determine the trade line based on type
@@ -119,7 +119,7 @@ class Display:
         
         print("=" * 80 + "\n")
 
-    def show_open_trades(self, trades: List[Dict]):
+    def showOpenTrades(self, trades: List[Dict]):
         """Display open trades in a formatted table"""
         if not trades:
             print("No open trades found.\n")
@@ -131,7 +131,7 @@ class Display:
         
         for i, trade in enumerate(trades, 1):
 
-            stars = self.format_grade(trade['grade'])
+            stars = self.formatGrade(trade['grade'])
             seller = trade['seller_username']
             vehicle = trade['vehicle']
             value = f"©{trade['price']}"
@@ -156,7 +156,7 @@ class Display:
         
     
     @staticmethod
-    def show_packs(packs: List[Dict]):
+    def showPacks(packs: List[Dict]):
         """Display available packs"""
         if not packs:
             print("No packs available.\n")
@@ -187,7 +187,7 @@ class Display:
         print("\n" + "=" * 80 + "\n")
     
     @staticmethod
-    def show_collections(collections: List[Dict]):
+    def showCollections(collections: List[Dict]):
         """Display all collections"""
         if not collections:
             print("No collections available.\n")
