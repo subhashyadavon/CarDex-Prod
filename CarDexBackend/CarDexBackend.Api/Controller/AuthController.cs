@@ -3,6 +3,8 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexBackend.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Api.Controllers
 {
@@ -17,15 +19,17 @@ namespace CarDexBackend.Api.Controllers
     [Route("auth")]
     public class AuthController : ControllerBase
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly IAuthService _authService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
         /// <param name="authService">The authentication service used for user management.</param>
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IStringLocalizer<SharedResources> sr)
         {
             _authService = authService;
+            _sr = sr;
         }
 
         /// <summary>
@@ -80,7 +84,7 @@ namespace CarDexBackend.Api.Controllers
                 ?? User.FindFirst("sub");
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                return Unauthorized(new ErrorResponse { Message = "Invalid token." });
+                return Unauthorized(new ErrorResponse { Message = _sr["InvalidTokenError"] });
             }
 
             await _authService.Logout(userId);

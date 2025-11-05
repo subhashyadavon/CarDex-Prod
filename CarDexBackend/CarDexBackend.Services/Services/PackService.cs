@@ -4,6 +4,8 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
@@ -16,15 +18,17 @@ namespace CarDexBackend.Services
     /// </remarks>
     public class PackService : IPackService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
         private readonly Random _random = new Random();
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
         private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-        public PackService(CarDexDbContext context)
+        public PackService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
         {
             _context = context;
+            _sr = sr;
         }
 
         /// <summary>
@@ -38,17 +42,17 @@ namespace CarDexBackend.Services
             // Get the collection
             var collection = await _context.Collections.FindAsync(request.CollectionId);
             if (collection == null)
-                throw new ArgumentException("Collection not found");
+                throw new ArgumentException(_sr["CollectionNotFoundError"]);
 
             // Get the user
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
-                throw new KeyNotFoundException("User not found");
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
             // Check if user has enough currency (use PackPrice, not BasePackValue)
             var packPrice = collection.PackPrice;
             if (user.Currency < packPrice)
-                throw new InvalidOperationException("Insufficient currency to purchase pack");
+                throw new InvalidOperationException(_sr["InsufficientCurrencyError", "pack"]);
 
             // Deduct currency from user
             user.Currency -= packPrice;
@@ -85,11 +89,11 @@ namespace CarDexBackend.Services
             // Need to join with Collections to get CollectionName
             var pack = await _context.Packs.FindAsync(packId);
             if (pack == null)
-                throw new KeyNotFoundException("Pack not found");
+                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
             var collection = await _context.Collections.FindAsync(pack.CollectionId);
             if (collection == null)
-                throw new KeyNotFoundException("Collection not found");
+                throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
             // Get preview cards (first 3 vehicles from this collection)
             var previewCards = await _context.Vehicles
@@ -124,11 +128,11 @@ namespace CarDexBackend.Services
         {
             var pack = await _context.Packs.FindAsync(packId);
             if (pack == null)
-                throw new KeyNotFoundException("Pack not found");
+                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
             var collection = await _context.Collections.FindAsync(pack.CollectionId);
             if (collection == null)
-                throw new KeyNotFoundException("Collection not found");
+                throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
             // Get all vehicles from this collection using the Vehicles array
             var vehicles = await _context.Vehicles
@@ -136,7 +140,7 @@ namespace CarDexBackend.Services
                 .ToListAsync();
 
             if (!vehicles.Any())
-                throw new InvalidOperationException("No vehicles available in this collection");
+                throw new InvalidOperationException(_sr["EmptyCollectionError"]);
 
             // Generate 5 random cards (typical pack size)
             var cards = new List<Card>();

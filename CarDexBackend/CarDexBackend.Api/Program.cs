@@ -31,6 +31,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add localization
+builder.Services.AddLocalization();
+
 // Register business services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICardService, CardService>();
@@ -44,6 +47,10 @@ builder.Services.AddScoped<TokenValidator>();
 builder.Services.AddSingleton<RateLimiter>();
 
 var app = builder.Build();
+
+// Configure supported languages
+var supportedCultures = new[] { "en" };
+app.UseRequestLocalization(options => options.SetDefaultCulture("end").AddSupportedCultures(supportedCultures).AddSupportedUICultures(supportedCultures));
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())

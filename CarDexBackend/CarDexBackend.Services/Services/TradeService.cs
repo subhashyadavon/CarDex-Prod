@@ -4,6 +4,9 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexDatabase;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using Microsoft.Win32.SafeHandles;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
@@ -16,14 +19,16 @@ namespace CarDexBackend.Services
     /// </remarks>
     public class TradeService : ITradeService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
         private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-        public TradeService(CarDexDbContext context)
+        public TradeService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
         {
             _context = context;
+            _sr = sr;
         }
 
         /// <summary>
@@ -128,7 +133,7 @@ namespace CarDexBackend.Services
         {
             var trade = await _context.OpenTrades.FindAsync(tradeId);
             if (trade == null)
-                throw new KeyNotFoundException("Trade not found");
+                throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
 
             var user = await _context.Users.FindAsync(trade.UserId);
             var card = await _context.Cards.FindAsync(trade.CardId);
@@ -139,7 +144,7 @@ namespace CarDexBackend.Services
                 Id = trade.Id,
                 Type = trade.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
                 UserId = trade.UserId,
-                Username = user?.Username ?? "Unknown",
+                Username = user?.Username ?? _sr["UnknownMessage"],
                 CardId = trade.CardId,
                 Price = trade.Type == TradeEnum.FOR_PRICE ? trade.Price : null,
                 WantCardId = trade.Type == TradeEnum.FOR_CARD ? trade.WantCardId : null,
@@ -153,11 +158,11 @@ namespace CarDexBackend.Services
                 response.Card = new CardDetailedResponse
                 {
                     Id = card.Id,
-                    Name = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : "Unknown",
+                    Name = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : _sr["UnknownMessage"],
                     Grade = card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
                     Value = card.Value,
                     CreatedAt = DateTime.UtcNow,
-                    Description = vehicle != null ? $"{vehicle.Make} {vehicle.Model}" : "Unknown",
+                    Description = vehicle != null ? $"{vehicle.Make} {vehicle.Model}" : _sr["UnknownMessage"],
                     VehicleId = card.VehicleId.ToString(),
                     CollectionId = card.CollectionId.ToString(),
                     OwnerId = card.UserId.ToString()
@@ -174,11 +179,11 @@ namespace CarDexBackend.Services
                     response.WantCard = new CardDetailedResponse
                     {
                         Id = wantCard.Id,
-                        Name = wantVehicle != null ? $"{wantVehicle.Year} {wantVehicle.Make} {wantVehicle.Model}" : "Unknown",
+                        Name = wantVehicle != null ? $"{wantVehicle.Year} {wantVehicle.Make} {wantVehicle.Model}" : _sr["UnknownMessage"],
                         Grade = wantCard.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
                         Value = wantCard.Value,
                         CreatedAt = DateTime.UtcNow,
-                        Description = wantVehicle != null ? $"{wantVehicle.Make} {wantVehicle.Model}" : "Unknown",
+                        Description = wantVehicle != null ? $"{wantVehicle.Make} {wantVehicle.Model}" : _sr["UnknownMessage"],
                         VehicleId = wantCard.VehicleId.ToString(),
                         CollectionId = wantCard.CollectionId.ToString(),
                         OwnerId = wantCard.UserId.ToString()
@@ -200,20 +205,20 @@ namespace CarDexBackend.Services
             // Validate the card exists and belongs to user
             var card = await _context.Cards.FindAsync(request.CardId);
             if (card == null)
-                throw new KeyNotFoundException("Card not found");
+                throw new KeyNotFoundException(_sr["CardNotFoundError"]);
 
             if (card.UserId != userId)
-                throw new InvalidOperationException("You can only trade your own cards");
+                throw new InvalidOperationException(_sr["OnlyTradeYourCardsError"]);
 
             // Parse trade type
             var tradeType = Enum.Parse<TradeEnum>(request.Type);
 
             // Validate trade type and required fields
             if (tradeType == TradeEnum.FOR_PRICE && !request.Price.HasValue)
-                throw new ArgumentException("Price is required for FOR_PRICE trades");
+                throw new ArgumentException(_sr["PriceRequiredForForPriceError"]);
 
             if (tradeType == TradeEnum.FOR_CARD && !request.WantCardId.HasValue)
-                throw new ArgumentException("WantCardId is required for FOR_CARD trades");
+                throw new ArgumentException(_sr["WantCardIdRequiredForForCardError"]);
 
             // OpenTrade constructor: OpenTrade(Guid id, TradeEnum type, Guid userId, Guid cardId, int price, Guid? wantCardId)
             var tradeId = Guid.NewGuid();
@@ -229,7 +234,7 @@ namespace CarDexBackend.Services
                 Id = trade.Id,
                 Type = trade.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
                 UserId = trade.UserId,
-                Username = user?.Username ?? "Unknown",
+                Username = user?.Username ?? _sr["UnknownMessage"],
                 CardId = trade.CardId,
                 Price = trade.Type == TradeEnum.FOR_PRICE ? trade.Price : null,
                 WantCardId = trade.Type == TradeEnum.FOR_CARD ? trade.WantCardId : null,
@@ -247,17 +252,17 @@ namespace CarDexBackend.Services
 
             var trade = await _context.OpenTrades.FindAsync(tradeId);
             if (trade == null)
-                throw new KeyNotFoundException("Trade not found");
+                throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
 
             var seller = await _context.Users.FindAsync(trade.UserId);
             var buyer = await _context.Users.FindAsync(buyerId);
             var sellerCard = await _context.Cards.FindAsync(trade.CardId);
 
             if (seller == null || buyer == null || sellerCard == null)
-                throw new InvalidOperationException("Invalid trade participants or card");
+                throw new InvalidOperationException(_sr["InvalidTradeParticipantError"]);
 
             if (buyer.Id == seller.Id)
-                throw new InvalidOperationException("Cannot trade with yourself");
+                throw new InvalidOperationException(_sr["SelfTradeError"]);
 
             // CompletedTrade properties
             Guid? buyerCardId = null;
@@ -270,7 +275,7 @@ namespace CarDexBackend.Services
                 // Currency trade
                 price = trade.Price;
                 if (buyer.Currency < price)
-                    throw new InvalidOperationException("Insufficient currency");
+                    throw new InvalidOperationException(_sr["GenericInsufficientCurrencyError"]);
 
                 // Transfer currency
                 buyer.Currency -= price;
@@ -287,14 +292,14 @@ namespace CarDexBackend.Services
             {
                 // Card-for-card trade
                 if (request == null || !request.BuyerCardId.HasValue)
-                    throw new ArgumentException("BuyerCardId is required for card-for-card trades");
+                    throw new ArgumentException(_sr["BuyerCardIdRequiredError"]);
 
                 var buyerCard = await _context.Cards.FindAsync(request.BuyerCardId.Value);
                 if (buyerCard == null)
-                    throw new KeyNotFoundException("Buyer card not found");
+                    throw new KeyNotFoundException(_sr["BuyerCardNotFoundError"]);
 
                 if (buyerCard.UserId != buyer.Id)
-                    throw new InvalidOperationException("You can only trade your own cards");
+                    throw new InvalidOperationException(_sr["OnlyTradeYourCardsError"]);
 
                 // Swap card ownership
                 buyerCard.UserId = seller.Id;
@@ -309,7 +314,7 @@ namespace CarDexBackend.Services
             }
             else
             {
-                throw new InvalidOperationException("Invalid trade type");
+                throw new InvalidOperationException(_sr["InvalidTradeTypeError"]);
             }
 
             // Transfer seller's card to buyer
@@ -380,11 +385,11 @@ namespace CarDexBackend.Services
         {
             var trade = await _context.OpenTrades.FindAsync(tradeId);
             if (trade == null)
-                throw new KeyNotFoundException("Trade not found");
+                throw new KeyNotFoundException(_sr["TradeNotFound"]);
 
             // TODO: Verify authenticated user owns this trade
             if (trade.UserId != _testUserId)
-                throw new InvalidOperationException("You can only delete your own trades");
+                throw new InvalidOperationException(_sr["OnlyDeleteYourTradeError"]);
 
             _context.OpenTrades.Remove(trade);
             await _context.SaveChangesAsync();
@@ -397,7 +402,7 @@ namespace CarDexBackend.Services
         {
             var trade = await _context.CompletedTrades.FindAsync(tradeId);
             if (trade == null)
-                throw new KeyNotFoundException("Completed trade not found");
+                throw new KeyNotFoundException(_sr["CompletedTradeNotFoundError"]);
 
             var seller = await _context.Users.FindAsync(trade.SellerUserId);
             var buyer = await _context.Users.FindAsync(trade.BuyerUserId);
@@ -407,10 +412,10 @@ namespace CarDexBackend.Services
                 Id = trade.Id,
                 Type = trade.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
                 SellerUserId = trade.SellerUserId,
-                SellerUsername = seller?.Username ?? "Unknown",
+                SellerUsername = seller?.Username ?? _sr["UnknownMessage"],
                 SellerCardId = trade.SellerCardId,
                 BuyerUserId = trade.BuyerUserId,
-                BuyerUsername = buyer?.Username ?? "Unknown",
+                BuyerUsername = buyer?.Username ?? _sr["UnknownMessage"],
                 BuyerCardId = trade.BuyerCardId,
                 Price = trade.Price,
                 ExecutedDate = DateTime.UtcNow
@@ -439,10 +444,10 @@ namespace CarDexBackend.Services
                     Id = t.Id,
                     Type = t.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
                     SellerUserId = t.SellerUserId,
-                    SellerUsername = _context.Users.Where(u => u.Id == t.SellerUserId).Select(u => u.Username).FirstOrDefault() ?? "Unknown",
+                    SellerUsername = _context.Users.Where(u => u.Id == t.SellerUserId).Select(u => u.Username).FirstOrDefault() ?? _sr["UnknownMessage"],
                     SellerCardId = t.SellerCardId,
                     BuyerUserId = t.BuyerUserId,
-                    BuyerUsername = _context.Users.Where(u => u.Id == t.BuyerUserId).Select(u => u.Username).FirstOrDefault() ?? "Unknown",
+                    BuyerUsername = _context.Users.Where(u => u.Id == t.BuyerUserId).Select(u => u.Username).FirstOrDefault() ?? _sr["UnknownMessage"],
                     BuyerCardId = t.BuyerCardId,
                     Price = t.Price,
                     ExecutedDate = DateTime.UtcNow

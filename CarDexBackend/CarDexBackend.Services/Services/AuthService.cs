@@ -10,20 +10,28 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using BCrypt.Net;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Localization;
+using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
     public class AuthService : IAuthService
     {
+        private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _db;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(CarDexDbContext db, IConfiguration configuration, ILogger<AuthService> logger)
+        public AuthService(
+            CarDexDbContext db,
+            IConfiguration configuration,
+            ILogger<AuthService> logger,
+            IStringLocalizer<SharedResources> sr)
         {
             _db = db;
             _configuration = configuration;
             _logger = logger;
+            _sr = sr;
         }
 
         public async Task<LoginResponse> Register(RegisterRequest request)
@@ -31,25 +39,25 @@ namespace CarDexBackend.Services
             // Validate username and password are not empty
             if (string.IsNullOrWhiteSpace(request.Username))
             {
-                throw new InvalidOperationException("Username is required.");
+                throw new InvalidOperationException(_sr["UsernameRequired"]);
             }
 
             if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
             {
-                throw new InvalidOperationException("Password must be at least 6 characters long.");
+                throw new InvalidOperationException(_sr["PasswordRequired"]);
             }
 
             // Check if username already exists
             try
             {
-                _logger.LogInformation("Checking for existing user: {Username}", request.Username);
+                _logger.LogInformation(_sr["CheckingForExistingUser"], request.Username);
                 var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
                 if (existingUser != null)
                 {
-                    _logger.LogWarning("Username already exists: {Username}", request.Username);
-                    throw new InvalidOperationException("Username already exists.");
+                    _logger.LogWarning(_sr["UsernameAlreadyExistsLog"], request.Username);
+                    throw new InvalidOperationException(_sr["UsernameAlreadyExistsError"]);
                 }
-                _logger.LogInformation("Username available: {Username}", request.Username);
+                _logger.LogInformation(_sr["UsernameAvailable"], request.Username);
             }
             catch (InvalidOperationException)
             {
@@ -57,7 +65,7 @@ namespace CarDexBackend.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Database error while checking username: {Username}", request.Username);
+                _logger.LogError(ex, _sr["DatabaseErrorCheckingUsername"], request.Username);
                 throw;
             }
 
@@ -87,8 +95,8 @@ namespace CarDexBackend.Services
             {
                 AccessToken = token,
                 TokenType = "Bearer",
-                ExpiresIn = _configuration.GetSection("Jwt")["ExpirationMinutes"] != null 
-                    ? int.Parse(_configuration.GetSection("Jwt")["ExpirationMinutes"]!) * 60 
+                ExpiresIn = _configuration.GetSection("Jwt")["ExpirationMinutes"] != null
+                    ? int.Parse(_configuration.GetSection("Jwt")["ExpirationMinutes"]!) * 60
                     : 3600,
                 User = new UserResponse
                 {
@@ -96,7 +104,7 @@ namespace CarDexBackend.Services
                     Username = user.Username,
                     Currency = user.Currency,
                     CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.CreatedAt 
+                    UpdatedAt = user.CreatedAt
                 }
             };
         }
@@ -107,13 +115,13 @@ namespace CarDexBackend.Services
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null)
             {
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                throw new UnauthorizedAccessException(_sr["InvalidCredentialsError"]);
             }
 
             // Verify password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                throw new UnauthorizedAccessException(_sr["InvalidCredentialsError"]);
             }
 
             // Generate JWT token
@@ -124,8 +132,8 @@ namespace CarDexBackend.Services
             {
                 AccessToken = token,
                 TokenType = "Bearer",
-                ExpiresIn = _configuration.GetSection("Jwt")["ExpirationMinutes"] != null 
-                    ? int.Parse(_configuration.GetSection("Jwt")["ExpirationMinutes"]!) * 60 
+                ExpiresIn = _configuration.GetSection("Jwt")["ExpirationMinutes"] != null
+                    ? int.Parse(_configuration.GetSection("Jwt")["ExpirationMinutes"]!) * 60
                     : 3600,
                 User = new UserResponse
                 {
@@ -150,15 +158,15 @@ namespace CarDexBackend.Services
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             // Try to get secret key from environment variable first, fallback to configuration
-            var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
+            var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
                 ?? jwtSettings["SecretKey"];
-            
+
             // Validate we have a secret key
             if (string.IsNullOrEmpty(secretKey) || secretKey == "UseEnvironmentVariable")
             {
-                throw new InvalidOperationException("JWT_SECRET_KEY environment variable is not set.");
+                throw new InvalidOperationException(_sr["JwtSecretKeyNotSetError"]);
             }
-            
+
             var issuer = jwtSettings["Issuer"];
             var audience = jwtSettings["Audience"];
             var expirationMinutes = int.Parse(jwtSettings["ExpirationMinutes"] ?? "60");
