@@ -1,42 +1,35 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./App.css";
-import PackDemo from "./components/Pack/Demo";
-import CardDemo from "./components/Card/CardDemo";
-import InputDemo from "./components/TextInput/Demo";
-import Login from "./pages/Login/Login";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import App from "./App";
+import Login from "./pages/Login/Login";
+import { AuthProvider } from "./context/AuthContext";
+import { GameProvider } from "./context/GameContext";
+import { TradeProvider } from "./context/TradeContext";
 
-const DEMO_MODE = false;
-
-/* -------------------- Mount -------------------- */
-const root = document.getElementById("root");
-if (!root) throw new Error("Root element #root not found");
-
-const app = (
-  <React.StrictMode>
-    <BrowserRouter>
-      {DEMO_MODE ? (
-        <>
-          <PackDemo />
-          <CardDemo />
-          <InputDemo />
-        </>
-      ) : (
-        <Routes>
-          {/* login page */}
-          <Route path="/login" element={<Login />} />
-
-          {/* your main app */}
-          <Route path="/app" element={<App />} />
-
-          {/* default: go to login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      )}
-    </BrowserRouter>
-  </React.StrictMode>
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
 );
 
-ReactDOM.createRoot(root).render(app);
+root.render(
+  <React.StrictMode>
+    <AuthProvider>
+      <GameProvider>
+        <TradeProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* When someone goes to /, send them to /login */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+
+              {/* Login page */}
+              <Route path="/login" element={<Login />} />
+
+              {/* Main app */}
+              <Route path="/app" element={<App />} />
+            </Routes>
+          </BrowserRouter>
+        </TradeProvider>
+      </GameProvider>
+    </AuthProvider>
+  </React.StrictMode>
+);
