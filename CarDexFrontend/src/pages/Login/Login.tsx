@@ -17,7 +17,6 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading, isAuthenticated } = useAuth();
 
-  // If already logged in (e.g. token from localStorage), go straight to app
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/app");
@@ -25,6 +24,7 @@ const Login: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async () => {
+    
     if (!username || !password) {
       setShowErrors(true);
       setAuthError(null);
@@ -35,15 +35,9 @@ const Login: React.FC = () => {
       setShowErrors(false);
       setAuthError(null);
 
-      // Backend expects "email", but UI is "username" → map username → email
-      console.log("[Login] submitting", { username, password });
       await login({ email: username, password });
-
       navigate("/app");
     } catch (err: any) {
-      console.error("[Login] login failed:", err);
-
-      // Try to surface a useful backend error if present
       const backendMessage =
         err?.response?.data?.message ||
         err?.response?.data ||
@@ -63,7 +57,7 @@ const Login: React.FC = () => {
       "Please fill in all fields.") || authError;
 
   return (
-    <div className={`bg-gradient-dark ${styles.screen}`}>
+    <div className={`${styles.screen} bg-gradient-dark`}>
       <div className={styles.container}>
         <img src={logo} alt="CarDex Logo" className={styles.logo} />
 
@@ -105,22 +99,13 @@ const Login: React.FC = () => {
           </Button>
 
           {displayError && (
-            <p
-              className="body-2"
-              style={{ color: "#ff6b6b", marginTop: "0.75rem" }}
-            >
+            <p className={`${styles.errorMessage} body-2`}>
               {displayError}
             </p>
           )}
 
           {isAuthenticated && !displayError && (
-            <p
-              className="body-2"
-              style={{
-                color: "var(--content-secondary)",
-                marginTop: "0.5rem",
-              }}
-            >
+            <p className={`${styles.successMessage} body-2`}>
               Logged in successfully.
             </p>
           )}

@@ -50,3 +50,15 @@
 .submitButton:hover {
   filter: brightness(1.1);
 }
+
+.errorMessage {
+  color: #ff6b6b;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.successMessage {
+  color: var(--content-secondary);
+  margin-top: 0.5rem;
+  text-align: center;
+}
