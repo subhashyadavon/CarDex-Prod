@@ -5,7 +5,7 @@ import Button from "../../components/Button/Button";
 import Input from "../../components/TextInput/TextInput";
 import logo from "../../assets/logo_full.png";
 import { UserIcon, LockIcon } from "../../components/Icons";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const Login: React.FC = () => {
@@ -38,9 +38,7 @@ const Login: React.FC = () => {
       navigate("/app");
     } catch (err: any) {
       const backendMessage =
-        err?.response?.data?.message ||
-        err?.response?.data ||
-        err?.message;
+        err?.response?.data?.message || err?.response?.data || err?.message;
 
       setAuthError(
         backendMessage
@@ -51,9 +49,8 @@ const Login: React.FC = () => {
   };
 
   const displayError =
-    (showErrors &&
-      (!username || !password) &&
-      "Please fill in all fields.") || authError;
+    (showErrors && (!username || !password) && "Please fill in all fields.") ||
+    authError;
 
   return (
     <div className={`${styles.screen} bg-gradient-dark`}>
@@ -97,10 +94,27 @@ const Login: React.FC = () => {
             {isLoading ? "Logging in..." : "Login"}
           </Button>
 
+          <p
+            className="body-2"
+            style={{
+              textAlign: "center",
+              marginTop: "0.75rem",
+              opacity: 0.9,
+              color: "white",
+            }}
+          >
+            Don’t have an account?{" "}
+            <Button
+              type="button"
+              onClick={() => navigate("/register")}
+              className={styles.submitButton} // make it look like a link
+            >
+              Create one
+            </Button>
+          </p>
+
           {displayError && (
-            <p className={`${styles.errorMessage} body-2`}>
-              {displayError}
-            </p>
+            <p className={`${styles.errorMessage} body-2`}>{displayError}</p>
           )}
 
           {isAuthenticated && !displayError && (
