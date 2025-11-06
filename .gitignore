@@ -513,3 +513,6 @@ CarDexFrontend/coverage/
 CarDexFrontend/reports/
 CarDexFrontend/test-results/
 
+# Ignore JetBrains IDE project settings
+.idea/
+.vscode/
