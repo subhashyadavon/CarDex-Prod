@@ -64,7 +64,7 @@ jobs:
             -reports:"**/coverage.cobertura.xml" \
             -targetdir:"coveragereport" \
             -reporttypes:Html \
-            -filefilters:"-*/Migrations/*;-*CarDexBackend.Api/Extensions/*"
+            -filefilters:"-*/Migrations/*;-*CarDexBackend.Api/Extensions/*;-*CarDexBackend.Api/GlobalExceptionHandler.cs"
 
 
       - name: Upload coverage report

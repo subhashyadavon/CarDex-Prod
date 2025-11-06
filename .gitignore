@@ -502,3 +502,14 @@ CarDexDatabase/**/packages.lock.json
 **/TestResults/
 coverage.opencover.xml
 coverage.xml
+
+
+
+# frontend files
+CarDexFrontend/node_modules/
+CarDexFrontend/dist/
+CarDexFrontend/build/
+CarDexFrontend/coverage/
+CarDexFrontend/reports/
+CarDexFrontend/test-results/
+
