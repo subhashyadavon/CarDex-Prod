@@ -143,6 +143,7 @@ npm --version
 # Clone
 git clone https://github.com/VSHAH1210/CarDex.git
 cd CarDexFrontend
+npm install
 ```
 
 ### Run: Tests
