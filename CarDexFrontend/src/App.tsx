@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header, { NavItem } from "./components/Header/Header";
 import "./App.css";
 import PackShop from "./components/Pack/PackShop";
@@ -6,9 +7,17 @@ import logo from "./assets/logo_full.png";
 import coinIcon from "./assets/coin.png";
 import packsData from "./data/packs.json";
 import Garage from "./components/Garage/Garage";
+import { useAuth } from "./hooks/useAuth";
 
 function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <div className="bg-gradient-dark" style={{ minHeight: "100vh" }}>
@@ -19,6 +28,7 @@ function AppContent() {
         userLevel={22}
         logoUrl={logo}
         coinIconUrl={coinIcon}
+        onLogout={handleLogout}
       />
 
       {/* Main content area */}
