@@ -506,12 +506,10 @@ coverage.xml
 
 
 # frontend files
-CarDexFrontend/**/node_modules/
-CarDexFrontend/**/dist/
-CarDexFrontend/**/build/
-CarDexFrontend/**/coverage/
-CarDexFrontend/**/reports/
-CarDexFrontend/**/test-results/
-CarDexFrontend/**/test-results/**/*.trx
-CarDexFrontend/**/test-results/**/*.xml
-CarDexFrontend/**/test-results/**/*.json
+CarDexFrontend/node_modules/
+CarDexFrontend/dist/
+CarDexFrontend/build/
+CarDexFrontend/coverage/
+CarDexFrontend/reports/
+CarDexFrontend/test-results/
+
