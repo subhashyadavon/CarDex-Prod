@@ -3,16 +3,19 @@
 </br>
 
 ## 1. Regression Testing
-Regression testing in the CarDex project is conducted to verify that existing features continue to function correctly after new changes, bug fixes, or refactoring. The regression suite includes all tests tagged with [Trait("Category", "Regression")], covering critical functional areas such as Authentication, Trading, Packs, Cards, User Inventory, and Collections. These tests are executed using the .NET test framework (dotnet test) with filters to target specific areas when needed, for example, dotnet test --filter "Category=Regression&Area=Authentication". The testing framework used is xUnit, which provides structured test cases and assertions. Developers can run regression tests locally through direct CLI commands or an automated script (./scripts/run-regression-tests.sh), while GitHub Actions runs the same regression suite automatically in the CI/CD pipeline using dotnet test --filter "Category=Regression".
+Regression testing in the CarDex project is conducted to verify that existing features continue to function correctly after new changes, bug fixes, or refactoring. The regression suite includes all tests tagged with [Trait("Category", "Regression")], covering critical functional areas such as Authentication, Trading, Packs, Cards, User Inventory, and Collections. These tests are executed using the .NET test framework (dotnet test) with filters to target specific areas when needed, for example, dotnet test --filter "Category=Regression&Area=Authentication".  
 
-[Script: run-regression-tests.sh](./CarDexBackend/scripts/run-regression-tests.sh)
+The testing framework used is **xUnit**, which provides structured test cases and assertions. Developers can run regression tests locally through direct CLI commands or an automated script (`./scripts/run-regression-tests.sh`), while GitHub Actions runs the same regression suite automatically in the CI/CD pipeline using dotnet test --filter "Category=Regression".
+
+### [Script `run-regression-tests.sh`](./CarDexBackend/scripts/run-regression-tests.sh)
 ![snapshot of test result](/assets/regression_test.png)
 
 </br>
 </br>
 
 ## 2. Testing Slowdown
-We have kept all of our unit and integration tests from the original testing plan. 
+We have kept all of our unit and integration tests from the original testing plan.  
+
 However, a few of our test assertions had to be updated after we introduced string localization with the .resx files.
 Since some messages are now pulled from localized resources instead of hardcoded strings, a few expected values in the tests had to be changed to match the new localized outputs.
 
@@ -20,7 +23,7 @@ We have not created separate test plans for different release types, the only se
 
 
 ### Frontend
-Thanks to the TestingEngine serving as a baseline for test coverage and syntax, we have maintained the standard set out in our testing plan, regarding our ReactEngines.
+Thanks to the `TestingEngine.test.tsx` serving as a baseline for test coverage and syntax, we have maintained the standard set out in our testing plan, regarding our React Engines.
 
 We hadn't yet decided on the second frontend when we wrote the testing plan, but we did attempt to follow the same testing naming conventions. That is, the logical grouping of frontend testing, as used in the React engines. However, since we used `pytest`, our test output displays in pytest-format, so it doesn't match exactly.
 
@@ -52,9 +55,11 @@ The things we have excluded from coverage are migration beacuse it is autogenera
 
 ![Profiler Output Table](docs/Sprint2_API_Profiling.png)
 
-`GET /cards` is the slowest endpoint. It currently returns all cards in a single response, which means latency will only grow as we add more cards. 
+### Worse Performing
+`GET /cards` is the slowest endpoint. It currently returns all cards in a single response, which means latency will only grow as we add more cards.  
 
-A potential fix is to add pagination to the response so that we are only returning the cards in batches as they get requested.  
+### Future Implications
+A potential fix for our slowdown is to add pagination to the response so that we are only returning the cards in batches as they get requested. This would require some tweaking to how our layers connect.
 
 </br>
 </br>
@@ -99,10 +104,10 @@ I’m proud of setting up string localization with SharedResources.resx. It clea
 The commit I’m most proud of is when I created the BrowserRoutes and wired together the main page components — Navigation, Garage, and PackShop — through App.tsx. This involved connecting multiple components, managing how data flowed through props, and ensuring everything rendered dynamically from our mock JSON files. It was challenging to structure the app so each component communicated smoothly while maintaining clean, modular code, but seeing the pages interact seamlessly felt like bringing the whole frontend to life. It taught me a lot about how React routing, props, and component composition work together to create a fully functional, scalable interface.
 
 ### Subhash 
-### [JWT Authentication](https://github.com/VSHAH1210/CarDex/commit/bf19486ee01572b547c3abff3ebd9ed2edbd212c)
-### [Rate Limiter](https://github.com/VSHAH1210/CarDex/commit/2de6e2d63bd5a20c075139a71f2146a77fa956ec)
-### [Regression Testing script and suite](https://github.com/VSHAH1210/CarDex/commit/f8e1ce1608b2cebfd94418c6ef790e4f90a6fe43)
-- I am proud of implementing the JWT authentication for better security and Rate Limiter for not being the backend overhelmed by api requests and also api not being abused. Then I created the regression script which checks if the new functionality breaks the previously implemented ones. 
+#### 1. [JWT Authentication](https://github.com/VSHAH1210/CarDex/commit/bf19486ee01572b547c3abff3ebd9ed2edbd212c)
+#### 2. [Rate Limiter](https://github.com/VSHAH1210/CarDex/commit/2de6e2d63bd5a20c075139a71f2146a77fa956ec)
+#### 3. [Regression Testing script and suite](https://github.com/VSHAH1210/CarDex/commit/f8e1ce1608b2cebfd94418c6ef790e4f90a6fe43)
+I am proud of implementing the JWT authentication for better security and Rate Limiter for not being the backend overhelmed by api requests and also api not being abused. Then I created the regression script which checks if the new functionality breaks the previously implemented ones. 
 
 </br>
 </br>
