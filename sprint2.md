@@ -33,7 +33,7 @@ The frontend coverage report can be found in CarDex\CarDexFrontend\coverage\lcov
 </br>
 
 ## 5. Last Dash
- - We anticipate scope creep. As the application functions are getting bigger and complex than expected therefore we may not be able to complete all the targets that we aimed for at the start of the course.
+ - We anticipate scope creep. As the application functions are getting bigger and complex than expected, we may not be able to complete all the targets that we aimed for at the start of the course.
  
 
 </br>
@@ -43,6 +43,9 @@ The frontend coverage report can be found in CarDex\CarDexFrontend\coverage\lcov
 
 Ansh - https://github.com/VSHAH1210/CarDex/commit/5c564ca85360b074db41b05ca92e52e30bda63c0
  - The above commit is what I am most proud of. The thinking and brainstorming of how I could do this was interesting, frustrating and exciting to see it work.  I learnt so much about frontend as I have not worked this deeply in frontend before so I wasn’t an expert but understanding why we need some of these code files and techniques was interesting to learn and understand.
+
+ Vansh - https://github.com/VSHAH1210/CarDex/commit/ff46a374c5c48cfda9cf0845d260fae19392c76c
+- I’m most proud of creating our app’s registration page, my first time ever building something in React, and I’m proud of it because I stepped into a brand-new framework, owned the whole flow from start to finish, and delivered a simple, welcoming experience that helps people get into the app without friction. It unlocked onboarding for our team, reduced confusion for new users, and set a clear, consistent pattern we can reuse for future forms. Seeing my group members use it confidently was a big win and showed me I can learn fast, make thoughtful design choices, and ship work that feels polished and high-impact.
 
 
 </br>
