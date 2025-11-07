@@ -58,7 +58,7 @@ Ian – [feat(localization): add centralized .resx-based string localization for
 
 Jotham - [Created BrowserRoutes for Navigation, Garage, and PackShop; modified App.tsx](https://github.com/VSHAH1210/CarDex/commit/e304a5331d5c655e908e16dc44a4f48b23267245)
 
-- The commit I’m most proud of is when I created the BrowserRoutes and wired together the main pages — Navigation, Garage, and PackShop — through App.tsx. This involved connecting multiple components, managing how data flowed through props, and ensuring everything rendered dynamically from our mock JSON files. It was challenging to structure the app so each component communicated smoothly while maintaining clean, modular code, but seeing the pages interact seamlessly felt like bringing the whole frontend to life. It taught me a lot about how React routing, props, and component composition work together to create a fully functional, scalable interface.
+- The commit I’m most proud of is when I created the BrowserRoutes and wired together the main page components — Navigation, Garage, and PackShop — through App.tsx. This involved connecting multiple components, managing how data flowed through props, and ensuring everything rendered dynamically from our mock JSON files. It was challenging to structure the app so each component communicated smoothly while maintaining clean, modular code, but seeing the pages interact seamlessly felt like bringing the whole frontend to life. It taught me a lot about how React routing, props, and component composition work together to create a fully functional, scalable interface.
 
 </br>
 </br>
