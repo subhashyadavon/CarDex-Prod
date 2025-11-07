@@ -28,6 +28,11 @@ The frontend coverage report can be found in CarDex\CarDexFrontend\coverage\lcov
 
 ## 4. Profiler
 
+![Profiler Output Table](docs/Sprint2_API_Profiling.png)
+
+`GET /cards` is the slowest endpoint. It currently returns all cards in a single response, which means latency will only grow as we add more cards. 
+
+A potential fix is to add pagination to the response so that we are only returning the cards in batches as they get requested.  
 
 </br>
 </br>
@@ -47,6 +52,9 @@ Ansh - https://github.com/VSHAH1210/CarDex/commit/5c564ca85360b074db41b05ca92e52
  Vansh - https://github.com/VSHAH1210/CarDex/commit/ff46a374c5c48cfda9cf0845d260fae19392c76c
 - I’m most proud of creating our app’s registration page, my first time ever building something in React, and I’m proud of it because I stepped into a brand-new framework, owned the whole flow from start to finish, and delivered a simple, welcoming experience that helps people get into the app without friction. It unlocked onboarding for our team, reduced confusion for new users, and set a clear, consistent pattern we can reuse for future forms. Seeing my group members use it confidently was a big win and showed me I can learn fast, make thoughtful design choices, and ship work that feels polished and high-impact.
 
+Ian – [feat(localization): add centralized .resx-based string localization for API and Services](https://github.com/VSHAH1210/CarDex/commit/1ad9b4b6394970cbb70a302a103d50cc20e1d660)
+
+- I’m proud of setting up string localization with SharedResources.resx. It cleaned up a bunch of hardcoded strings across the backend and made everything way easier to manage, and will make it easier going forward. It felt great seeing the API return proper localized messages, and it sets us up nicely if we ever want to support multiple languages later on.
 
 </br>
 </br>
