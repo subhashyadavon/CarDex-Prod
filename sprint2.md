@@ -46,6 +46,13 @@ A potential fix is to add pagination to the response so that we are only returni
 
 ## 6. Show Off
 
+
+### Alejandro
+#### 1. [Created second frontend, the CARDEX CLI. Cleaned up TextInput component.](https://github.com/VSHAH1210/CarDex/commit/689679b16755d7751daa42d12dd9e99545050c37)  
+This commit was the result of a few days of working locally to build the entire second frontend. I started by brainstorming with AI to plan out the python filestructure, alongside creating an api client that supported mock testing and easy (future) endpoint connection. We landed on 4-5 core functionalities of the CLI, attempting to mimic a "Companion App" of real trading card games. It follows that I wrote >50 test cases for this CLI, achieving >99% test coverage. They handle input validation, api responses, display output and more. Thiis Frontend is ready for real endpoint plug in for next sprint!
+#### 2. [Global styles in App.css](https://github.com/VSHAH1210/CarDex/commit/e9f6f1d4b385898c47c403477e16c41b4978547a)  
+Although this commit looks small, it was a small portion of the full app design effort I have been making since sprint 0. As such, this commit was the creation of the global stylesheet for our React app, which took all my Figma designs, typography, and colours and made them reusable css classes for our app.
+
 Ansh - https://github.com/VSHAH1210/CarDex/commit/5c564ca85360b074db41b05ca92e52e30bda63c0
  - The above commit is what I am most proud of. The thinking and brainstorming of how I could do this was interesting, frustrating and exciting to see it work.  I learnt so much about frontend as I have not worked this deeply in frontend before so I wasn’t an expert but understanding why we need some of these code files and techniques was interesting to learn and understand.
 
