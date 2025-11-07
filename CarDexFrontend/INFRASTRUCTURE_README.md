@@ -30,12 +30,12 @@ src/
 ## Quick Start
 
 ### Backend Setup
-Make sure the backend API is running on `http://localhost:5083`
+Make sure the backend API is running on `http://localhost:5090`
 
 ### Environment Variables
 The `.env` file is configured with:
 ```
-REACT_APP_API_URL=http://localhost:5083
+REACT_APP_API_URL=http://localhost:5090
 ```
 
 ## Authentication
