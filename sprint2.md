@@ -9,6 +9,11 @@
 </br>
 
 ## 2. Testing Slowdown
+We have kept all of our unit and integration tests from the original testing plan. 
+However, a few of our test assertions had to be updated after we introduced string localization with the .resx files.
+Since some messages are now pulled from localized resources instead of hardcoded strings, a few expected values in the tests had to be changed to match the new localized outputs.
+
+We have not created separate test plans for different release types, the only separation is between Frontend and Backend testing. Right now, the tests all run together for every commit, which keeps things simple and ensures that everything is covered no matter what we release.
 
 
 ### Frontend
@@ -21,6 +26,10 @@ We hadn't yet decided on the second frontend when we wrote the testing plan, but
 </br>
 
 ## 3. Not Testing
+
+![System Design Diagram](./assets/system_design.png)
+
+
 The following parts of the code haven't been tested:
 | Component | Tested | Untested | Coverage | Testing Level |
 |----------|----------|----------|----------|----------|
@@ -81,6 +90,9 @@ I’m proud of setting up string localization with SharedResources.resx. It clea
 #### [Created BrowserRoutes for Navigation, Garage, and PackShop; modified App.tsx](https://github.com/VSHAH1210/CarDex/commit/e304a5331d5c655e908e16dc44a4f48b23267245)
 
 The commit I’m most proud of is when I created the BrowserRoutes and wired together the main page components — Navigation, Garage, and PackShop — through App.tsx. This involved connecting multiple components, managing how data flowed through props, and ensuring everything rendered dynamically from our mock JSON files. It was challenging to structure the app so each component communicated smoothly while maintaining clean, modular code, but seeing the pages interact seamlessly felt like bringing the whole frontend to life. It taught me a lot about how React routing, props, and component composition work together to create a fully functional, scalable interface.
+
+Subhash - [JWT Authentication, Rate Limiter, Regression Testing script and suite](https://github.com/VSHAH1210/CarDex/commit/bf19486ee01572b547c3abff3ebd9ed2edbd212c)(https://github.com/VSHAH1210/CarDex/commit/2de6e2d63bd5a20c075139a71f2146a77fa956ec)(https://github.com/VSHAH1210/CarDex/commit/f8e1ce1608b2cebfd94418c6ef790e4f90a6fe43)
+- I am proud of implementing the JWT authentication for better security and Rate Limiter for not being the backend overhelmed by api requests and also api not being abused. Then I created the regression script which checks if the new functionality breaks the previously implemented ones. 
 
 </br>
 </br>
