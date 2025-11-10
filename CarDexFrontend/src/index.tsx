@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import App from "./App";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
+import OpenedPack from "./pages/OpenPack/OpenedPack";
 import { AuthProvider } from "./context/AuthContext";
 import { GameProvider } from "./context/GameContext";
 import { TradeProvider } from "./context/TradeContext";
@@ -24,8 +25,10 @@ root.render(
 
               {/* Login page */}
               <Route path="/login" element={<Login />} />
+              {/* Register page */}
               <Route path="/register" element={<Register />} />
-
+              {/* OpenedPack page */}
+              <Route path="/openedPack" element={<OpenedPack />} />
               {/* Main app */}
               <Route path="/app" element={<App />} />
             </Routes>
