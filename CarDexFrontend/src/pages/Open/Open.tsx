@@ -15,7 +15,7 @@ function pickThreeRandom<T>(arr: T[]): T[] {
   const out: T[] = [];
   for (let i = 0; i < 3 && copy.length > 0; i++) {
     const idx = Math.floor(Math.random() * copy.length);
-    out.push(copy.splice(idx, 1)[0]); // remove to avoid duplicates
+    out.push(copy.splice(idx, 1)[0]); 
   }
   return out;
 }
@@ -32,7 +32,6 @@ const Open: React.FC = () => {
 
   const ownedCards: { id: number }[] = []; // wire to your state/API later
 
-  // Parent handles clicks (PackShop stays presentational)
   const handlePackGridClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const tile = (e.target as HTMLElement).closest<HTMLElement>(
       "[data-pack-index]"
@@ -63,7 +62,7 @@ const Open: React.FC = () => {
     // 3) Pick 3 random vehicles
     const picked = pickThreeRandom(candidates);
 
-    // 4) Navigate to OpenPack with the actual vehicle objects (no extra logic there)
+    // 4) Navigate to OpenPack with the actual vehicle objects 
     navigate("/openedPack", {
       state: {
         packName: pack.name,

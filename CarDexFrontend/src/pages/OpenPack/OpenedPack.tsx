@@ -25,7 +25,6 @@ const OpenPack: React.FC = () => {
     : "Opened Cards";
 
   return (
-    // Full-viewport gradient (from your global utilities)
     <div className={`bg-gradient-dark ${styles.page}`}>
       {/* Foreground panel */}
       <div className={styles.content}>

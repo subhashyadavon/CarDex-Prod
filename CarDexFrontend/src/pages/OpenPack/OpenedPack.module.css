@@ -30,7 +30,6 @@
     gap: 1.25rem;
 }
 
-/* Empty-state pill that matches the panel aesthetic */
 .emptyMessage {
     grid-column: 1 / -1;
     text-align: center;
@@ -43,7 +42,7 @@
             rgba(24, 3, 3, 0.6));
 }
 
-/* Individual card tiles pop slightly off the panel */
+
 .cardTile {
     background: linear-gradient(180deg,
             var(--block-secondary),
@@ -88,7 +87,6 @@
     margin-top: 1rem;
 }
 
-/* Button that reuses your palette but feels elevated on the panel */
 .backBtn {
     background: linear-gradient(180deg,
             var(--block-secondary),
