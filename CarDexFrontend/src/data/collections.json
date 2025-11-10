@@ -9,7 +9,7 @@
   {
     "id": 2,
     "name": "90s Icons",
-    "vehicles": [1, 3, 4],
+    "vehicles": [1, 2, 3, 4, 6],
     "image": "/images/collections/90s-icons.jpg",
     "pack_price": 300
   },
@@ -19,5 +19,40 @@
     "vehicles": [1, 5],
     "image": "/images/collections/nissan-heritage.jpg",
     "pack_price": 600
+  },
+  {
+    "id": 4,
+    "name": "Nismo Performance",
+    "vehicles": [1, 5],
+    "image": "/images/collections/nismo-performance.jpg",
+    "pack_price": 1200
+  },
+  {
+    "id": 5,
+    "name": "Ultra Rare Mix",
+    "vehicles": [5, 2, 1, 4],
+    "image": "/images/collections/ultra-rare-mix.jpg",
+    "pack_price": 1500
+  },
+  {
+    "id": 6,
+    "name": "Starter Set",
+    "vehicles": [1, 3, 6],
+    "image": "/images/collections/starter-set.jpg",
+    "pack_price": 250
+  },
+  {
+    "id": 7,
+    "name": "Premium Mix",
+    "vehicles": [1, 2, 3, 4],
+    "image": "/images/collections/premium-mix.jpg",
+    "pack_price": 500
+  },
+  {
+    "id": 8,
+    "name": "Daily Special",
+    "vehicles": [2, 4, 6],
+    "image": "/images/collections/daily-special.jpg",
+    "pack_price": 200
   }
 ]
