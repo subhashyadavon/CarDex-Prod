@@ -1,10 +1,9 @@
 import React from "react";
 import PackShop from "../../components/Pack/PackShop";
 import packsData from "../../data/packs.json";
-import styles from "./Open.module.css"; // <-- import the module
+import styles from "./Open.module.css"; 
 
 const Open: React.FC = () => {
-  // When you wire this up, replace with real data from context/API
   const ownedCards: any[] = [];
 
   return (
@@ -15,7 +14,6 @@ const Open: React.FC = () => {
           Owned Cards
         </h2>
 
-        {/* Grid container (empty for now) */}
         <div className={styles.grid}>
           {ownedCards.length === 0 ? (
             <div className={`body-1 ${styles.emptyMessage}`}>
@@ -23,7 +21,7 @@ const Open: React.FC = () => {
             </div>
           ) : (
             ownedCards.map((card) => (
-              <div key={card.id} /* your future card tile here */ />
+              <div key={card.id}/>
             ))
           )}
         </div>
