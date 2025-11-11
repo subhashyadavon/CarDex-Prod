@@ -17,18 +17,25 @@ const CollectionProgressCard: React.FC<CollectionProgressCardProps> = ({
   totalVehicles,
   percentage,
 }) => {
+  const [imgSrc, setImgSrc] = React.useState(collectionImage);
+  const [hasError, setHasError] = React.useState(false);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc('/images/collections/placeholder.jpg');
+    }
+  };
+
   return (
     <div className={styles.card}>
       {/* Collection Image/Icon */}
       <div className={styles.imageWrapper}>
         <img 
-          src={collectionImage} 
+          src={imgSrc} 
           alt={collectionName}
           className={styles.image}
-          onError={(e) => {
-            // Fallback if image doesn't exist
-            e.currentTarget.src = '/images/collections/placeholder.jpg';
-          }}
+          onError={handleImageError}
         />
       </div>
 

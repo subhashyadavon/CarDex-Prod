@@ -5,14 +5,14 @@ import CollectionProgressCard from "../../components/CollectionProgressCard/Coll
 import { userService } from "../../services/userService";
 import { CollectionProgress } from "../../types/types";
 
+// 🚧 TEMPORARY: Hardcoded userId outside component to prevent re-renders
+// TODO: Get from AuthContext when authentication is integrated
+const TEMP_USER_ID = 1;
+
 const GarageSection: React.FC = () => {
   const [collectionProgress, setCollectionProgress] = useState<CollectionProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // TEMPORARY: Using hardcoded userId
-  // TODO: Get from AuthContext when authentication is integrated
-  const userId = 1;
 
   useEffect(() => {
     const fetchGarageData = async () => {
@@ -21,7 +21,7 @@ const GarageSection: React.FC = () => {
 
       try {
         // Fetch collection progress
-        const progressData = await userService.getCollectionProgress(userId);
+        const progressData = await userService.getCollectionProgress(TEMP_USER_ID);
 
         // Sort collections by percentage (highest first)
         const sortedCollections = progressData.collections.sort(
@@ -38,7 +38,7 @@ const GarageSection: React.FC = () => {
     };
 
     fetchGarageData();
-  }, [userId]);
+  }, []); // Empty dependency array - only run once on mount
 
   if (error) {
     return (
