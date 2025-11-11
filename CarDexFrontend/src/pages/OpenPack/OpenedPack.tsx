@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./OpenedPack.module.css";
 
@@ -24,11 +24,19 @@ const OpenPack: React.FC = () => {
     ? `${state.packName} — Opened Cards`
     : "Opened Cards";
 
+  // Trigger animations on mount
+  // Used ChatGPT to add the animations
+  const [play, setPlay] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setPlay(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className={`bg-gradient-dark ${styles.page}`}>
-      {/* Foreground panel */}
       <div className={styles.content}>
-        <section className={styles.panel}>
+        {/* Add animations*/}
+        <section className={`${styles.panel} ${play ? styles.play : ""}`}>
           <h2 className="header-1" style={{ marginBottom: "0.75rem" }}>
             {heading}
           </h2>
