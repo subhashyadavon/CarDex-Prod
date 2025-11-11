@@ -1,33 +1,31 @@
-/* Full-viewport background holder */
+/* Page background and layout */
 .page {
     min-height: 100vh;
     width: 100%;
 }
 
-/* Center the foreground content */
 .content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
 }
 
-/* Foreground panel with darker gradient + soft blur/shadow */
+/* Foreground panel */
 .panel {
-    background: linear-gradient(180deg,
-            rgba(45, 20, 20, 0.75),
-            rgba(24, 3, 3, 0.85));
+    background: linear-gradient(180deg, rgba(114, 44, 44, 0.75), rgba(24, 3, 3, 0.85));
     border: 1px solid var(--color-white-20);
     border-radius: 16px;
     padding: 1.25rem;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 12px 30px rgba(161, 68, 68, 0.35);
     backdrop-filter: blur(2px);
 }
 
-/* Card grid */
+/* Grid and 3D context for flips */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.25rem;
+    perspective: 1000px;
 }
 
 .emptyMessage {
@@ -37,30 +35,25 @@
     padding: 1rem 1.25rem;
     border: 1px dashed var(--color-white-20);
     border-radius: 12px;
-    background: linear-gradient(180deg,
-            rgba(45, 20, 20, 0.5),
-            rgba(24, 3, 3, 0.6));
+    background: linear-gradient(180deg, rgba(45, 20, 20, 0.5), rgba(24, 3, 3, 0.6));
 }
 
-
+/* Card tile base */
 .cardTile {
-    background: linear-gradient(180deg,
-            var(--block-secondary),
-            rgba(24, 3, 3, 0.95));
+    background: linear-gradient(180deg, var(--block-secondary), rgba(77, 9, 9, 0.95));
     border: 1px solid var(--color-white-20);
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
-    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    align-items: center;
+    box-shadow: 0 6px 18px rgba(149, 167, 85, 0.28);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    /* Initial state before animation plays */
+    opacity: 0;
+    transform: rotateY(0deg) translateY(12px) scale(0.98);
 }
 
-.cardTile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.36);
-    border-color: var(--color-white-50);
-}
-
-/* Image area */
+/* Image + meta */
 .cardImageWrap {
     aspect-ratio: 16 / 9;
     width: 100%;
@@ -75,7 +68,6 @@
     object-fit: cover;
 }
 
-/* Card meta area */
 .cardMeta {
     padding: 0.8rem 0.95rem;
     display: grid;
@@ -88,9 +80,7 @@
 }
 
 .backBtn {
-    background: linear-gradient(180deg,
-            var(--block-secondary),
-            rgba(24, 3, 3, 0.95));
+    background: linear-gradient(180deg, var(--block-secondary), rgba(24, 3, 3, 0.95));
     border: 1px solid var(--color-white-20);
     color: var(--content-primary);
     padding: 0.6rem 0.9rem;
@@ -113,3 +103,66 @@
     outline: 2px solid var(--color-white-20);
     outline-offset: 2px;
 }
+
+
+/* Used ChatGPT to add animations to the cards */
+/* === Animations === */
+
+/* 1) Spin (360°) while fading in */
+@keyframes spinIn {
+    0% {
+        opacity: 0;
+        transform: rotateY(0deg) translateY(12px) scale(0.98);
+    }
+
+    60% {
+        opacity: 1;
+        transform: rotateY(300deg) translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: rotateY(360deg) translateY(0) scale(1);
+    }
+}
+
+/* 2) Bounce after landing */
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+
+.play .cardTile {
+    animation:
+        spinIn 700ms cubic-bezier(.2, .7, .3, 1) forwards,
+        bounce 600ms ease-out 720ms forwards;
+}
+
+/* Staggered delays for 3 cards */
+.play .cardTile:nth-child(1) {
+    animation-delay: 0ms, 720ms;
+}
+
+.play .cardTile:nth-child(2) {
+    animation-delay: 100ms, 820ms;
+}
+
+.play .cardTile:nth-child(3) {
+    animation-delay: 200ms, 920ms;
+}
+
+
