@@ -110,3 +110,24 @@ export interface ValidationResult {
 export interface TradeValidation extends ValidationResult {
   trade?: CompletedTrade;
 }
+
+/**
+ * Represents a user's progress in a specific collection
+ */
+export interface CollectionProgress {
+  collectionId: number;
+  collectionName: string;
+  collectionImage: string;
+  ownedVehicles: number;   
+  totalVehicles: number;     // Total unique vehicles in collection
+  percentage: number;        
+}
+
+/**
+ * Response from GET /users/{userId}/collection-progress
+ * Contains progress data for all collections where user owns at least 1 card
+ */
+export interface CollectionProgressResponse {
+  collections: CollectionProgress[];
+  totalCollections: number;  // How many collections user has cards from
+}

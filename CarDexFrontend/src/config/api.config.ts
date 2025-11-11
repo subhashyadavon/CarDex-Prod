@@ -73,6 +73,7 @@ export const API_CONFIG = {
       GET_PROFILE: (userId: number) => `/users/${userId}`,         // GET: User profile
       UPDATE_PROFILE: (userId: number) => `/users/${userId}`,      // PUT: Update profile
       GET_REWARDS: (userId: number) => `/users/${userId}/rewards`, // GET: User rewards
+      GET_COLLECTION_PROGRESS: (userId: number) => `/users/${userId}/collection-progress`, // GET: Collection progress
     },
     
     // Collection management endpoints

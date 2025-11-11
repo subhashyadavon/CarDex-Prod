@@ -1,0 +1,118 @@
+.garagePage {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Collection Progress Section */
+.collectionProgressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--content-primary);
+  margin: 0;
+}
+
+.progressGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+/* All Cards Section */
+.allCardsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* States */
+.loading,
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--content-secondary);
+  font-size: 16px;
+}
+
+.loading {
+  font-style: italic;
+}
+
+.error {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-error);
+  background: var(--block-secondary);
+  border-radius: 8px;
+  font-size: 16px;
+  border: 1px solid var(--color-white-20);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .garagePage {
+    padding: 20px;
+    gap: 40px;
+  }
+
+  .progressGrid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .garagePage {
+    padding: 16px;
+    gap: 32px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .progressGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+
+  .loading,
+  .empty,
+  .error {
+    font-size: 14px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .garagePage {
+    padding: 12px;
+    gap: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .progressGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .loading,
+  .empty,
+  .error {
+    font-size: 13px;
+    padding: 16px;
+  }
+}

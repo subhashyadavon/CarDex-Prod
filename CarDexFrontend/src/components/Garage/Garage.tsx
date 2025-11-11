@@ -2,6 +2,8 @@ import React from "react";
 import styles from "./Garage.module.css";
 import Card, { CardRarity } from "../Card/Card";
 
+// TEMPORARY: Keep mock data imports for vehicle details
+// When backend provides vehicle details with cards, remove these
 import userCars from "../../data/usercars.json";
 import vehicles from "../../data/vehicles.json";
 
@@ -26,6 +28,10 @@ type Vehicle = {
   image: string;
 };
 
+interface GarageProps {
+  isLoading?: boolean;
+}
+
 const gradeToRarity = (grade: string): CardRarity => {
   switch (grade) {
     case "NISMO":
@@ -38,9 +44,20 @@ const gradeToRarity = (grade: string): CardRarity => {
   }
 };
 
-const Garage: React.FC = () => {
-  // 🔹 no filtering — show all cars
+const Garage: React.FC<GarageProps> = ({ isLoading = false }) => {
+  // TEMPORARY: Still using mock data
+  // When backend provides user cards, this will come from props
   const allCars = userCars as UserCar[];
+
+  if (isLoading) {
+    return (
+      <section className={styles.garage}>
+        <div className={styles.panel}>
+          <p className={styles.loading}>Loading your cars...</p>
+        </div>
+      </section>
+    );
+  }
 
   const cards = allCars
     .map((uc) => {
@@ -73,7 +90,7 @@ const Garage: React.FC = () => {
     <section className={styles.garage}>
       <div className={styles.panel}>
         {cards.length === 0 ? (
-          <p className={styles.empty}>No cars found.</p>
+          <p className={styles.empty}>No cars yet. Open some packs to start your collection!</p>
         ) : (
           cards.map((car: any) => (
             <Card
