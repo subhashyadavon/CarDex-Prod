@@ -29,8 +29,6 @@ export interface User {
   username: string;
   password: string;
   currency: number;
-  // Note: Backend uses relational DB - cards/packs are fetched via separate endpoints
-  // These arrays are kept for backward compatibility but may be deprecated
   owned_cards: string[];
   owned_packs: string[];
   open_trades: string[];
