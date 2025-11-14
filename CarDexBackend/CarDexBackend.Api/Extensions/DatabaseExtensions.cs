@@ -3,6 +3,7 @@ using CarDexBackend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql.NameTranslation;
 using Npgsql;
 
 namespace CarDexBackend.Api.Extensions
@@ -26,12 +27,14 @@ namespace CarDexBackend.Api.Extensions
                 throw new InvalidOperationException("CarDexDatabase connection string is not configured.");
             }
 
-            var builder = new NpgsqlDataSourceBuilder(connectionString);
-            builder.MapEnum<GradeEnum>("grade_enum");
-            builder.MapEnum<TradeEnum>("trade_enum");
-            builder.MapEnum<RewardEnum>("reward_enum");
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            var nameTranslator = new NpgsqlNullNameTranslator();
+            dataSourceBuilder.MapEnum<GradeEnum>("grade_enum", nameTranslator);
+            dataSourceBuilder.MapEnum<TradeEnum>("trade_enum", nameTranslator);
+            dataSourceBuilder.MapEnum<RewardEnum>("reward_enum", nameTranslator);
 
-            var dataSource = builder.Build();
+            var dataSource = dataSourceBuilder.Build();
+
             services.AddDbContext<CarDexDbContext>(opt => opt.UseNpgsql(dataSource));
 
             return services;
