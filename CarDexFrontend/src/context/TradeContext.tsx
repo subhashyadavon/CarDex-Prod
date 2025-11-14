@@ -13,10 +13,10 @@ interface TradeContextType {
   statusFilter: TradeEnum | null;
   isLoading: boolean;
   loadTrades: () => Promise<void>;
-  loadUserTrades: (userId: number) => Promise<void>;
+  loadUserTrades: (userId: string) => Promise<void>;
   createTrade: (tradeData: CreateTradeRequest) => Promise<OpenTrade>;
-  acceptTrade: (tradeId: number) => Promise<CompletedTrade>;
-  cancelTrade: (tradeId: number) => Promise<void>;
+  acceptTrade: (tradeId: string) => Promise<CompletedTrade>;
+  cancelTrade: (tradeId: string) => Promise<void>;
   setStatusFilter: (status: TradeEnum | null) => void;
   refreshTrades: () => Promise<void>;
 }
@@ -47,7 +47,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     }
   };
 
-  const loadUserTrades = async (userId: number) => {
+  const loadUserTrades = async (userId: string) => {
     setIsLoading(true);
     try {
       const data = await tradeService.getUserTrades(userId);
@@ -76,7 +76,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     }
   };
 
-  const acceptTrade = async (tradeId: number): Promise<CompletedTrade> => {
+  const acceptTrade = async (tradeId: string): Promise<CompletedTrade> => {
     setIsLoading(true);
     try {
       const completedTrade = await tradeService.acceptTrade(tradeId);
@@ -91,7 +91,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     }
   };
 
-  const cancelTrade = async (tradeId: number): Promise<void> => {
+  const cancelTrade = async (tradeId: string): Promise<void> => {
     setIsLoading(true);
     try {
       await tradeService.cancelTrade(tradeId);

@@ -8,10 +8,10 @@ import { API_CONFIG } from '../config/api.config';
 import { OpenTrade, CompletedTrade } from '../types/types';
 
 export interface CreateTradeRequest {
-  offeringUserId: number;
-  receivingUserId: number;
-  offeredCardIds: number[];
-  requestedCardIds: number[];
+  offeringUserId: string;
+  receivingUserId: string;
+  offeredCardIds: string[];
+  requestedCardIds: string[];
 }
 
 export const tradeService = {
@@ -28,7 +28,7 @@ export const tradeService = {
   /**
    * Get trade by ID
    */
-  getTradeById: async (tradeId: number): Promise<OpenTrade> => {
+  getTradeById: async (tradeId: string): Promise<OpenTrade> => {
     const response = await apiClient.get<OpenTrade>(
       API_CONFIG.ENDPOINTS.TRADES.GET_BY_ID(tradeId)
     );
@@ -38,7 +38,7 @@ export const tradeService = {
   /**
    * Get all trades for a specific user
    */
-  getUserTrades: async (userId: number): Promise<OpenTrade[]> => {
+  getUserTrades: async (userId: string): Promise<OpenTrade[]> => {
     const response = await apiClient.get<OpenTrade[]>(
       API_CONFIG.ENDPOINTS.TRADES.GET_USER_TRADES(userId)
     );
@@ -59,7 +59,7 @@ export const tradeService = {
   /**
    * Accept a trade
    */
-  acceptTrade: async (tradeId: number): Promise<CompletedTrade> => {
+  acceptTrade: async (tradeId: string): Promise<CompletedTrade> => {
     const response = await apiClient.post<CompletedTrade>(
       API_CONFIG.ENDPOINTS.TRADES.ACCEPT(tradeId)
     );
@@ -69,7 +69,7 @@ export const tradeService = {
   /**
    * Cancel a trade
    */
-  cancelTrade: async (tradeId: number): Promise<void> => {
+  cancelTrade: async (tradeId: string): Promise<void> => {
     await apiClient.delete(API_CONFIG.ENDPOINTS.TRADES.CANCEL(tradeId));
   },
 };

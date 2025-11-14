@@ -7,6 +7,7 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CarDexBackend.UnitTests.Api.Controllers
@@ -207,6 +208,151 @@ namespace CarDexBackend.UnitTests.Api.Controllers
             var ok = Assert.IsType<OkObjectResult>(result);
             var value = Assert.IsType<UserRewardListResponse>(ok.Value);
             Assert.Equal(2, value.Total);
+        }
+
+        /// <summary>
+        /// Ensures GetUserCardsWithVehicles returns 200 OK with cards including vehicle details.
+        /// </summary>
+        [Fact]
+        public async Task GetUserCardsWithVehicles_Succeeds()
+        {
+            var userId = Guid.NewGuid();
+            var vehicleId = Guid.NewGuid();
+            var collectionId = Guid.NewGuid();
+            
+            var mockResponse = new UserCardWithVehicleListResponse
+            {
+                Cards = new List<UserCardWithVehicleResponse>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        VehicleId = vehicleId,
+                        CollectionId = collectionId,
+                        Grade = "NISMO",
+                        Value = 50000,
+                        Year = "1999",
+                        Make = "Nissan",
+                        Model = "Skyline GT-R",
+                        Stat1 = 276,
+                        Stat2 = 165,
+                        Stat3 = 1560,
+                        VehicleImage = "/images/gtr.jpg"
+                    }
+                },
+                Total = 1,
+                Limit = 50,
+                Offset = 0
+            };
+
+            _mockUserService
+                .Setup(s => s.GetUserCardsWithVehicles(userId, null, null, 50, 0))
+                .ReturnsAsync(mockResponse);
+
+            var result = await _controller.GetUserCardsWithVehicles(userId, null, null, 50, 0);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<UserCardWithVehicleListResponse>(ok.Value);
+            Assert.Single(value.Cards);
+            Assert.Equal("Nissan", value.Cards.First().Make);
+            Assert.Equal("Skyline GT-R", value.Cards.First().Model);
+        }
+
+        /// <summary>
+        /// Ensures GetUserCardsWithVehicles returns 404 when user not found.
+        /// </summary>
+        [Fact]
+        public async Task GetUserCardsWithVehicles_NotFound()
+        {
+            var userId = Guid.NewGuid();
+            
+            _mockUserService
+                .Setup(s => s.GetUserCardsWithVehicles(userId, null, null, 50, 0))
+                .ThrowsAsync(new KeyNotFoundException("User not found"));
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => 
+                _controller.GetUserCardsWithVehicles(userId, null, null, 50, 0));
+        }
+
+        /// <summary>
+        /// Ensures GetCollectionProgress returns 200 OK with progress data.
+        /// </summary>
+        [Fact]
+        public async Task GetCollectionProgress_Succeeds()
+        {
+            var userId = Guid.NewGuid();
+            var collectionId = Guid.NewGuid();
+            
+            var mockResponse = new CollectionProgressResponse
+            {
+                Collections = new List<CollectionProgressDto>
+                {
+                    new()
+                    {
+                        CollectionId = collectionId,
+                        CollectionName = "JDM Legends",
+                        CollectionImage = "/images/collections/jdm.jpg",
+                        OwnedVehicles = 5,
+                        TotalVehicles = 10,
+                        Percentage = 50
+                    }
+                },
+                TotalCollections = 1
+            };
+
+            _mockUserService
+                .Setup(s => s.GetCollectionProgress(userId))
+                .ReturnsAsync(mockResponse);
+
+            var result = await _controller.GetCollectionProgress(userId);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<CollectionProgressResponse>(ok.Value);
+            Assert.Single(value.Collections);
+            Assert.Equal(50, value.Collections.First().Percentage);
+            Assert.Equal("JDM Legends", value.Collections.First().CollectionName);
+        }
+
+        /// <summary>
+        /// Ensures GetCollectionProgress returns empty list when user has no cards.
+        /// </summary>
+        [Fact]
+        public async Task GetCollectionProgress_EmptyWhenNoCards()
+        {
+            var userId = Guid.NewGuid();
+            
+            var mockResponse = new CollectionProgressResponse
+            {
+                Collections = new List<CollectionProgressDto>(),
+                TotalCollections = 0
+            };
+
+            _mockUserService
+                .Setup(s => s.GetCollectionProgress(userId))
+                .ReturnsAsync(mockResponse);
+
+            var result = await _controller.GetCollectionProgress(userId);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<CollectionProgressResponse>(ok.Value);
+            Assert.Empty(value.Collections);
+            Assert.Equal(0, value.TotalCollections);
+        }
+
+        /// <summary>
+        /// Ensures GetCollectionProgress returns 404 when user not found.
+        /// </summary>
+        [Fact]
+        public async Task GetCollectionProgress_NotFound()
+        {
+            var userId = Guid.NewGuid();
+            
+            _mockUserService
+                .Setup(s => s.GetCollectionProgress(userId))
+                .ThrowsAsync(new KeyNotFoundException("User not found"));
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => 
+                _controller.GetCollectionProgress(userId));
         }
     }
 }

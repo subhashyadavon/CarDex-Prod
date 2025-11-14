@@ -13,6 +13,11 @@ namespace CarDexBackend.Domain.Entities
         public int Value { get; set; }          // Current market value
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Navigation properties for Entity Framework Core
+        public Vehicle Vehicle { get; set; } = null!;  // Navigation to Vehicle entity
+        public Collection Collection { get; set; } = null!;  // Navigation to Collection entity
+        public User User { get; set; } = null!;  // Navigation to User entity
+
         // Parameterless constructor for EF Core
         public Card()
         {
@@ -23,6 +28,9 @@ namespace CarDexBackend.Domain.Entities
             Grade = GradeEnum.FACTORY;
             Value = 0;
             CreatedAt = DateTime.UtcNow;
+            Vehicle = null!;
+            Collection = null!;
+            User = null!;
         }
 
         // Constructor
@@ -35,6 +43,9 @@ namespace CarDexBackend.Domain.Entities
             Grade = grade;
             Value = value;
             CreatedAt = DateTime.UtcNow;
+            Vehicle = null!;
+            Collection = null!;
+            User = null!;
         }
 
         // Domain behavior: update value (e.g., based on market)

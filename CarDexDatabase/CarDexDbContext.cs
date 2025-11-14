@@ -90,18 +90,18 @@ namespace CarDexDatabase
                     .HasColumnName("created_at")
                     .HasDefaultValueSql("now()");
 
-                // Foreign keys
-                entity.HasOne<User>()
+                // Foreign keys with navigation properties
+                entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne<Vehicle>()
+                entity.HasOne(e => e.Vehicle)
                     .WithMany()
                     .HasForeignKey(e => e.VehicleId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne<Collection>()
+                entity.HasOne(e => e.Collection)
                     .WithMany()
                     .HasForeignKey(e => e.CollectionId)
                     .OnDelete(DeleteBehavior.Cascade);

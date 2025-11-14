@@ -1,27 +1,49 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./Garage.module.css";
 import Garage from "../../components/Garage/Garage";
 import CollectionProgressCard from "../../components/CollectionProgressCard/CollectionProgressCard";
 import { userService } from "../../services/userService";
-import { CollectionProgress } from "../../types/types";
-
-// 🚧 TEMPORARY: Hardcoded userId outside component to prevent re-renders
-// TODO: Get from AuthContext when authentication is integrated
-const TEMP_USER_ID = 1;
+import { cardService } from "../../services/cardService";
+import { CollectionProgress, CardWithVehicle } from "../../types/types";
+import { useAuth } from "../../hooks/useAuth";
 
 const GarageSection: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [cards, setCards] = useState<CardWithVehicle[]>([]);
   const [collectionProgress, setCollectionProgress] = useState<CollectionProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    // Don't fetch if user is not logged in
+    if (!user) {
+      setIsLoading(false);
+      setError("Please log in to view your garage.");
+      return;
+    }
+
     const fetchGarageData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        // Fetch collection progress
-        const progressData = await userService.getCollectionProgress(TEMP_USER_ID);
+        // Fetch both cards and collection progress in parallel
+        const [cardsResponse, progressData] = await Promise.all([
+          cardService.getUserCardsWithVehicles(user.id),
+          userService.getCollectionProgress(user.id)
+        ]);
+
+        // Set cards data
+        setCards(cardsResponse.cards);
 
         // Sort collections by percentage (highest first)
         const sortedCollections = progressData.collections.sort(
@@ -38,7 +60,8 @@ const GarageSection: React.FC = () => {
     };
 
     fetchGarageData();
-  }, []); // Empty dependency array - only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Re-fetch when user changes
 
   if (error) {
     return (
@@ -80,8 +103,8 @@ const GarageSection: React.FC = () => {
 
       {/* SECTION 2: All Cards */}
       <section className={styles.allCardsSection}>
-        <h2 className={styles.sectionTitle}>All Cards</h2>
-        <Garage isLoading={isLoading} />
+        <h2 className={styles.sectionTitle}>Owned Cards</h2>
+        <Garage cards={cards} isLoading={isLoading} />
       </section>
     </div>
   );

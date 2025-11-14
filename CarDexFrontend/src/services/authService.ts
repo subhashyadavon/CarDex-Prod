@@ -58,11 +58,15 @@ export interface RegisterRequest {
  * 
  * Backend sends back:
  * - user: Full user object with all their data
- * - token: JWT token for authenticating future requests
+ * - accessToken: JWT token for authenticating future requests
+ * - tokenType: Type of token (usually "Bearer")
+ * - expiresIn: Token expiration time in seconds
  */
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
 }
 
 /**

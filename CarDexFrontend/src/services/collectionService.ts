@@ -11,7 +11,7 @@ export const collectionService = {
   /**
    * Get user's collection
    */
-  getCollection: async (userId: number): Promise<Collection> => {
+  getCollection: async (userId: string): Promise<Collection> => {
     const response = await apiClient.get<Collection>(
       API_CONFIG.ENDPOINTS.COLLECTIONS.GET_COLLECTION(userId)
     );
@@ -22,7 +22,7 @@ export const collectionService = {
    * Update user's collection
    */
   updateCollection: async (
-    userId: number,
+    userId: string,
     collection: Collection
   ): Promise<Collection> => {
     const response = await apiClient.put<Collection>(
