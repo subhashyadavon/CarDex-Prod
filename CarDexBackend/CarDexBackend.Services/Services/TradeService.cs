@@ -22,9 +22,6 @@ namespace CarDexBackend.Services
         private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
         private readonly ICurrentUserService _currentUserService;
-        
-        // TODO: Replace with actual authenticated user ID from JWT/claims
-        //private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
         public TradeService(CarDexDbContext context, IStringLocalizer<SharedResources> sr, ICurrentUserService currentUserService)
         {
@@ -201,7 +198,6 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<TradeResponse> CreateTrade(TradeCreateRequest request)
         {
-            // TODO: Get actual authenticated user ID
             var userId = _currentUserService.UserId;;
 
             // Validate the card exists and belongs to user
@@ -249,7 +245,6 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<(CompletedTradeResponse CompletedTrade, RewardResponse SellerReward, RewardResponse BuyerReward)> ExecuteTrade(Guid tradeId, TradeExecuteRequest? request)
         {
-            // TODO: Get actual authenticated user ID (buyer)
             var buyerId = _currentUserService.UserId;;
 
             var trade = await _context.OpenTrades.FindAsync(tradeId);

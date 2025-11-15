@@ -5,18 +5,9 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace CarDexBackend.Api.Services
 {
-    /*
-
-    Hi Ian, add XML commenting to this file before you commit anything.
-
-    or else you'll embarass yourself ;)
-
-
-
-    */
-
-
-
+    /// <summary>
+    /// Provides access to information about the currently authenticated user, including authentication state and user identifier, based on the HTTP context.
+    /// </summary>
     public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -26,6 +17,9 @@ namespace CarDexBackend.Api.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the current user is authenticated.
+        /// </summary>
         public bool IsAuthenticated
         {
             get
@@ -34,7 +28,10 @@ namespace CarDexBackend.Api.Services
                 return user?.Identity?.IsAuthenticated ?? false;
             }
         }
-
+        
+        /// <summary>
+        /// Gets the unique identifier of the currently authenticated user.
+        /// </summary>
         public Guid UserId
         {
             get

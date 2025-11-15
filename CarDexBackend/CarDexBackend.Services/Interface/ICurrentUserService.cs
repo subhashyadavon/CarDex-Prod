@@ -1,15 +1,8 @@
 namespace CarDexBackend.Services
 {
-
-        /*
-
-    Hi Ian, add XML commenting to this file before you commit anything.
-
-    or else you'll embarass yourself ;)
-
-
-
-    */
+    /// <summary>
+    /// Provides access to information about the currently authenticated user, including authentication state and user identifier, based on the HTTP context.
+    /// </summary>
     public interface ICurrentUserService
     {
         Guid UserId { get; }
