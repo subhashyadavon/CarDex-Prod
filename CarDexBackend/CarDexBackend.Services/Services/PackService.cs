@@ -21,14 +21,16 @@ namespace CarDexBackend.Services
         private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
         private readonly Random _random = new Random();
+        private readonly ICurrentUserService _currentUserService;
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
-        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        //private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-        public PackService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
+        public PackService(CarDexDbContext context, IStringLocalizer<SharedResources> sr, ICurrentUserService currentUserService)
         {
             _context = context;
             _sr = sr;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace CarDexBackend.Services
         public async Task<PackPurchaseResponse> PurchasePack(PackPurchaseRequest request)
         {
             // TODO: Get actual authenticated user ID instead of using hardcoded test user
-            var userId = _testUserId;
+            var userId = _currentUserService.UserId;
             
             // Get the collection
             var collection = await _context.Collections.FindAsync(request.CollectionId);

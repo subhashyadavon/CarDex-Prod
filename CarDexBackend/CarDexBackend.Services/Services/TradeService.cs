@@ -21,14 +21,16 @@ namespace CarDexBackend.Services
     {
         private readonly IStringLocalizer<SharedResources> _sr;
         private readonly CarDexDbContext _context;
+        private readonly ICurrentUserService _currentUserService;
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
-        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        //private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-        public TradeService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
+        public TradeService(CarDexDbContext context, IStringLocalizer<SharedResources> sr, ICurrentUserService currentUserService)
         {
             _context = context;
             _sr = sr;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -200,7 +202,7 @@ namespace CarDexBackend.Services
         public async Task<TradeResponse> CreateTrade(TradeCreateRequest request)
         {
             // TODO: Get actual authenticated user ID
-            var userId = _testUserId;
+            var userId = _currentUserService.UserId;;
 
             // Validate the card exists and belongs to user
             var card = await _context.Cards.FindAsync(request.CardId);
@@ -248,7 +250,7 @@ namespace CarDexBackend.Services
         public async Task<(CompletedTradeResponse CompletedTrade, RewardResponse SellerReward, RewardResponse BuyerReward)> ExecuteTrade(Guid tradeId, TradeExecuteRequest? request)
         {
             // TODO: Get actual authenticated user ID (buyer)
-            var buyerId = _testUserId;
+            var buyerId = _currentUserService.UserId;;
 
             var trade = await _context.OpenTrades.FindAsync(tradeId);
             if (trade == null)
@@ -388,7 +390,7 @@ namespace CarDexBackend.Services
                 throw new KeyNotFoundException(_sr["TradeNotFound"]);
 
             // TODO: Verify authenticated user owns this trade
-            if (trade.UserId != _testUserId)
+            if (trade.UserId != _currentUserService.UserId)
                 throw new InvalidOperationException(_sr["OnlyDeleteYourTradeError"]);
 
             _context.OpenTrades.Remove(trade);

@@ -19,6 +19,7 @@ namespace DefaultNamespace
     {
         private readonly CarDexDbContext _context;
         private readonly PackService _packService;
+        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
         //Used ChatGPT to get the base code and to get help seeding the data
         public PackServiceTest()
@@ -29,7 +30,9 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>());
+
+            var currentUser = new TestCurrentUserService{UserId = _testUserId, IsAuthenticated = true};
+            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
 
             // Seed test data
             SeedTestData();

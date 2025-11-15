@@ -18,6 +18,7 @@ namespace DefaultNamespace
     {
         private readonly CarDexDbContext _context;
         private readonly TradeService _tradeService;
+        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
         //Used ChatGPT to get the base code and get help seeding the data, and to write the test for GetOpenTrade with filters.
         public TradeServiceTest()
@@ -28,7 +29,9 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>());
+
+            var currentUser = new TestCurrentUserService{UserId = _testUserId, IsAuthenticated = true};
+            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
 
             // Seed test data
             SeedTestData();

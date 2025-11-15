@@ -1,4 +1,5 @@
 using CarDexBackend.Api.Extensions;
+using CarDexBackend.Api.Services;
 using CarDexBackend.Services;
 using CarDexBackend.Shared.Validator;
 using CarDexBackend.Api.GlobalExceptionHandler;
@@ -34,6 +35,9 @@ builder.Services.AddCors(options =>
 // Add localization
 builder.Services.AddLocalization();
 
+// HTTP Context Accessor
+builder.Services.AddHttpContextAccessor();
+
 // Register business services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICardService, CardService>();
@@ -41,6 +45,7 @@ builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IPackService, PackService>();
 builder.Services.AddScoped<ITradeService, TradeService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Register custom middleware
 builder.Services.AddScoped<TokenValidator>();

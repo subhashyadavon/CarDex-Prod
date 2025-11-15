@@ -31,6 +31,7 @@ namespace DefaultNamespace.RegressionTests
         private readonly CardService _cardService;
         private readonly UserService _userService;
         private readonly CollectionService _collectionService;
+        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
         public RegressionTestSuite()
         {
@@ -54,10 +55,13 @@ namespace DefaultNamespace.RegressionTests
             var loggerFactory = new LoggerFactory();
             var authLogger = loggerFactory.CreateLogger<AuthService>();
 
+            // grab a dummy user for constructors
+            var currentUser = new TestCurrentUserService{UserId = _testUserId, IsAuthenticated = true};
+
             // Initialize services
             _authService = new AuthService(_context, configuration, authLogger, new NullStringLocalizer<SharedResources>());
-            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>());
-            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>());
+            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
+            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
             _cardService = new CardService(_context, new NullStringLocalizer<SharedResources>());
             _userService = new UserService(_context, new NullStringLocalizer<SharedResources>());
             _collectionService = new CollectionService(_context, new NullStringLocalizer<SharedResources>());
