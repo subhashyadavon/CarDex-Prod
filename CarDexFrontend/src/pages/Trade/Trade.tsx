@@ -1,15 +1,155 @@
 import React, { useState } from "react";
 import TextInput from "../../components/TextInput/TextInput";
 import Button from "../../components/Button/Button";
+import TradeCard, { Trade } from "../../components/TradeCard/TradeCard";
 import styles from "./Trade.module.css";
+
+// Mock trades – later replace with data from backend/API
+const mockTrades: Trade[] = [
+  {
+    id: "t1",
+    status: "open",
+    price: 125000,
+    card: {
+      makeModel: "Nissan GT-R",
+      cardName: "R35 Premium Edition",
+      imageUrl: "/assets/cards/gtr-r35.png",
+      stat1Label: "POWER",
+      stat1Value: "565",
+      stat2Label: "WEIGHT",
+      stat2Value: "1740",
+      stat3Label: "BRAKING",
+      stat3Value: "9.1",
+      stat4Label: "TORQUE",
+      stat4Value: "467",
+      grade: "FACTORY",
+      value: "125,000",
+      rarity: "factory",
+    },
+  },
+  {
+    id: "t2",
+    status: "open",
+    price: 210000,
+    card: {
+      makeModel: "Toyota Supra",
+      cardName: "A80 Twin Turbo",
+      imageUrl: "/assets/cards/supra-a80.png",
+      stat1Label: "POWER",
+      stat1Value: "320",
+      stat2Label: "WEIGHT",
+      stat2Value: "1560",
+      stat3Label: "BRAKING",
+      stat3Value: "8.7",
+      stat4Label: "TORQUE",
+      stat4Value: "315",
+      grade: "LIMITED",
+      value: "210,000",
+      rarity: "limited",
+    },
+  },
+  {
+    id: "t3",
+    status: "completed",
+    price: 340000,
+    card: {
+      makeModel: "Nissan GT-R",
+      cardName: "NISMO",
+      imageUrl: "/assets/cards/gtr-nismo.png",
+      stat1Label: "POWER",
+      stat1Value: "600",
+      stat2Label: "WEIGHT",
+      stat2Value: "1720",
+      stat3Label: "BRAKING",
+      stat3Value: "9.6",
+      stat4Label: "TORQUE",
+      stat4Value: "481",
+      grade: "NISMO",
+      value: "340,000",
+      rarity: "nismo",
+    },
+  },
+  {
+    id: "t4",
+    status: "open",
+    price: 95000,
+    card: {
+      makeModel: "Mazda RX-7",
+      cardName: "FD Spirit R",
+      imageUrl: "/assets/cards/rx7-fd.png",
+      stat1Label: "POWER",
+      stat1Value: "276",
+      stat2Label: "WEIGHT",
+      stat2Value: "1280",
+      stat3Label: "BRAKING",
+      stat3Value: "8.4",
+      stat4Label: "TORQUE",
+      stat4Value: "231",
+      grade: "LIMITED",
+      value: "95,000",
+      rarity: "limited",
+    },
+  },
+  {
+    id: "t5",
+    status: "cancelled",
+    price: 180000,
+    card: {
+      makeModel: "Honda NSX",
+      cardName: "NA1 Type R",
+      imageUrl: "/assets/cards/nsx-na1.png",
+      stat1Label: "POWER",
+      stat1Value: "276",
+      stat2Label: "WEIGHT",
+      stat2Value: "1350",
+      stat3Label: "BRAKING",
+      stat3Value: "8.9",
+      stat4Label: "TORQUE",
+      stat4Value: "217",
+      grade: "FACTORY",
+      value: "180,000",
+      rarity: "factory",
+    },
+  },
+  {
+    id: "t6",
+    status: "open",
+    price: 265000,
+    card: {
+      makeModel: "Subaru Impreza",
+      cardName: "22B STi",
+      imageUrl: "/assets/cards/impreza-22b.png",
+      stat1Label: "POWER",
+      stat1Value: "276",
+      stat2Label: "WEIGHT",
+      stat2Value: "1270",
+      stat3Label: "BRAKING",
+      stat3Value: "8.8",
+      stat4Label: "TORQUE",
+      stat4Value: "268",
+      grade: "LIMITED",
+      value: "265,000",
+      rarity: "limited",
+    },
+  },
+];
 
 const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
+  const filteredTrades = mockTrades.filter((trade) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      trade.card.makeModel.toLowerCase().includes(q) ||
+      trade.card.cardName.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className={styles.tradeContainer}>
+      {/* Toolbar */}
       <div className={styles.tradeToolbar}>
-        {/* Search Input */}
         <TextInput
           type="search"
           size="large"
@@ -21,21 +161,35 @@ const TradeSection: React.FC = () => {
           className={styles.searchInput}
         />
 
-        {/* Search Button */}
         <Button size="large" variant="primary">
           Search
         </Button>
 
-        {/* Trade Card */}
         <Button size="large" variant="secondary">
           Trade Card
         </Button>
 
-        {/* Sell Card */}
         <Button size="large" variant="secondary">
           Sell Card
         </Button>
       </div>
+
+      {/* Empty State */}
+      {filteredTrades.length === 0 ? (
+        <p className={styles.emptyState}>No open trades currently.</p>
+      ) : (
+        <>
+          {/* Section Header */}
+          <h2 className={`header-2 ${styles.sectionHeader}`}>Open Trades</h2>
+
+          {/* List of TradeCards */}
+          <div className={styles.tradeList}>
+            {filteredTrades.map((trade) => (
+              <TradeCard key={trade.id} trade={trade} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

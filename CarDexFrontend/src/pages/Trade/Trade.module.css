@@ -1,6 +1,38 @@
-.tradeToolbar {
+.tradeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
+  margin-top: 16px;
+}
+
+.tradeToolbar {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.emptyState {
+  color: var(--content-secondary);
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.tradeList {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.sectionHeader {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  color: var(--content-primary);
 }
