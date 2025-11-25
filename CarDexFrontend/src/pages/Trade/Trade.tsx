@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import TextInput from "../../components/TextInput/TextInput";
 import Button from "../../components/Button/Button";
 import TradeCard, { Trade } from "../../components/TradeCard/TradeCard";
+import CreateTradeModal from "../../components/CreateTradeModal/CreateTradeModal"; // ✅ NEW
 import styles from "./Trade.module.css";
 
-// Mock trades – later replace with data from backend/API
 const mockTrades: Trade[] = [
   {
     id: "t1",
@@ -137,6 +137,10 @@ const mockTrades: Trade[] = [
 const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
+  // ✅ NEW: modal state (tiny addition)
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [modalMode, setModalMode] = useState<"sell" | "trade">("trade");
+
   const filteredTrades = mockTrades.filter((trade) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
@@ -165,14 +169,42 @@ const TradeSection: React.FC = () => {
           Search
         </Button>
 
-        <Button size="large" variant="secondary">
+        {/* ✅ Hook up modal open */}
+        <Button
+          size="large"
+          variant="secondary"
+          onClick={() => {
+            setModalMode("trade");
+            setShowCreateModal(true);
+          }}
+        >
           Trade Card
         </Button>
 
-        <Button size="large" variant="secondary">
+        {/* ✅ Hook up modal open */}
+        <Button
+          size="large"
+          variant="secondary"
+          onClick={() => {
+            setModalMode("sell");
+            setShowCreateModal(true);
+          }}
+        >
           Sell Card
         </Button>
       </div>
+
+      {/* ✅ Render modal if open */}
+      {showCreateModal && (
+        <CreateTradeModal
+          mode={modalMode}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={(payload) => {
+            // later: send to backend
+            console.log("Create trade payload:", payload);
+          }}
+        />
+      )}
 
       {/* Empty State */}
       {filteredTrades.length === 0 ? (
