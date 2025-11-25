@@ -12,12 +12,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Domain.Entities;
+
 namespace DefaultNamespace
 {
     public class TradeServiceTest : IDisposable
     {
         private readonly CarDexDbContext _context;
         private readonly TradeService _tradeService;
+        private readonly IOpenTradeRepository _openTradeRepo;
+        private readonly ICompletedTradeRepository _completedTradeRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly ICardRepository _cardRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly IRewardRepository _rewardRepo;
 
         //Used ChatGPT to get the base code and get help seeding the data, and to write the test for GetOpenTrade with filters.
         public TradeServiceTest()
@@ -28,7 +38,21 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>());
+            _openTradeRepo = new OpenTradeRepository(_context);
+            _completedTradeRepo = new CompletedTradeRepository(_context);
+            _userRepo = new UserRepository(_context);
+            _cardRepo = new CardRepository(_context);
+            _vehicleRepo = new Repository<Vehicle>(_context);
+            _rewardRepo = new RewardRepository(_context);
+
+            _tradeService = new TradeService(
+                _openTradeRepo, 
+                _completedTradeRepo, 
+                _userRepo, 
+                _cardRepo, 
+                _vehicleRepo, 
+                _rewardRepo, 
+                new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

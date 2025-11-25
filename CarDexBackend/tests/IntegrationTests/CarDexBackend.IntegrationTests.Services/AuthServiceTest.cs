@@ -12,6 +12,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+
 namespace DefaultNamespace
 {
     public class AuthServiceTest : IDisposable
@@ -20,6 +23,7 @@ namespace DefaultNamespace
         private readonly AuthService _authService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
+        private readonly IUserRepository _userRepo;
 
         public AuthServiceTest()
         {
@@ -41,8 +45,9 @@ namespace DefaultNamespace
             _configuration = configurationBuilder.Build();
 
             _logger = new LoggerFactory().CreateLogger<AuthService>();
+            _userRepo = new UserRepository(_context);
 
-            _authService = new AuthService(_context, _configuration, _logger, new NullStringLocalizer<SharedResources>());
+            _authService = new AuthService(_userRepo, _configuration, _logger, new NullStringLocalizer<SharedResources>());
         }
 
         public void Dispose()
