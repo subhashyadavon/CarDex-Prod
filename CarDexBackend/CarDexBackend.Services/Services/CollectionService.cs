@@ -1,5 +1,5 @@
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexDatabase;
+using CarDexBackend.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using CarDexBackend.Services.Resources;
@@ -7,16 +7,18 @@ using CarDexBackend.Services.Resources;
 namespace CarDexBackend.Services
 {
     /// <summary>
-    /// Production implementation of <see cref="ICollectionService"/> using Entity Framework Core and PostgreSQL.
+    /// Production implementation of <see cref="ICollectionService"/> using Repositories.
     /// </summary>
     public class CollectionService : ICollectionService
     {
         private readonly IStringLocalizer<SharedResources> _sr;
-        private readonly CarDexDbContext _context;
+        private readonly ICollectionRepository _collectionRepo;
+        private readonly ICardRepository _cardRepo;
 
-        public CollectionService(CarDexDbContext context, IStringLocalizer<SharedResources> sr)
+        public CollectionService(ICollectionRepository collectionRepo, ICardRepository cardRepo, IStringLocalizer<SharedResources> sr)
         {
-            _context = context;
+            _collectionRepo = collectionRepo;
+            _cardRepo = cardRepo;
             _sr = sr;
         }
 
@@ -25,16 +27,18 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CollectionListResponse> GetAllCollections()
         {
-            var collections = await _context.Collections
+            var collectionsWithCounts = await _collectionRepo.GetAllWithCardCountsAsync();
+            
+            var collections = collectionsWithCounts
                 .Select(c => new CollectionResponse
                 {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Theme = c.Name, // Using name as theme since theme field doesn't exist in entity
-                    Description = c.Name, // Using name as description since description field doesn't exist
-                    CardCount = _context.Cards.Count(card => card.CollectionId == c.Id)
+                    Id = c.Collection.Id,
+                    Name = c.Collection.Name,
+                    Theme = c.Collection.Name, // Using name as theme since theme field doesn't exist in entity
+                    Description = c.Collection.Name, // Using name as description since description field doesn't exist
+                    CardCount = c.CardCount
                 })
-                .ToListAsync();
+                .ToList();
 
             return new CollectionListResponse
             {
@@ -48,25 +52,23 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CollectionDetailedResponse> GetCollectionById(Guid collectionId)
         {
-            var collection = await _context.Collections.FindAsync(collectionId);
+            var collection = await _collectionRepo.GetByIdAsync(collectionId);
             if (collection == null)
                 throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
 
             // Get all cards in this collection
-            var cards = await _context.Cards
-                .Where(c => c.CollectionId == collectionId)
-                .Join(_context.Vehicles,
-                    card => card.VehicleId,
-                    vehicle => vehicle.Id,
-                    (card, vehicle) => new CardResponse
-                    {
-                        Id = card.Id,
-                        Name = $"{vehicle.Year} {vehicle.Make} {vehicle.Model}",
-                        Grade = card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
-                        Value = card.Value,
-                        CreatedAt = DateTime.UtcNow  // Not in DB, using current time
-                    })
-                .ToListAsync();
+            var cardsWithVehicles = await _cardRepo.GetCardsWithVehiclesByCollectionIdAsync(collectionId);
+            
+            var cards = cardsWithVehicles
+                .Select(cv => new CardResponse
+                {
+                    Id = cv.Card.Id,
+                    Name = $"{cv.Vehicle.Year} {cv.Vehicle.Make} {cv.Vehicle.Model}",
+                    Grade = cv.Card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
+                    Value = cv.Card.Value,
+                    CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                })
+                .ToList();
 
             return new CollectionDetailedResponse
             {
