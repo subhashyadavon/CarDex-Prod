@@ -275,6 +275,7 @@ namespace CarDexBackend.Services
                     Id = r.Id,
                     Type = r.Type.ToString(),  // Will be "PACK", "CURRENCY", "CARD_FROM_TRADE", etc.
                     ItemId = r.ItemId,
+                    Amount = r.Amount,
                     CreatedAt = DateTime.UtcNow,  // Not in DB, using current time
                     ClaimedAt = r.ClaimedAt
                 })

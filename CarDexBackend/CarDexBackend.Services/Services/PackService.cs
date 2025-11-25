@@ -132,6 +132,10 @@ namespace CarDexBackend.Services
             if (collection == null)
                 throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
+            // if attempting to open a pack they do not own, throw a Pack not found error
+            if (pack.UserId != _currentUserService.UserId)
+                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
+
             // Get all vehicles from this collection using the Vehicles array
             var vehicles = await _context.Vehicles
                 .Where(v => collection.Vehicles.Contains(v.Id))

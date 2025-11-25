@@ -314,6 +314,9 @@ namespace CarDexBackend.Services
                 throw new InvalidOperationException(_sr["InvalidTradeTypeError"]);
             }
 
+            sellerRewardEntity.ClaimedAt = DateTime.UtcNow;
+            buyerRewardEntity.ClaimedAt = DateTime.UtcNow;
+
             // Transfer seller's card to buyer
             sellerCard.UserId = buyer.Id;
 
@@ -384,7 +387,7 @@ namespace CarDexBackend.Services
             if (trade == null)
                 throw new KeyNotFoundException(_sr["TradeNotFound"]);
 
-            // TODO: Verify authenticated user owns this trade
+            //Verify authenticated user owns this trade
             if (trade.UserId != _currentUserService.UserId)
                 throw new InvalidOperationException(_sr["OnlyDeleteYourTradeError"]);
 
