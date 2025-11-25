@@ -26,6 +26,12 @@ namespace CarDexDatabase
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure PostgreSQL enum types for EF Core
+            // Specify the database enum type name and map to C# enum
+            modelBuilder.HasPostgresEnum<GradeEnum>("grade_enum");
+            modelBuilder.HasPostgresEnum<TradeEnum>("trade_enum");
+            modelBuilder.HasPostgresEnum<RewardEnum>("reward_enum");
+
             // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
