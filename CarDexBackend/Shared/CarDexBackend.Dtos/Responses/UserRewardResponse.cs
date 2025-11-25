@@ -15,6 +15,11 @@ namespace CarDexBackend.Shared.Dtos.Responses
         public Guid Id { get; set; }
 
         /// <summary>
+        /// The unique identifier of the user who owns this reward.
+        /// </summary>
+        public Guid UserId { get; set; }
+
+        /// <summary>
         /// The type of reward earned by the user.
         /// </summary>
         /// <remarks>
