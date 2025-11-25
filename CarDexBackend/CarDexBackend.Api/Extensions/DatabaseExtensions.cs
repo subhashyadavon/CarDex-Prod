@@ -12,12 +12,6 @@ namespace CarDexBackend.Api.Extensions
     /// </summary>
     public static class DatabaseExtensions
     {
-        /// <summary>
-        /// Configures the database context with PostgreSQL and enum mappings.
-        /// </summary>
-        /// <param name="services">The service collection.</param>
-        /// <param name="config">The application configuration.</param>
-        /// <returns>The service collection for chaining.</returns>
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfiguration config)
         {
             var connectionString = config.GetConnectionString("CarDexDatabase");
@@ -27,9 +21,11 @@ namespace CarDexBackend.Api.Extensions
             }
 
             var builder = new NpgsqlDataSourceBuilder(connectionString);
-            builder.MapEnum<GradeEnum>("grade_enum");
-            builder.MapEnum<TradeEnum>("trade_enum");
-            builder.MapEnum<RewardEnum>("reward_enum");
+            // Map enums with explicit PostgreSQL type names
+            // Use case-insensitive mapping to handle uppercase values in database
+            builder.MapEnum<GradeEnum>("grade_enum", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
+            builder.MapEnum<TradeEnum>("trade_enum", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
+            builder.MapEnum<RewardEnum>("reward_enum", nameTranslator: new Npgsql.NameTranslation.NpgsqlNullNameTranslator());
 
             var dataSource = builder.Build();
             services.AddDbContext<CarDexDbContext>(opt => opt.UseNpgsql(dataSource));
@@ -37,11 +33,7 @@ namespace CarDexBackend.Api.Extensions
             return services;
         }
 
-        /// <summary>
-        /// Ensures the database is created and validates the connection.
-        /// </summary>
-        /// <param name="app">The web application.</param>
-        /// <returns>The web application for chaining.</returns>
+
         public static WebApplication EnsureDatabaseCreated(this WebApplication app)
         {
             using (var scope = app.Services.CreateScope())
