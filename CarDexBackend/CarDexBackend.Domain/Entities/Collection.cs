@@ -10,7 +10,6 @@ namespace CarDexBackend.Domain.Entities
         public string Image { get; set; } // URL or base64
         public int PackPrice { get; set; } // Price for opening a pack
         public Guid[] Vehicles { get; set; } = Array.Empty<Guid>(); // Array of vehicle UUIDs (matches DB schema)
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Constructor
         public Collection(Guid id, string name, string image, int packPrice, Guid[] vehicles)
@@ -20,7 +19,6 @@ namespace CarDexBackend.Domain.Entities
             Image = image;
             PackPrice = packPrice;
             Vehicles = vehicles ?? Array.Empty<Guid>();
-            CreatedAt = DateTime.UtcNow;
         }
 
         // Parameterless constructor for EF Core
@@ -31,7 +29,6 @@ namespace CarDexBackend.Domain.Entities
             Image = string.Empty;
             PackPrice = 0;
             Vehicles = Array.Empty<Guid>();
-            CreatedAt = DateTime.UtcNow;
         }
 
        // Domain Behavior
@@ -48,7 +45,7 @@ namespace CarDexBackend.Domain.Entities
             }
         }
 
-        // Add a vehicle to the collection (overload for Vehicle entity)
+        // Add a vehicle to the collection 
         public void AddVehicle(Vehicle? vehicle)
         {
             if (vehicle == null) throw new ArgumentNullException(nameof(vehicle));
