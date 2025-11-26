@@ -98,15 +98,6 @@ namespace CarDexDatabase
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(e => e.Vehicle)
-                    .WithMany()
-                    .HasForeignKey(e => e.VehicleId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(e => e.Collection)
-                    .WithMany()
-                    .HasForeignKey(e => e.CollectionId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configure Vehicle entity
