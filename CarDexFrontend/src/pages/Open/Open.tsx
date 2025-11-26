@@ -10,7 +10,6 @@ import type {
 } from "../../types/types";
 import Pack from "../../components/Pack/Pack";
 
-
 // Picks 3 cards randomly from the list of cards after opening a pack
 function pickThreeRandom<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -25,7 +24,7 @@ function pickThreeRandom<T>(arr: T[]): T[] {
 const Open: React.FC = () => {
   const navigate = useNavigate();
 
-  // Collections from backend  
+  // Collections from backend
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(false);
   const [collectionsError, setCollectionsError] = useState<string | null>(null);
@@ -35,7 +34,7 @@ const Open: React.FC = () => {
       setIsLoadingCollections(true);
       setCollectionsError(null);
       try {
-        const data = await collectionService.getAllCollections(); 
+        const data = await collectionService.getAllCollections();
         console.log("Collections from API:", data);
         setCollections(data);
       } catch (err) {
@@ -78,31 +77,8 @@ const Open: React.FC = () => {
     }
   };
 
-  const ownedCards: any[] = [];
-
   return (
     <div className={styles.container}>
-      {/* Owned Cards Section */}
-      <section className={styles.ownedSection}>
-        <h2 className="header-1" style={{ marginBottom: "0.75rem" }}>
-          Owned Cards
-        </h2>
-
-        <div className={styles.placeholderGrid}>
-          {ownedCards.length === 0 ? (
-            <div className={`body-1 ${styles.emptyMessage}`}>
-              No cards owned...
-            </div>
-          ) : (
-            ownedCards.map((card) => (
-              <div key={card.id} className={styles.ownedCardTile}>
-                <div className="body-2">Card #{card.id}</div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
       {/* Collections Section */}
       <section className={styles.shop}>
         <header className={styles.header}>
