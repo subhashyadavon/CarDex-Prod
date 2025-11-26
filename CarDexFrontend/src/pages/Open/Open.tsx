@@ -36,6 +36,7 @@ const Open: React.FC = () => {
       setCollectionsError(null);
       try {
         const data = await collectionService.getAllCollections(); 
+        console.log("Collections from API:", data);
         setCollections(data);
       } catch (err) {
         console.error("Failed to fetch collections:", err);
@@ -127,8 +128,8 @@ const Open: React.FC = () => {
                 <Pack
                   name={collection.name}
                   packType="Collection"
-                  imageUrl={collection.image}
-                  price={collection.packPrice ?? 0}
+                  imageUrl={collection.imageUrl}
+                  price={collection.price ?? 0}
                 />
               </div>
             ))}
