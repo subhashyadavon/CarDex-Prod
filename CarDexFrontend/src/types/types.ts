@@ -68,7 +68,7 @@ export interface Collection {
   vehicles: string[];
   name: string;
   image: string;
-  pack_price: number;
+  packPrice: number;
 }
 
 export interface OpenTrade {
@@ -178,4 +178,23 @@ export interface CardWithVehicleListResponse {
   total: number;
   limit: number;
   offset: number;
+}
+
+// One card in the detailed collection response
+export interface CollectionCard {
+  id: string;
+  name: string;
+  grade: GradeEnum;   
+  value: number;
+  createdAt: string;  
+}
+
+// Detailed collection response 
+export interface CollectionDetailedResponse {
+  id: string;
+  name: string;
+  theme: string;
+  description: string;
+  cardCount: number;
+  cards: CollectionCard[];
 }
