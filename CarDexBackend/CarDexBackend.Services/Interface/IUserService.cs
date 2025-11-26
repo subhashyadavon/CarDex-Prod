@@ -87,9 +87,43 @@ namespace CarDexBackend.Services
         /// <param name="userId">The unique identifier of the user whose rewards to retrieve.</param>
         /// <param name="claimed">If true, includes claimed rewards; otherwise returns only unclaimed ones.</param>
         /// <returns>
-        /// A <see cref="UserRewardListResponse"/> containing the user’s rewards.
+        /// A <see cref="UserRewardListResponse"/> containing the user's rewards.
         /// </returns>
         /// <exception cref="KeyNotFoundException">Thrown if the user does not exist.</exception>
         Task<UserRewardListResponse> GetUserRewards(Guid userId, bool claimed);
+
+        /// <summary>
+        /// Retrieves all cards owned by a user with full vehicle details embedded.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose cards to retrieve.</param>
+        /// <param name="collectionId">Optional filter to return cards from a specific collection.</param>
+        /// <param name="grade">Optional filter to return only cards of a specific grade.</param>
+        /// <param name="limit">The number of results per page (default 50).</param>
+        /// <param name="offset">The number of results to skip for pagination (default 0).</param>
+        /// <returns>
+        /// A <see cref="UserCardWithVehicleListResponse"/> containing cards with embedded vehicle details.
+        /// </returns>
+        /// <remarks>
+        /// This method joins card data with vehicle information to provide all details needed
+        /// for card display without requiring additional API calls. More efficient than separate
+        /// calls to get cards and then vehicles individually.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">Thrown if the user does not exist.</exception>
+        Task<UserCardWithVehicleListResponse> GetUserCardsWithVehicles(Guid userId, Guid? collectionId, string? grade, int limit, int offset);
+
+        /// <summary>
+        /// Retrieves collection completion progress for a user.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>
+        /// A <see cref="CollectionProgressResponse"/> containing progress data for all collections
+        /// where the user owns at least one card.
+        /// </returns>
+        /// <remarks>
+        /// Shows how many unique vehicles the user owns from each collection and calculates
+        /// completion percentage. Only includes collections with at least one owned card.
+        /// </remarks>
+        /// <exception cref="KeyNotFoundException">Thrown if the user does not exist.</exception>
+        Task<CollectionProgressResponse> GetCollectionProgress(Guid userId);
     }
 }

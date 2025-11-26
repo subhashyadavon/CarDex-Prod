@@ -1,0 +1,30 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.ownedSection {
+    margin-bottom: 2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    background: var(--block-secondary);
+    border: 1px dashed var(--color-white-20);
+    border-radius: 12px;
+    padding: 1.25rem;
+    min-height: 160px;
+    align-content: start;
+}
+
+.emptyMessage {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--content-secondary);
+    opacity: 0.9;
+    padding: 1rem;
+}

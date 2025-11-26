@@ -130,17 +130,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   const login = async (credentials: LoginRequest) => {
     try {
+      console.log('[AuthContext] Starting login for:', credentials.username);
+      
       // Call backend API to authenticate
       const response = await authService.login(credentials);
+      
+      console.log('[AuthContext] Login response:', response);
+      console.log('[AuthContext] User:', response.user);
+      console.log('[AuthContext] Token:', response.accessToken);
       
       // Update React state with user and token
       // This immediately makes isAuthenticated = true
       setUser(response.user);
-      setToken(response.token);
+      setToken(response.accessToken);
       
       // Save to localStorage so it persists across page refreshes
-      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('authToken', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
+      
+      console.log('[AuthContext] Login successful, saved to localStorage');
+      console.log('[AuthContext] User state after login:', response.user);
     } catch (error) {
       // If login fails (wrong password, network error, etc.), log and re-throw
       console.error('Login failed:', error);
@@ -162,8 +171,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Log the user in immediately after registration
       setUser(response.user);
-      setToken(response.token);
-      localStorage.setItem('authToken', response.token);
+      setToken(response.accessToken);
+      localStorage.setItem('authToken', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
     } catch (error) {
       console.error('Registration failed:', error);

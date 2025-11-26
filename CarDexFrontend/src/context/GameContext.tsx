@@ -55,11 +55,11 @@ interface GameContextType {
   collection: Collection | null;                      // User's collection status
   isLoading: boolean;                                 // Loading state
   loadCards: () => Promise<void>;                     // Load card catalog
-  loadUserCards: (userId: number) => Promise<void>;  // Load user's cards
+  loadUserCards: (userId: string) => Promise<void>;  // Load user's cards
   loadPacks: () => Promise<void>;                     // Load available packs
-  loadCollection: (userId: number) => Promise<void>; // Load user's collection
-  openPack: (packId: number) => Promise<OpenPackResponse>; // Open pack
-  refreshInventory: (userId: number) => Promise<void>; // Reload all user data
+  loadCollection: (userId: string) => Promise<void>; // Load user's collection
+  openPack: (packId: string) => Promise<OpenPackResponse>; // Open pack
+  refreshInventory: (userId: string) => Promise<void>; // Reload all user data
 }
 
 export const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -88,7 +88,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
-  const loadUserCards = async (userId: number) => {
+  const loadUserCards = async (userId: string) => {
     setIsLoading(true);
     try {
       const data = await cardService.getUserCards(userId);
@@ -114,7 +114,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
-  const loadCollection = async (userId: number) => {
+  const loadCollection = async (userId: string) => {
     setIsLoading(true);
     try {
       const data = await collectionService.getCollection(userId);
@@ -127,7 +127,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
-  const openPack = async (packId: number): Promise<OpenPackResponse> => {
+  const openPack = async (packId: string): Promise<OpenPackResponse> => {
     setIsLoading(true);
     try {
       const result = await packService.openPack(packId);
@@ -140,7 +140,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     }
   };
 
-  const refreshInventory = async (userId: number) => {
+  const refreshInventory = async (userId: string) => {
     await Promise.all([
       loadUserCards(userId),
       loadPacks(),

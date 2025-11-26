@@ -12,6 +12,8 @@ namespace CarDexBackend.Domain.Entities
         public GradeEnum Grade { get; set; }    // Rarity/grade
         public int Value { get; set; }          // Current market value
 
+      
+
         // Parameterless constructor for EF Core
         public Card()
         {

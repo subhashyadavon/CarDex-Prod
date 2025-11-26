@@ -25,6 +25,7 @@ namespace CarDexBackend.Services
         private readonly ICardRepository _cardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly IRewardRepository _rewardRepo;
+        private readonly ICurrentUserService _currentUserService;
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
         private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
@@ -36,6 +37,7 @@ namespace CarDexBackend.Services
             ICardRepository cardRepo,
             IRepository<Vehicle> vehicleRepo,
             IRewardRepository rewardRepo,
+            ICurrentUserService currentUserService,
             IStringLocalizer<SharedResources> sr)
         {
             _openTradeRepo = openTradeRepo;
@@ -44,6 +46,7 @@ namespace CarDexBackend.Services
             _cardRepo = cardRepo;
             _vehicleRepo = vehicleRepo;
             _rewardRepo = rewardRepo;
+            _currentUserService = currentUserService;
             _sr = sr;
         }
 
@@ -173,8 +176,7 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<TradeResponse> CreateTrade(TradeCreateRequest request)
         {
-            // TODO: Get actual authenticated user ID
-            var userId = _testUserId;
+            var userId = _currentUserService.UserId;;
 
             // Validate the card exists and belongs to user
             var card = await _cardRepo.GetCardByIdRawAsync(request.CardId);
@@ -221,8 +223,7 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<(CompletedTradeResponse CompletedTrade, RewardResponse SellerReward, RewardResponse BuyerReward)> ExecuteTrade(Guid tradeId, TradeExecuteRequest? request)
         {
-            // TODO: Get actual authenticated user ID (buyer)
-            var buyerId = _testUserId;
+            var buyerId = _currentUserService.UserId;;
 
             var trade = await _openTradeRepo.GetByIdAsync(tradeId);
             if (trade == null)
@@ -291,6 +292,9 @@ namespace CarDexBackend.Services
             {
                 throw new InvalidOperationException(_sr["InvalidTradeTypeError"]);
             }
+
+            sellerRewardEntity.ClaimedAt = DateTime.UtcNow;
+            buyerRewardEntity.ClaimedAt = DateTime.UtcNow;
 
             // Transfer seller's card to buyer
             sellerCard.UserId = buyer.Id;
@@ -367,8 +371,8 @@ namespace CarDexBackend.Services
             if (trade == null)
                 throw new KeyNotFoundException(_sr["TradeNotFound"]);
 
-            // TODO: Verify authenticated user owns this trade
-            if (trade.UserId != _testUserId)
+            //Verify authenticated user owns this trade
+            if (trade.UserId != _currentUserService.UserId)
                 throw new InvalidOperationException(_sr["OnlyDeleteYourTradeError"]);
 
             await _openTradeRepo.DeleteAsync(trade);

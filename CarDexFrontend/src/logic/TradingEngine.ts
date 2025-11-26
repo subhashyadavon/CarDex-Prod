@@ -167,8 +167,10 @@ export class TradingEngine
         return percentDifference <= thresholdPercent ? 'fair' : 'unfair';
     }
 
-    // > Generate random trade id
-    private generateTradeId(): number {
-        return Date.now();
+    // > Generate random trade id (returns string to match GUID format)
+    private generateTradeId(): string {
+        // Generate a simple UUID-like string for frontend use
+        // In production, backend will generate actual GUIDs
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 }

@@ -1,0 +1,29 @@
+{
+  "collections": [
+    {
+      "collectionId": 1,
+      "collectionName": "JDM Legends",
+      "collectionImage": "/images/collections/jdm-legends.jpg",
+      "ownedVehicles": 5,
+      "totalVehicles": 6,
+      "percentage": 83
+    },
+    {
+      "collectionId": 3,
+      "collectionName": "Nissan Heritage",
+      "collectionImage": "/images/collections/nissan-heritage.jpg",
+      "ownedVehicles": 1,
+      "totalVehicles": 2,
+      "percentage": 50
+    },
+    {
+      "collectionId": 2,
+      "collectionName": "90s Icons",
+      "collectionImage": "/images/collections/90s-icons.jpg",
+      "ownedVehicles": 2,
+      "totalVehicles": 5,
+      "percentage": 40
+    }
+  ],
+  "totalCollections": 3
+}

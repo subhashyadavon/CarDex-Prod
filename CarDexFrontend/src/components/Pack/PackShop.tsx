@@ -21,14 +21,15 @@ const PackShop: React.FC<PackShopProps> = ({ packs }) => {
       </header>
 
       <div className={styles.grid}>
-        {packs.map((pack) => (
-          <Pack
-            key={pack.name}
-            name={pack.name}
-            packType={pack.packType}
-            imageUrl={pack.imageUrl}
-            price={pack.price}
-          />
+        {packs.map((pack, idx) => (
+          <div key={pack.name} data-pack-index={idx}>
+            <Pack
+              name={pack.name}
+              packType={pack.packType}
+              imageUrl={pack.imageUrl}
+              price={pack.price}
+            />
+          </div>
         ))}
       </div>
     </section>

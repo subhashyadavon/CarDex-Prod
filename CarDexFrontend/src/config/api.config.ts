@@ -47,38 +47,40 @@ export const API_CONFIG = {
     // Card management endpoints
     CARDS: {
       GET_ALL: '/cards',                                    // GET: Fetch all cards
-      GET_BY_ID: (id: number) => `/cards/${id}`,           // GET: Fetch specific card
-      GET_USER_CARDS: (userId: number) => `/cards/user/${userId}`, // GET: User's cards
+      GET_BY_ID: (id: string) => `/cards/${id}`,           // GET: Fetch specific card
+      GET_USER_CARDS: (userId: string) => `/cards/user/${userId}`, // GET: User's cards
     },
     
     // Pack management endpoints
     PACKS: {
       GET_ALL: '/packs',                                    // GET: Fetch all packs
-      GET_BY_ID: (id: number) => `/packs/${id}`,           // GET: Fetch specific pack
-      OPEN_PACK: (packId: number) => `/packs/${packId}/open`, // POST: Open pack, get cards
+      GET_BY_ID: (id: string) => `/packs/${id}`,           // GET: Fetch specific pack
+      OPEN_PACK: (packId: string) => `/packs/${packId}/open`, // POST: Open pack, get cards
     },
     
     // Trade management endpoints
     TRADES: {
       GET_ALL: '/trades',                                   // GET: All open trades
-      GET_BY_ID: (id: number) => `/trades/${id}`,          // GET: Specific trade
-      GET_USER_TRADES: (userId: number) => `/trades/user/${userId}`, // GET: User's trades
+      GET_BY_ID: (id: string) => `/trades/${id}`,          // GET: Specific trade
+      GET_USER_TRADES: (userId: string) => `/trades/user/${userId}`, // GET: User's trades
       CREATE: '/trades',                                    // POST: Create new trade
-      ACCEPT: (tradeId: number) => `/trades/${tradeId}/accept`,  // POST: Accept trade
-      CANCEL: (tradeId: number) => `/trades/${tradeId}/cancel`,  // DELETE: Cancel trade
+      ACCEPT: (tradeId: string) => `/trades/${tradeId}/accept`,  // POST: Accept trade
+      CANCEL: (tradeId: string) => `/trades/${tradeId}/cancel`,  // DELETE: Cancel trade
     },
     
     // User profile endpoints
     USERS: {
-      GET_PROFILE: (userId: number) => `/users/${userId}`,         // GET: User profile
-      UPDATE_PROFILE: (userId: number) => `/users/${userId}`,      // PUT: Update profile
-      GET_REWARDS: (userId: number) => `/users/${userId}/rewards`, // GET: User rewards
+      GET_PROFILE: (userId: string) => `/users/${userId}`,         // GET: User profile
+      UPDATE_PROFILE: (userId: string) => `/users/${userId}`,      // PUT: Update profile
+      GET_REWARDS: (userId: string) => `/users/${userId}/rewards`, // GET: User rewards
+      GET_COLLECTION_PROGRESS: (userId: string) => `/users/${userId}/collection-progress`, // GET: Collection progress
+      GET_CARDS_WITH_VEHICLES: (userId: string) => `/users/${userId}/cards/with-vehicles`, // GET: Cards with vehicle details
     },
     
     // Collection management endpoints
     COLLECTIONS: {
-      GET_COLLECTION: (userId: number) => `/collections/${userId}`,    // GET: User collection
-      UPDATE_COLLECTION: (userId: number) => `/collections/${userId}`, // PUT: Update collection
+      GET_COLLECTION: (userId: string) => `/collections/${userId}`,    // GET: User collection
+      UPDATE_COLLECTION: (userId: string) => `/collections/${userId}`, // PUT: Update collection
     },
   },
   

@@ -5,6 +5,7 @@ using CarDexBackend.Domain.Entities;
 using CarDexBackend.Domain.Enums;
 using Microsoft.Extensions.Localization;
 using CarDexBackend.Services.Resources;
+using System.Linq;
 
 namespace CarDexBackend.Services
 {
@@ -21,6 +22,7 @@ namespace CarDexBackend.Services
         private readonly ICompletedTradeRepository _tradeRepo;
         private readonly IRewardRepository _rewardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly ICollectionRepository _collectionRepo;
 
         public UserService(
             IUserRepository userRepo,
@@ -30,6 +32,7 @@ namespace CarDexBackend.Services
             ICompletedTradeRepository tradeRepo,
             IRewardRepository rewardRepo,
             IRepository<Vehicle> vehicleRepo,
+            ICollectionRepository collectionRepo,
             IStringLocalizer<SharedResources> sr)
         {
             _userRepo = userRepo;
@@ -39,6 +42,7 @@ namespace CarDexBackend.Services
             _tradeRepo = tradeRepo;
             _rewardRepo = rewardRepo;
             _vehicleRepo = vehicleRepo;
+            _collectionRepo = collectionRepo;
             _sr = sr;
         }
 
@@ -176,7 +180,7 @@ namespace CarDexBackend.Services
             return new UserTradeListResponse
             {
                 Trades = tradeResponses,
-                Total = tradeResponses.Count()
+                Total = tradeResponses.Count
             };
         }
 
@@ -235,6 +239,152 @@ namespace CarDexBackend.Services
             {
                 Rewards = rewardResponses,
                 Total = rewardResponses.Count
+            };
+        }
+
+        /// <summary>
+        /// Retrieves all cards owned by a user with full vehicle details embedded.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="collectionId">Optional collection filter.</param>
+        /// <param name="grade">Optional grade filter.</param>
+        /// <param name="limit">Results per page.</param>
+        /// <param name="offset">Results to skip.</param>
+        /// <returns>A <see cref="UserCardWithVehicleListResponse"/> containing cards with vehicle details.</returns>
+        public async Task<UserCardWithVehicleListResponse> GetUserCardsWithVehicles(
+            Guid userId, 
+            Guid? collectionId, 
+            string? grade, 
+            int limit, 
+            int offset)
+        {
+            // Verify user exists
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
+
+            // Get cards using repository
+            var (cards, total) = await _cardRepo.GetCardsAsync(
+                userId: userId,
+                collectionId: collectionId,
+                vehicleId: null,
+                grade: grade,
+                minValue: null,
+                maxValue: null,
+                sortBy: null,
+                limit: limit,
+                offset: offset);
+
+            // Fetch vehicle details for each card
+            var cardResponses = new List<UserCardWithVehicleResponse>();
+            foreach (var card in cards)
+            {
+                var vehicle = await _vehicleRepo.GetByIdAsync(card.VehicleId);
+                if (vehicle != null)
+                {
+                    cardResponses.Add(new UserCardWithVehicleResponse
+                    {
+                        // Card properties
+                        Id = card.Id,
+                        VehicleId = card.VehicleId,
+                        CollectionId = card.CollectionId,
+                        Grade = card.Grade.ToString(),
+                        Value = card.Value,
+                        // Vehicle properties
+                        Year = vehicle.Year,
+                        Make = vehicle.Make,
+                        Model = vehicle.Model,
+                        Stat1 = vehicle.Stat1,
+                        Stat2 = vehicle.Stat2,
+                        Stat3 = vehicle.Stat3,
+                        VehicleImage = vehicle.Image
+                    });
+                }
+            }
+
+            return new UserCardWithVehicleListResponse
+            {
+                Cards = cardResponses,
+                Total = total,
+                Limit = limit,
+                Offset = offset
+            };
+        }
+
+        /// <summary>
+        /// Retrieves collection completion progress for a user.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>A <see cref="CollectionProgressResponse"/> with completion data for each collection.</returns>
+        public async Task<CollectionProgressResponse> GetCollectionProgress(Guid userId)
+        {
+            // Verify user exists
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
+
+            // Get all cards owned by the user
+            var (userCards, _) = await _cardRepo.GetCardsAsync(
+                userId: userId,
+                collectionId: null,
+                vehicleId: null,
+                grade: null,
+                minValue: null,
+                maxValue: null,
+                sortBy: null,
+                limit: int.MaxValue,
+                offset: 0);
+
+            var userCardsList = userCards.ToList();
+
+            // If user has no cards, return empty response
+            if (!userCardsList.Any())
+            {
+                return new CollectionProgressResponse
+                {
+                    Collections = new List<CollectionProgressDto>(),
+                    TotalCollections = 0
+                };
+            }
+
+            // Get unique collection IDs from user's cards
+            var collectionIds = userCardsList.Select(c => c.CollectionId).Distinct().ToList();
+
+            // Fetch collection details for those collections
+            var collections = await _collectionRepo.FindAsync(c => collectionIds.Contains(c.Id));
+            var collectionsList = collections.ToList();
+
+            // Calculate progress for each collection
+            var progressList = collectionsList.Select(collection =>
+            {
+                // Get unique vehicles owned by user in this collection
+                var ownedVehicleIds = userCardsList
+                    .Where(c => c.CollectionId == collection.Id)
+                    .Select(c => c.VehicleId)
+                    .Distinct()
+                    .ToList();
+
+                int ownedCount = ownedVehicleIds.Count;
+                int totalCount = collection.Vehicles.Length;
+                int percentage = totalCount > 0 ? (int)((ownedCount * 100.0) / totalCount) : 0;
+
+                return new CollectionProgressDto
+                {
+                    CollectionId = collection.Id,
+                    CollectionName = collection.Name,
+                    CollectionImage = collection.Image,
+                    OwnedVehicles = ownedCount,
+                    TotalVehicles = totalCount,
+                    Percentage = percentage
+                };
+            })
+            .OrderByDescending(p => p.Percentage)  // Sort by completion percentage (highest first)
+            .ToList();
+
+            return new CollectionProgressResponse
+            {
+                Collections = progressList,
+                TotalCollections = progressList.Count
             };
         }
     }

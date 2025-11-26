@@ -131,5 +131,52 @@ namespace CarDexBackend.Controllers
             var result = await _userService.GetUserRewards(userId, claimed);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Retrieves all cards owned by a user with full vehicle details embedded.
+        /// </summary>
+        /// <param name="userId">User identifier whose cards to fetch.</param>
+        /// <param name="collectionId">Optional filter for collection ID.</param>
+        /// <param name="grade">Optional filter for card grade.</param>
+        /// <param name="limit">Number of results per page (default 50).</param>
+        /// <param name="offset">Number of results to skip for pagination.</param>
+        /// <returns>A paginated list of the user's cards with vehicle details.</returns>
+        /// <remarks>
+        /// This endpoint is optimized for UI display by including all vehicle information
+        /// (make, model, year, stats, image) with each card, eliminating the need for
+        /// additional API calls to fetch vehicle details separately.
+        /// </remarks>
+        [HttpGet("{userId:guid}/cards/with-vehicles")]
+        [ProducesResponseType(typeof(UserCardWithVehicleListResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetUserCardsWithVehicles(
+            Guid userId, 
+            [FromQuery] Guid? collectionId, 
+            [FromQuery] string? grade, 
+            [FromQuery] int limit = 50, 
+            [FromQuery] int offset = 0)
+        {
+            var result = await _userService.GetUserCardsWithVehicles(userId, collectionId, grade, limit, offset);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Retrieves collection completion progress for a user.
+        /// </summary>
+        /// <param name="userId">User identifier whose collection progress to fetch.</param>
+        /// <returns>Progress data for all collections where the user owns at least one card.</returns>
+        /// <remarks>
+        /// Shows how many unique vehicles the user owns from each collection and calculates
+        /// completion percentage. Only includes collections with at least one owned card.
+        /// Results are sorted by completion percentage (highest first).
+        /// </remarks>
+        [HttpGet("{userId:guid}/collection-progress")]
+        [ProducesResponseType(typeof(CollectionProgressResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCollectionProgress(Guid userId)
+        {
+            var result = await _userService.GetCollectionProgress(userId);
+            return Ok(result);
+        }
     }
 }

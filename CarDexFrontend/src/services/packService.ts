@@ -26,7 +26,7 @@ export const packService = {
   /**
    * Get pack by ID
    */
-  getPackById: async (packId: number): Promise<Pack> => {
+  getPackById: async (packId: string): Promise<Pack> => {
     const response = await apiClient.get<Pack>(
       API_CONFIG.ENDPOINTS.PACKS.GET_BY_ID(packId)
     );
@@ -36,7 +36,7 @@ export const packService = {
   /**
    * Open a pack and receive cards
    */
-  openPack: async (packId: number): Promise<OpenPackResponse> => {
+  openPack: async (packId: string): Promise<OpenPackResponse> => {
     const response = await apiClient.post<OpenPackResponse>(
       API_CONFIG.ENDPOINTS.PACKS.OPEN_PACK(packId)
     );

@@ -26,3 +26,10 @@
   margin-top: 1rem;
   text-align: center;
 }
+
+.loading {
+  color: var(--content-secondary);
+  margin-top: 1rem;
+  text-align: center;
+  font-style: italic;
+}

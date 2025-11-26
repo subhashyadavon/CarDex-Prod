@@ -24,9 +24,7 @@ namespace CarDexBackend.Services
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly ICardRepository _cardRepo;
         private readonly Random _random = new Random();
-        
-        // TODO: Replace with actual authenticated user ID from JWT/claims
-        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        private readonly ICurrentUserService _currentUserService;
 
         public PackService(
             IPackRepository packRepo,
@@ -34,6 +32,7 @@ namespace CarDexBackend.Services
             IUserRepository userRepo,
             IRepository<Vehicle> vehicleRepo,
             ICardRepository cardRepo,
+            ICurrentUserService currentUserService,
             IStringLocalizer<SharedResources> sr)
         {
             _packRepo = packRepo;
@@ -41,6 +40,7 @@ namespace CarDexBackend.Services
             _userRepo = userRepo;
             _vehicleRepo = vehicleRepo;
             _cardRepo = cardRepo;
+            _currentUserService = currentUserService;
             _sr = sr;
         }
 
@@ -82,8 +82,7 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<PackPurchaseResponse> PurchasePack(PackPurchaseRequest request)
         {
-            // TODO: Get actual authenticated user ID instead of using hardcoded test user
-            var userId = _testUserId;
+            var userId = _currentUserService.UserId;    //grab authenticated user's ID
             
             // Get the collection
             var collection = await _collectionRepo.GetByIdAsync(request.CollectionId);
@@ -182,6 +181,10 @@ namespace CarDexBackend.Services
             if (collection == null)
                 throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
+            // if attempting to open a pack they do not own, throw a Pack not found error
+            if (pack.UserId != _currentUserService.UserId)
+                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
+
             // Get all vehicles from this collection using the Vehicles array
             var vehicles = (await _vehicleRepo.FindAsync(v => collection.Vehicles.Contains(v.Id))).ToList();
 
