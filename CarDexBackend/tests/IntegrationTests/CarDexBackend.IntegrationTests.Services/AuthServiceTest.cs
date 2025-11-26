@@ -69,7 +69,7 @@ namespace DefaultNamespace
             Assert.Equal("Bearer", result.TokenType);
             Assert.NotNull(result.User);
             Assert.Equal("TestUser", result.User.Username);
-            Assert.Equal(0, result.User.Currency);
+            Assert.Equal(5000, result.User.Currency);
 
             // Verify user was saved
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == "TestUser");
