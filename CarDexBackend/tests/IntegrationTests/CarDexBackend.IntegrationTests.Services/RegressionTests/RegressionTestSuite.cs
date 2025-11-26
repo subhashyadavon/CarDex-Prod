@@ -72,6 +72,7 @@ namespace DefaultNamespace.RegressionTests
             // Initialize services
             _authService = new AuthService(userRepo, configuration, authLogger, new NullStringLocalizer<SharedResources>());
             
+            var tradeCurrentUserService = new TestCurrentUserService { UserId = _testUserId };
             _tradeService = new TradeService(
                 openTradeRepo, 
                 completedTradeRepo, 
@@ -79,14 +80,17 @@ namespace DefaultNamespace.RegressionTests
                 cardRepo, 
                 vehicleRepo, 
                 rewardRepo, 
+                tradeCurrentUserService,
                 new NullStringLocalizer<SharedResources>());
             
+            var packCurrentUserService = new TestCurrentUserService { UserId = _testUserId };
             _packService = new PackService(
                 packRepo, 
                 collectionRepo, 
                 userRepo, 
                 vehicleRepo, 
                 cardRepo, 
+                packCurrentUserService,
                 new NullStringLocalizer<SharedResources>());
             
             _cardService = new CardService(cardRepo, vehicleRepo, new NullStringLocalizer<SharedResources>());
@@ -99,6 +103,7 @@ namespace DefaultNamespace.RegressionTests
                 completedTradeRepo, 
                 rewardRepo, 
                 vehicleRepo, 
+                collectionRepo,
                 new NullStringLocalizer<SharedResources>());
             
             _collectionService = new CollectionService(collectionRepo, cardRepo, new NullStringLocalizer<SharedResources>());

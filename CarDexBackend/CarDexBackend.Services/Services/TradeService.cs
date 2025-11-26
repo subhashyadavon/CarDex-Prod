@@ -25,6 +25,7 @@ namespace CarDexBackend.Services
         private readonly ICardRepository _cardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly IRewardRepository _rewardRepo;
+        private readonly ICurrentUserService _currentUserService;
         
         // TODO: Replace with actual authenticated user ID from JWT/claims
         private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
@@ -36,6 +37,7 @@ namespace CarDexBackend.Services
             ICardRepository cardRepo,
             IRepository<Vehicle> vehicleRepo,
             IRewardRepository rewardRepo,
+            ICurrentUserService currentUserService,
             IStringLocalizer<SharedResources> sr)
         {
             _openTradeRepo = openTradeRepo;
@@ -44,8 +46,8 @@ namespace CarDexBackend.Services
             _cardRepo = cardRepo;
             _vehicleRepo = vehicleRepo;
             _rewardRepo = rewardRepo;
-            _sr = sr;
             _currentUserService = currentUserService;
+            _sr = sr;
         }
 
         /// <summary>

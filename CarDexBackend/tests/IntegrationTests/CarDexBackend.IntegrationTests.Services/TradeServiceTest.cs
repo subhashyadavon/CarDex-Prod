@@ -45,6 +45,9 @@ namespace DefaultNamespace
             _vehicleRepo = new Repository<Vehicle>(_context);
             _rewardRepo = new RewardRepository(_context);
 
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var currentUserService = new TestCurrentUserService { UserId = testUserId };
+
             _tradeService = new TradeService(
                 _openTradeRepo, 
                 _completedTradeRepo, 
@@ -52,6 +55,7 @@ namespace DefaultNamespace
                 _cardRepo, 
                 _vehicleRepo, 
                 _rewardRepo, 
+                currentUserService,
                 new NullStringLocalizer<SharedResources>());
 
             // Seed test data

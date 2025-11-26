@@ -32,6 +32,7 @@ namespace CarDexBackend.Services
             IUserRepository userRepo,
             IRepository<Vehicle> vehicleRepo,
             ICardRepository cardRepo,
+            ICurrentUserService currentUserService,
             IStringLocalizer<SharedResources> sr)
         {
             _packRepo = packRepo;
@@ -39,8 +40,8 @@ namespace CarDexBackend.Services
             _userRepo = userRepo;
             _vehicleRepo = vehicleRepo;
             _cardRepo = cardRepo;
-            _sr = sr;
             _currentUserService = currentUserService;
+            _sr = sr;
         }
 
         /// <summary>

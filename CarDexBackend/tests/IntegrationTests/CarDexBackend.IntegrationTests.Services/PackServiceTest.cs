@@ -44,12 +44,16 @@ namespace DefaultNamespace
             _vehicleRepo = new Repository<Vehicle>(_context);
             _cardRepo = new CardRepository(_context);
             
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var currentUserService = new TestCurrentUserService { UserId = testUserId };
+            
             _packService = new PackService(
                 _packRepo, 
                 _collectionRepo, 
                 _userRepo, 
                 _vehicleRepo, 
                 _cardRepo, 
+                currentUserService,
                 new NullStringLocalizer<SharedResources>());
 
             // Seed test data
