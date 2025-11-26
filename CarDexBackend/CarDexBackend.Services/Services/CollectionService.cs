@@ -32,7 +32,9 @@ namespace CarDexBackend.Services
                     Name = c.Name,
                     Theme = c.Name, // Using name as theme since theme field doesn't exist in entity
                     Description = c.Name, // Using name as description since description field doesn't exist
-                    CardCount = _context.Cards.Count(card => card.CollectionId == c.Id)
+                    CardCount = _context.Cards.Count(card => card.CollectionId == c.Id),
+                    Price = c.PackPrice,
+                    ImageUrl = c.Image
                 })
                 .ToListAsync();
 
