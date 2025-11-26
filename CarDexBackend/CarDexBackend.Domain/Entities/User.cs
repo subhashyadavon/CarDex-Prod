@@ -12,6 +12,13 @@ namespace CarDexBackend.Domain.Entities
         public int Currency { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Navigation Properties
+        public ICollection<Card> Cards { get; set; } = new List<Card>();
+        public ICollection<Pack> Packs { get; set; } = new List<Pack>();
+        public ICollection<OpenTrade> OpenTrades { get; set; } = new List<OpenTrade>();
+        public ICollection<CompletedTrade> TradeHistory { get; set; } = new List<CompletedTrade>();
+
+
         // Parameterless constructor for EF Core
         public User()
         {

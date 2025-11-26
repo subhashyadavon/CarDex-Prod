@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarDexBackend.IntegrationTests.Services", "tests\IntegrationTests\CarDexBackend.IntegrationTests.Services\CarDexBackend.IntegrationTests.Services.csproj", "{F4BF99D0-B544-4F0E-9801-8D88823C9805}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarDexBackend.Repository", "CarDexBackend.Repository\CarDexBackend.Repository.csproj", "{67A256CD-A741-4F93-8D40-0AD9ECD48676}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,18 @@ Global
 		{F4BF99D0-B544-4F0E-9801-8D88823C9805}.Release|x64.Build.0 = Release|Any CPU
 		{F4BF99D0-B544-4F0E-9801-8D88823C9805}.Release|x86.ActiveCfg = Release|Any CPU
 		{F4BF99D0-B544-4F0E-9801-8D88823C9805}.Release|x86.Build.0 = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|x64.Build.0 = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Debug|x86.Build.0 = Debug|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|x64.ActiveCfg = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|x64.Build.0 = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|x86.ActiveCfg = Release|Any CPU
+		{67A256CD-A741-4F93-8D40-0AD9ECD48676}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

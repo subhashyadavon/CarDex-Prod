@@ -3,11 +3,7 @@ using CarDexBackend.Domain.Enums;
 
 namespace CarDexBackend.Domain.Entities
 {
-    /// <summary>
-    /// Represents a completed trade transaction between two users in the CarDex system.
-    /// Records the details of successful trades, including what was exchanged and when.
-    /// Used for trade history and tracking completed transactions.
-    /// </summary>
+
     public class CompletedTrade
     {
         
@@ -20,10 +16,7 @@ namespace CarDexBackend.Domain.Entities
         public int Price { get; set; }
         public DateTime ExecutedDate { get; set; }
 
-        /// <summary>
-        /// Parameterless constructor required for Entity Framework Core.
-        /// Initializes all properties to their default values.
-        /// </summary>
+
         public CompletedTrade()
         {
             Id = Guid.Empty;
@@ -36,16 +29,7 @@ namespace CarDexBackend.Domain.Entities
             ExecutedDate = DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// Creates a new CompletedTrade instance with the specified properties.
-        /// </summary>
-        /// <param name="id">Unique identifier for the completed trade.</param>
-        /// <param name="type">Type of trade (FOR_CARD or FOR_PRICE).</param>
-        /// <param name="sellerUserId">Unique identifier of the seller.</param>
-        /// <param name="sellerCardId">Unique identifier of the card being sold.</param>
-        /// <param name="buyerUserId">Unique identifier of the buyer.</param>
-        /// <param name="price">Price paid in in-game currency (for FOR_PRICE trades). Defaults to 0.</param>
-        /// <param name="buyerCardId">Unique identifier of the card received by seller (for FOR_CARD trades). Defaults to null.</param>
+
         public CompletedTrade(
             Guid id,
             TradeEnum type,
@@ -67,13 +51,6 @@ namespace CarDexBackend.Domain.Entities
             ValidateTrade();
         }
 
-        /// <summary>
-        /// Validates the trade to ensure all required fields are provided based on the trade type.
-        /// Ensures data integrity for completed trades.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when FOR_CARD trade is missing BuyerCardId, or when FOR_PRICE trade has invalid price.
-        /// </exception>
         private void ValidateTrade()
         {
             if (Type == TradeEnum.FOR_CARD && BuyerCardId == null)

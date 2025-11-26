@@ -47,6 +47,11 @@ namespace CarDexBackend.Shared.Dtos.Responses
         /// This field is <c>null</c> for trades based on price.
         /// </remarks>
         public Guid? WantCardId { get; set; }
+
+        /// <summary>
+        /// The timestamp when the trade was created.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
     }
 
     /// <summary>

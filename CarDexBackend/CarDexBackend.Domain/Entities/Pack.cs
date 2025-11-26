@@ -9,7 +9,6 @@ namespace CarDexBackend.Domain.Entities
         public Guid CollectionId { get; set; }  // Collection this pack belongs to
         public int Value { get; set; }          // Current value of the pack
         public bool IsOpened { get; set; }      // Whether pack has been opened
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Parameterless constructor for EF Core
         public Pack()
@@ -19,7 +18,6 @@ namespace CarDexBackend.Domain.Entities
             CollectionId = Guid.Empty;
             Value = 0;
             IsOpened = false;
-            CreatedAt = DateTime.UtcNow;
         }
 
         // Constructor
@@ -30,7 +28,6 @@ namespace CarDexBackend.Domain.Entities
             CollectionId = collectionId;
             Value = value;
             IsOpened = false;
-            CreatedAt = DateTime.UtcNow;
         }
 
         // Domain behavior: update value (e.g., due to market or rarity)

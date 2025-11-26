@@ -11,12 +11,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Domain.Entities;
+
 namespace DefaultNamespace
 {
     public class CardServiceTest : IDisposable
     {
         private readonly CarDexDbContext _context;
         private readonly CardService _cardService;
+        private readonly ICardRepository _cardRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
 
         //Used ChatGPT to set up the base code, help with seeding the data and modify the code for the test
         //for getallcards with filters and sorting
@@ -28,7 +34,9 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _cardService = new CardService(_context, new NullStringLocalizer<SharedResources>());
+            _cardRepo = new CardRepository(_context);
+            _vehicleRepo = new Repository<Vehicle>(_context);
+            _cardService = new CardService(_cardRepo, _vehicleRepo, new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

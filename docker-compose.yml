@@ -1,0 +1,39 @@
+services:
+  cardex-api:
+    build:
+      context: .
+      dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
+    container_name: cardex-api
+    ports:
+      - "5001:8080"
+    environment:
+      - ConnectionStrings__CarDexDatabase=Host=cardex-db;Database=cardex;Username=postgres;Password=postgres
+      - Jwt__SecretKey=DevelopmentSecretKeyThatIsAtLeast32CharactersLong!123
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - cardex-db
+    networks:
+      - cardex-network
+    restart: always
+
+  cardex-db:
+    image: postgres:16
+    container_name: cardex-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cardex
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - cardex-network
+    restart: always
+
+networks:
+  cardex-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
