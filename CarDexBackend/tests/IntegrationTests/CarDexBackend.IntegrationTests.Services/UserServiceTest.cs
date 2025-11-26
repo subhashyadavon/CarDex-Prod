@@ -11,12 +11,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Domain.Entities;
+
 namespace DefaultNamespace
 {
     public class UserServiceTest : IDisposable
     {
         private readonly CarDexDbContext _context;
         private readonly UserService _userService;
+        private readonly IUserRepository _userRepo;
+        private readonly ICardRepository _cardRepo;
+        private readonly IPackRepository _packRepo;
+        private readonly IOpenTradeRepository _openTradeRepo;
+        private readonly ICompletedTradeRepository _completedTradeRepo;
+        private readonly IRewardRepository _rewardRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
         
         //Used ChatGPT to set up the base code
         public UserServiceTest()
@@ -27,7 +38,23 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _userService = new UserService(_context, new NullStringLocalizer<SharedResources>());
+            _userRepo = new UserRepository(_context);
+            _cardRepo = new CardRepository(_context);
+            _packRepo = new PackRepository(_context);
+            _openTradeRepo = new OpenTradeRepository(_context);
+            _completedTradeRepo = new CompletedTradeRepository(_context);
+            _rewardRepo = new RewardRepository(_context);
+            _vehicleRepo = new Repository<Vehicle>(_context);
+
+            _userService = new UserService(
+                _userRepo, 
+                _cardRepo, 
+                _packRepo, 
+                _openTradeRepo, 
+                _completedTradeRepo, 
+                _rewardRepo, 
+                _vehicleRepo, 
+                new NullStringLocalizer<SharedResources>());
         }
 
         // Dispose method to clean up the DbContext

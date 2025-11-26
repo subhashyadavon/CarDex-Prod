@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using BCrypt.Net;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Domain.Entities;
+
 namespace DefaultNamespace.RegressionTests
 {
     /// <summary>
@@ -55,16 +59,49 @@ namespace DefaultNamespace.RegressionTests
             var loggerFactory = new LoggerFactory();
             var authLogger = loggerFactory.CreateLogger<AuthService>();
 
-            // grab a dummy user for constructors
-            var currentUser = new TestCurrentUserService{UserId = _testUserId, IsAuthenticated = true};
+            // Initialize Repositories
+            var userRepo = new UserRepository(_context);
+            var cardRepo = new CardRepository(_context);
+            var packRepo = new PackRepository(_context);
+            var openTradeRepo = new OpenTradeRepository(_context);
+            var completedTradeRepo = new CompletedTradeRepository(_context);
+            var rewardRepo = new RewardRepository(_context);
+            var collectionRepo = new CollectionRepository(_context);
+            var vehicleRepo = new Repository<Vehicle>(_context);
 
             // Initialize services
-            _authService = new AuthService(_context, configuration, authLogger, new NullStringLocalizer<SharedResources>());
-            _tradeService = new TradeService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
-            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
-            _cardService = new CardService(_context, new NullStringLocalizer<SharedResources>());
-            _userService = new UserService(_context, new NullStringLocalizer<SharedResources>());
-            _collectionService = new CollectionService(_context, new NullStringLocalizer<SharedResources>());
+            _authService = new AuthService(userRepo, configuration, authLogger, new NullStringLocalizer<SharedResources>());
+            
+            _tradeService = new TradeService(
+                openTradeRepo, 
+                completedTradeRepo, 
+                userRepo, 
+                cardRepo, 
+                vehicleRepo, 
+                rewardRepo, 
+                new NullStringLocalizer<SharedResources>());
+            
+            _packService = new PackService(
+                packRepo, 
+                collectionRepo, 
+                userRepo, 
+                vehicleRepo, 
+                cardRepo, 
+                new NullStringLocalizer<SharedResources>());
+            
+            _cardService = new CardService(cardRepo, vehicleRepo, new NullStringLocalizer<SharedResources>());
+            
+            _userService = new UserService(
+                userRepo, 
+                cardRepo, 
+                packRepo, 
+                openTradeRepo, 
+                completedTradeRepo, 
+                rewardRepo, 
+                vehicleRepo, 
+                new NullStringLocalizer<SharedResources>());
+            
+            _collectionService = new CollectionService(collectionRepo, cardRepo, new NullStringLocalizer<SharedResources>());
 
             // Seed critical test data
             SeedRegressionTestData();

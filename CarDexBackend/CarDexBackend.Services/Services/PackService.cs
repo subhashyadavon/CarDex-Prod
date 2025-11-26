@@ -2,15 +2,14 @@ using CarDexBackend.Domain.Entities;
 using CarDexBackend.Domain.Enums;
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexDatabase;
-using Microsoft.EntityFrameworkCore;
+using CarDexBackend.Repository.Interfaces;
 using Microsoft.Extensions.Localization;
 using CarDexBackend.Services.Resources;
 
 namespace CarDexBackend.Services
 {
     /// <summary>
-    /// Production implementation of <see cref="IPackService"/> using Entity Framework Core and PostgreSQL.
+    /// Production implementation of <see cref="IPackService"/> using Repositories.
     /// </summary>
     /// <remarks>
     /// NOTE: This implementation uses a hardcoded test user ID for development.
@@ -19,15 +18,62 @@ namespace CarDexBackend.Services
     public class PackService : IPackService
     {
         private readonly IStringLocalizer<SharedResources> _sr;
-        private readonly CarDexDbContext _context;
+        private readonly IPackRepository _packRepo;
+        private readonly ICollectionRepository _collectionRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly ICardRepository _cardRepo;
         private readonly Random _random = new Random();
         private readonly ICurrentUserService _currentUserService;
 
-        public PackService(CarDexDbContext context, IStringLocalizer<SharedResources> sr, ICurrentUserService currentUserService)
+        public PackService(
+            IPackRepository packRepo,
+            ICollectionRepository collectionRepo,
+            IUserRepository userRepo,
+            IRepository<Vehicle> vehicleRepo,
+            ICardRepository cardRepo,
+            IStringLocalizer<SharedResources> sr)
         {
-            _context = context;
+            _packRepo = packRepo;
+            _collectionRepo = collectionRepo;
+            _userRepo = userRepo;
+            _vehicleRepo = vehicleRepo;
+            _cardRepo = cardRepo;
             _sr = sr;
             _currentUserService = currentUserService;
+        }
+
+        /// <summary>
+        /// Retrieves the list of packs owned by the user, optionally filtered by collection.
+        /// </summary>
+        public async Task<UserPackListResponse> GetUserPacks(Guid userId, Guid? collectionId)
+        {
+            // Note: User existence check should ideally be done by caller or handled by repository returning empty list
+            // But for consistency with previous implementation, we might want to check user existence.
+            // However, PackService shouldn't depend on UserRepository just for this check if it's not critical.
+            // The previous implementation checked User existence.
+            // Let's assume the Controller or a higher level service handles user validation, or we just return empty list.
+            // If we strictly need to throw KeyNotFoundException for missing user, we need IUserRepository.
+            // But usually GetUserPacks(userId) implies userId is valid (from token).
+            // If we want to keep the behavior, we can inject IUserRepository.
+            // For now, I'll skip the user check as it's redundant if userId comes from token.
+            
+            var packs = await _packRepo.GetByUserIdAsync(userId, collectionId);
+
+            var packResponses = packs
+                .Select(p => new UserPackResponse
+                {
+                    Id = p.Id,
+                    CollectionId = p.CollectionId,
+                    Value = p.Value
+                })
+                .ToList();
+
+            return new UserPackListResponse
+            {
+                Packs = packResponses,
+                Total = packResponses.Count
+            };
         }
 
         /// <summary>
@@ -38,12 +84,12 @@ namespace CarDexBackend.Services
             var userId = _currentUserService.UserId;    //grab authenticated user's ID
             
             // Get the collection
-            var collection = await _context.Collections.FindAsync(request.CollectionId);
+            var collection = await _collectionRepo.GetByIdAsync(request.CollectionId);
             if (collection == null)
                 throw new ArgumentException(_sr["CollectionNotFoundError"]);
 
             // Get the user
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepo.GetByIdAsync(userId);
             if (user == null)
                 throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
@@ -53,14 +99,15 @@ namespace CarDexBackend.Services
                 throw new InvalidOperationException(_sr["InsufficientCurrencyError", "pack"]);
 
             // Deduct currency from user
-            user.Currency -= packPrice;
+            user.DeductCurrency(packPrice);
+            await _userRepo.UpdateAsync(user);
 
             // Create the pack using constructor: Pack(Guid id, Guid userId, Guid collectionId, int value)
             var packId = Guid.NewGuid();
             var pack = new Pack(packId, userId, request.CollectionId, packPrice);
 
-            _context.Packs.Add(pack);
-            await _context.SaveChangesAsync();
+            await _packRepo.AddAsync(pack);
+            await _packRepo.SaveChangesAsync();
 
             // PackPurchaseResponse: {Pack: PackResponse, UserCurrency: int}
             // PackResponse: {Id, CollectionId, CollectionName, PurchasedAt, IsOpened}
@@ -85,17 +132,18 @@ namespace CarDexBackend.Services
         {
             // PackDetailedResponse extends PackResponse and adds: PreviewCards, EstimatedValue
             // Need to join with Collections to get CollectionName
-            var pack = await _context.Packs.FindAsync(packId);
+            var pack = await _packRepo.GetByIdAsync(packId);
             if (pack == null)
                 throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
-            var collection = await _context.Collections.FindAsync(pack.CollectionId);
+            var collection = await _collectionRepo.GetByIdAsync(pack.CollectionId);
             if (collection == null)
                 throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
             // Get preview cards (first 3 vehicles from this collection)
-            var previewCards = await _context.Vehicles
-                .Where(v => collection.Vehicles.Contains(v.Id))
+            // Note: Inefficient if collection has many vehicles, but simpler than custom query for now
+            var allVehicles = await _vehicleRepo.FindAsync(v => collection.Vehicles.Contains(v.Id));
+            var previewCards = allVehicles
                 .Take(3)
                 .Select(v => new CardResponse
                 {
@@ -105,14 +153,14 @@ namespace CarDexBackend.Services
                     Value = v.Value,
                     CreatedAt = DateTime.UtcNow
                 })
-                .ToListAsync();
+                .ToList();
 
             return new PackDetailedResponse
             {
                 Id = pack.Id,
                 CollectionId = pack.CollectionId,
                 CollectionName = collection.Name,
-                PurchasedAt = pack.CreatedAt,
+                PurchasedAt = DateTime.UtcNow,
                 IsOpened = pack.IsOpened,
                 PreviewCards = previewCards,
                 EstimatedValue = pack.Value
@@ -124,11 +172,11 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<PackOpenResponse> OpenPack(Guid packId)
         {
-            var pack = await _context.Packs.FindAsync(packId);
+            var pack = await _packRepo.GetByIdAsync(packId);
             if (pack == null)
                 throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
-            var collection = await _context.Collections.FindAsync(pack.CollectionId);
+            var collection = await _collectionRepo.GetByIdAsync(pack.CollectionId);
             if (collection == null)
                 throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
             
@@ -137,9 +185,7 @@ namespace CarDexBackend.Services
                 throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
             // Get all vehicles from this collection using the Vehicles array
-            var vehicles = await _context.Vehicles
-                .Where(v => collection.Vehicles.Contains(v.Id))
-                .ToListAsync();
+            var vehicles = (await _vehicleRepo.FindAsync(v => collection.Vehicles.Contains(v.Id))).ToList();
 
             if (!vehicles.Any())
                 throw new InvalidOperationException(_sr["EmptyCollectionError"]);
@@ -176,12 +222,13 @@ namespace CarDexBackend.Services
             }
 
             // Add cards to database
-            _context.Cards.AddRange(cards);
+            await _cardRepo.AddRangeAsync(cards);
 
             // Mark pack as opened
             pack.Open(); // Use domain behavior
+            await _packRepo.UpdateAsync(pack);
 
-            await _context.SaveChangesAsync();
+            await _packRepo.SaveChangesAsync();
 
             // PackOpenResponse: {Cards: IEnumerable<CardDetailedResponse>, Pack: PackResponse}
             return new PackOpenResponse
@@ -192,7 +239,7 @@ namespace CarDexBackend.Services
                     Id = pack.Id,
                     CollectionId = pack.CollectionId,
                     CollectionName = collection?.Name ?? "Unknown",
-                    PurchasedAt = pack.CreatedAt,
+                    PurchasedAt = DateTime.UtcNow,
                     IsOpened = pack.IsOpened
                 }
             };

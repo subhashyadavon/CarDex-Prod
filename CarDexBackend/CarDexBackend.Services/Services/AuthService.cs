@@ -1,8 +1,7 @@
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexDatabase;
 using CarDexBackend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using CarDexBackend.Repository.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,17 +17,17 @@ namespace CarDexBackend.Services
     public class AuthService : IAuthService
     {
         private readonly IStringLocalizer<SharedResources> _sr;
-        private readonly CarDexDbContext _db;
+        private readonly IUserRepository _userRepo;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
 
         public AuthService(
-            CarDexDbContext db,
+            IUserRepository userRepo,
             IConfiguration configuration,
             ILogger<AuthService> logger,
             IStringLocalizer<SharedResources> sr)
         {
-            _db = db;
+            _userRepo = userRepo;
             _configuration = configuration;
             _logger = logger;
             _sr = sr;
@@ -51,7 +50,7 @@ namespace CarDexBackend.Services
             try
             {
                 _logger.LogInformation(_sr["CheckingForExistingUser"], request.Username);
-                var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+                var existingUser = await _userRepo.GetByUsernameAsync(request.Username);
                 if (existingUser != null)
                 {
                     _logger.LogWarning(_sr["UsernameAlreadyExistsLog"], request.Username);
@@ -81,11 +80,11 @@ namespace CarDexBackend.Services
                 Currency = 0 // Default starting currency
             };
 
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            await _userRepo.AddAsync(user);
+            await _userRepo.SaveChangesAsync();
 
             // Reload user to get the database-set CreatedAt timestamp
-            await _db.Entry(user).ReloadAsync();
+            await _userRepo.ReloadAsync(user);
 
             // Generate JWT token for the newly registered user
             var token = GenerateJwtToken(user);
@@ -103,8 +102,7 @@ namespace CarDexBackend.Services
                     Id = user.Id,
                     Username = user.Username,
                     Currency = user.Currency,
-                    CreatedAt = user.CreatedAt,
-                    UpdatedAt = user.CreatedAt
+                    CreatedAt = user.CreatedAt
                 }
             };
         }
@@ -112,7 +110,7 @@ namespace CarDexBackend.Services
         public async Task<LoginResponse> Login(LoginRequest request)
         {
             // Find user by username
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _userRepo.GetByUsernameAsync(request.Username);
             if (user == null)
             {
                 throw new UnauthorizedAccessException(_sr["InvalidCredentialsError"]);
@@ -140,8 +138,7 @@ namespace CarDexBackend.Services
                     Id = user.Id,
                     Username = user.Username,
                     Currency = user.Currency,
-                    CreatedAt = user.CreatedAt,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = user.CreatedAt
                 }
             };
         }

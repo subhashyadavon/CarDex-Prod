@@ -1,0 +1,21 @@
+services:
+  cardex-api:
+    build:
+      context: .
+      dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
+    container_name: cardex-api-prod
+    ports:
+      - "80:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      # you will have to have this in your .env file
+      - ConnectionStrings__CarDexDatabase=${SUPABASE_CONNECTION_STRING}
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+    restart: always
+    networks:
+      - cardex-prod-network
+
+networks:
+  cardex-prod-network:
+    driver: bridge

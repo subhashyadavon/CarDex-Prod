@@ -26,6 +26,12 @@ namespace CarDexDatabase
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure PostgreSQL enum types for EF Core
+            // Specify the database enum type name and map to C# enum
+            modelBuilder.HasPostgresEnum<GradeEnum>("grade_enum");
+            modelBuilder.HasPostgresEnum<TradeEnum>("trade_enum");
+            modelBuilder.HasPostgresEnum<RewardEnum>("reward_enum");
+
             // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
@@ -85,14 +91,10 @@ namespace CarDexDatabase
                 entity.Property(e => e.Value)
                     .HasColumnName("value")
                     .HasDefaultValue(0);
-                
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("now()");
 
-                // Foreign keys with navigation properties
-                entity.HasOne(e => e.User)
-                    .WithMany()
+                // Foreign keys
+                entity.HasOne<User>()
+                    .WithMany(u => u.Cards)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -179,10 +181,6 @@ namespace CarDexDatabase
                 // Map Vehicles array to database array column
                 entity.Property(e => e.Vehicles)
                     .HasColumnName("vehicles");
-                
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("now()");
             });
 
             // Configure Pack entity
@@ -210,14 +208,10 @@ namespace CarDexDatabase
                 entity.Property(e => e.IsOpened)
                     .HasColumnName("is_opened")
                     .HasDefaultValue(false);
-                
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("now()");
 
                 // Foreign keys
                 entity.HasOne<User>()
-                    .WithMany()
+                    .WithMany(u => u.Packs)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -256,14 +250,10 @@ namespace CarDexDatabase
                 
                 entity.Property(e => e.WantCardId)
                     .HasColumnName("want_card_id");
-                
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnName("created_at")
-                    .HasDefaultValueSql("now()");
 
                 // Foreign keys
                 entity.HasOne<User>()
-                    .WithMany()
+                    .WithMany(u => u.OpenTrades)
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -313,7 +303,7 @@ namespace CarDexDatabase
 
                 // Foreign keys
                 entity.HasOne<User>()
-                    .WithMany()
+                    .WithMany(u => u.TradeHistory)
                     .HasForeignKey(e => e.SellerUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
@@ -368,11 +358,6 @@ namespace CarDexDatabase
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configure PostgreSQL enum types for EF Core
-            // Specify the database enum type name and map to C# enum
-            modelBuilder.HasPostgresEnum<GradeEnum>("grade_enum");
-            modelBuilder.HasPostgresEnum<TradeEnum>("trade_enum");
-            modelBuilder.HasPostgresEnum<RewardEnum>("reward_enum");
         }
     }
 }

@@ -11,12 +11,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+
 namespace DefaultNamespace
 {
     public class CollectionServiceTest : IDisposable
     {
         private readonly CarDexDbContext _context;
         private readonly CollectionService _collectionService;
+        private readonly ICollectionRepository _collectionRepo;
+        private readonly ICardRepository _cardRepo;
 
         //Used ChatGPT to get the base code and to help seed the data
         public CollectionServiceTest()
@@ -27,7 +32,9 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-            _collectionService = new CollectionService(_context, new NullStringLocalizer<SharedResources>());
+            _collectionRepo = new CollectionRepository(_context);
+            _cardRepo = new CardRepository(_context);
+            _collectionService = new CollectionService(_collectionRepo, _cardRepo, new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

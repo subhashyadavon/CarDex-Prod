@@ -24,6 +24,7 @@
     <ProjectReference Include="..\CarDexBackend.Services\CarDexBackend.Services.csproj" />
     <ProjectReference Include="..\Shared\CarDexBackend.Dtos\CarDexBackend.Dtos.csproj" />
     <ProjectReference Include="..\..\CarDexDatabase\CarDexDatabase.csproj" />
+    <ProjectReference Include="..\CarDexBackend.Repository\CarDexBackend.Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

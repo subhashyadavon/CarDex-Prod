@@ -6,25 +6,13 @@ from datetime import datetime
 
 # Display helpers
 D_LOGO = """
-╔═══════════════════════════════════════════════════╗
-║    MNNNNNNNN       NNNN      NNNNNNNNM            ║
-║   NNN     NNN     NNNNN      NN     NNM           ║
-║  NNN             MNN MNN     NN     NNN           ║
-║  NNN             NN   NNN    NNNNNNNNN            ║
-║  NNN            NNNNNNNNN    NNMMMNNM             ║
-║   NNN     NNN   NN     NNN   NN    NNM            ║
-║    MNNNNNNNM   NNM      NNN  NN     NNM           ║
-║                                      NNN          ║
-║              NNNNNNNNN    MNNNNNNNN   NNN    NNN  ║
-║              NNM    NNN   MNN          NNN  NNN   ║
-║              NNM      NN  MNN           NNNNNN    ║
-║              NNM      NN  MNNNNNNNN      NNNN     ║
-║              NNM      NN  MNN           NNNNNN    ║
-║              NNM     NN   MNN          NNN  NNN   ║
-║              NNNNNNNNN    MNNNNNNNN   NNN    NNN  ║
-╠═══════════════════════════════════════════════════╣
-║               L I V E   M A R K E T               ║
-╚═══════════════════════════════════════════════════╝
+═══════════════════════════════════════════════════════════════════════════════
+    MNNNNNNNN       NNNN      NNNNNNNNM   NNNNNNNNN    MNNNNNNNN   NNN    NNN
+   NNN     NNN    NNN  NNN    NN     NNM  NNM    NNN   MNN          NNN  NNN
+  NNN            NNNNNNNNNN   NNMMMNNM    NNM      NN  MNNNNNNNN      NNNN     
+   NNN     NNN   NN     NNN   NN    NNM   NNM     NN   MNN          NNN  NNN  
+    MNNNNNNNM   NNM      NNN  NN     NNM  NNNNNNNNN    MNNNNNNNN   NNN    NNN
+════════════════════════════════ L I V E   M A R K E T ════════════════════════════
 """
 
 D_VROOM = r"""
@@ -70,13 +58,23 @@ class Display:
     
     @staticmethod
     def formatGrade(grade: str) -> str:
-        """Format a card grade with visual indicator"""
-        grade_symbols = {
-            "FACTORY": "★",
-            "LIMITED_RUN": "★ ★",
-            "NISMO": "★ ★ ★"
-        }
-        return f"{grade_symbols.get(grade, '?')}"
+        """
+        Format a card grade with visual indicator
+        Handles various grade formats from API: factory, limited, nismo, etc.
+        """
+        # Normalize grade to uppercase for comparison
+        grade_upper = str(grade).upper()
+        
+        # Map various grade formats to star display
+        if "FACTORY" in grade_upper:
+            return "★"
+        elif "LIMITED" in grade_upper:
+            return "★ ★"
+        elif "NISMO" in grade_upper:
+            return "★ ★ ★"
+        else:
+            # Unknown grade - show placeholder
+            return "¯¯¯"
     
     def showCompletedTrades(self, trades: List[Dict]):
         """Display completed trades in card-like box format"""
@@ -99,8 +97,11 @@ class Display:
                 trade_line = f"©{trade['price']:,} → {trade['vehicle']}"
                 value = trade['price']
             else:  # FOR_CARD
-                # Card trade: seller_vehicle → buyer_vehicle
-                trade_line = f"{trade['seller_vehicle']} → {trade['buyer_vehicle']}"
+                # Card trade: buyer_vehicle → seller_vehicle
+                if trade.get('buyer_vehicle'):
+                    trade_line = f"{trade['buyer_vehicle']} → {trade['seller_vehicle']}"
+                else:
+                    trade_line = f"Bought {trade['seller_vehicle']}"
                 value = trade.get('price', 0)  # May not have a value for card trades
             
             # Format value for bottom of card
@@ -127,7 +128,7 @@ class Display:
         
         print("\n" + "=" * 80)
         print("OPEN TRADES - Latest 5".center(80))
-        print("=" * 80)
+        print("=" * 80 + "\n")
         
         for i, trade in enumerate(trades, 1):
 
@@ -139,7 +140,7 @@ class Display:
             if trade['type'] == 'FOR_PRICE':
                 wants = f"©{trade['price']:,}"
             else:  # FOR_CARD
-                wants = f"{trade['want_vehicle']}"
+                wants = f"{trade.get('want_vehicle', 'Any Card')}"
 
             print(f"┌────────────┐")
             print(f"│ {stars:<10} │")
@@ -151,7 +152,7 @@ class Display:
             print(f"└────────────┘")
             print()
         
-        print("\n" + "=" * 80 + "\n")
+        print("=" * 80 + "\n")
 
         
     
@@ -164,27 +165,26 @@ class Display:
         
         print("\n" + "=" * 80)
         print("SHOP - AVAILABLE PACKS".center(80))
-        print("=" * 80)
+        print("=" * 80 + "\n")
         
         for i, pack in enumerate(packs, 1):
 
-            name  = pack['collection_name']
-            desc  = pack['description']
-            value = f"©{pack['price']:,}".center(12)
+            name  = pack['name']
+            cards = pack['cardCount']
 
             print(f" ╦╦╦╦╦╦╦╦╦╦╦╦╦╦")
             print(f" ╠╩╩╩╩╩╩╩╩╩╩╩╩╣")
             print(f" │            │")
             print(f" │ B O O S T  │  {name}")
-            print(f" │    P A C K │  {desc}")
+            print(f" │    P A C K │  {cards} possible cards")
             print(f" │            │")
-            print(f" │{value}│")
+            print(f" │            │")
             print(f" │            │")
             print(f" ╠╦╦╦╦╦╦╦╦╦╦╦╦╣")
             print(f" ╩╩╩╩╩╩╩╩╩╩╩╩╩╩")
             print()
         
-        print("\n" + "=" * 80 + "\n")
+        print("=" * 80 + "\n")
     
     @staticmethod
     def showCollections(collections: List[Dict]):
@@ -200,7 +200,7 @@ class Display:
         for i, col in enumerate(collections, 1):
             print(f"\n[{i}] {col['name']}")
             print("-" * 80)
-            print(f"  Price:  ©{col['pack_price']:,}")
+            print(f"  Price:       ©{col['pack_price']:,}")
             print(f"  Vehicles:    {col['vehicle_count']}")
             print(f"  Description: {col['description']}")
         

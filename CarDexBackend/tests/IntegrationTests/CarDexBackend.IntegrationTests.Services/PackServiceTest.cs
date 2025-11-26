@@ -13,13 +13,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using CarDexBackend.Services.Resources;
 
+using CarDexBackend.Repository.Implementations;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Domain.Entities;
+
 namespace DefaultNamespace
 {
     public class PackServiceTest : IDisposable
     {
         private readonly CarDexDbContext _context;
         private readonly PackService _packService;
-        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        private readonly IPackRepository _packRepo;
+        private readonly ICollectionRepository _collectionRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly ICardRepository _cardRepo;
 
         //Used ChatGPT to get the base code and to get help seeding the data
         public PackServiceTest()
@@ -30,9 +38,19 @@ namespace DefaultNamespace
                 .Options;
 
             _context = new CarDexDbContext(options);
-
-            var currentUser = new TestCurrentUserService{UserId = _testUserId, IsAuthenticated = true};
-            _packService = new PackService(_context, new NullStringLocalizer<SharedResources>(), currentUser);
+            _packRepo = new PackRepository(_context);
+            _collectionRepo = new CollectionRepository(_context);
+            _userRepo = new UserRepository(_context);
+            _vehicleRepo = new Repository<Vehicle>(_context);
+            _cardRepo = new CardRepository(_context);
+            
+            _packService = new PackService(
+                _packRepo, 
+                _collectionRepo, 
+                _userRepo, 
+                _vehicleRepo, 
+                _cardRepo, 
+                new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();

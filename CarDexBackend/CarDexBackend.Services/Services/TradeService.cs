@@ -2,8 +2,7 @@ using CarDexBackend.Domain.Entities;
 using CarDexBackend.Domain.Enums;
 using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
-using CarDexDatabase;
-using Microsoft.EntityFrameworkCore;
+using CarDexBackend.Repository.Interfaces;
 using Microsoft.Extensions.Localization;
 using Microsoft.Win32.SafeHandles;
 using CarDexBackend.Services.Resources;
@@ -11,7 +10,7 @@ using CarDexBackend.Services.Resources;
 namespace CarDexBackend.Services
 {
     /// <summary>
-    /// Production implementation of <see cref="ITradeService"/> using Entity Framework Core and PostgreSQL.
+    /// Production implementation of <see cref="ITradeService"/> using Repositories.
     /// </summary>
     /// <remarks>
     /// NOTE: This implementation uses a hardcoded test user ID for development.
@@ -20,12 +19,31 @@ namespace CarDexBackend.Services
     public class TradeService : ITradeService
     {
         private readonly IStringLocalizer<SharedResources> _sr;
-        private readonly CarDexDbContext _context;
-        private readonly ICurrentUserService _currentUserService;
+        private readonly IOpenTradeRepository _openTradeRepo;
+        private readonly ICompletedTradeRepository _completedTradeRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly ICardRepository _cardRepo;
+        private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly IRewardRepository _rewardRepo;
+        
+        // TODO: Replace with actual authenticated user ID from JWT/claims
+        private readonly Guid _testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-        public TradeService(CarDexDbContext context, IStringLocalizer<SharedResources> sr, ICurrentUserService currentUserService)
+        public TradeService(
+            IOpenTradeRepository openTradeRepo,
+            ICompletedTradeRepository completedTradeRepo,
+            IUserRepository userRepo,
+            ICardRepository cardRepo,
+            IRepository<Vehicle> vehicleRepo,
+            IRewardRepository rewardRepo,
+            IStringLocalizer<SharedResources> sr)
         {
-            _context = context;
+            _openTradeRepo = openTradeRepo;
+            _completedTradeRepo = completedTradeRepo;
+            _userRepo = userRepo;
+            _cardRepo = cardRepo;
+            _vehicleRepo = vehicleRepo;
+            _rewardRepo = rewardRepo;
             _sr = sr;
             _currentUserService = currentUserService;
         }
@@ -45,80 +63,38 @@ namespace CarDexBackend.Services
             int limit,
             int offset)
         {
-            var query = _context.OpenTrades.AsQueryable();
+            var (trades, total) = await _openTradeRepo.GetOpenTradesAsync(
+                type,
+                collectionId,
+                grade,
+                minPrice,
+                maxPrice,
+                vehicleId,
+                wantCardId,
+                sortBy,
+                limit,
+                offset);
 
-            // Apply filters
-            if (!string.IsNullOrEmpty(type))
-                query = query.Where(t => t.Type.ToString() == type);
+            // Fetch users for these trades
+            var userIds = trades.Select(t => t.UserId).Distinct().ToList();
+            var users = await _userRepo.FindAsync(u => userIds.Contains(u.Id));
+            var userMap = users.ToDictionary(u => u.Id, u => u.Username);
 
-            // Filter by collection - need to join with Cards
-            if (collectionId.HasValue)
+            var tradeResponses = trades.Select(t => new TradeResponse
             {
-                var cardIdsInCollection = _context.Cards
-                    .Where(c => c.CollectionId == collectionId.Value)
-                    .Select(c => c.Id);
-                query = query.Where(t => cardIdsInCollection.Contains(t.CardId));
-            }
-
-            // Filter by grade - need to join with Cards
-            if (!string.IsNullOrEmpty(grade))
-            {
-                var cardIdsWithGrade = _context.Cards
-                    .Where(c => c.Grade.ToString() == grade)
-                    .Select(c => c.Id);
-                query = query.Where(t => cardIdsWithGrade.Contains(t.CardId));
-            }
-
-            if (minPrice.HasValue)
-                query = query.Where(t => t.Price >= minPrice);
-
-            if (maxPrice.HasValue)
-                query = query.Where(t => t.Price <= maxPrice);
-
-            // Filter by vehicle - need to join with Cards
-            if (vehicleId.HasValue)
-            {
-                var cardIdsForVehicle = _context.Cards
-                    .Where(c => c.VehicleId == vehicleId.Value)
-                    .Select(c => c.Id);
-                query = query.Where(t => cardIdsForVehicle.Contains(t.CardId));
-            }
-
-            if (wantCardId.HasValue)
-                query = query.Where(t => t.WantCardId == wantCardId);
-
-            // Apply sorting (date sorting removed - no CreatedAt in DB)
-            query = sortBy?.ToLower() switch
-            {
-                "price_asc" => query.OrderBy(t => t.Price),
-                "price_desc" => query.OrderByDescending(t => t.Price),
-                "date_asc" => query.OrderBy(t => t.Id),  // Fallback to ID ordering
-                "date_desc" => query.OrderByDescending(t => t.Id),
-                _ => query.OrderByDescending(t => t.Id)  // Default order by ID descending
-            };
-
-            var total = await query.CountAsync();
-
-            // Get trades and join with Users to get Username
-            var trades = await query
-                .Skip(offset)
-                .Take(limit)
-                .Join(_context.Users, t => t.UserId, u => u.Id, (t, u) => new TradeResponse
-                {
-                    Id = t.Id,
-                    Type = t.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
-                    UserId = t.UserId,
-                    Username = u.Username,
-                    CardId = t.CardId,
-                    Price = t.Type == TradeEnum.FOR_PRICE ? t.Price : null,
-                    WantCardId = t.Type == TradeEnum.FOR_CARD ? t.WantCardId : null,
-                    CreatedAt = DateTime.UtcNow  // Not in DB, using current time
-                })
-                .ToListAsync();
+                Id = t.Id,
+                Type = t.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
+                UserId = t.UserId,
+                Username = userMap.ContainsKey(t.UserId) ? userMap[t.UserId] : _sr["UnknownMessage"],
+                CardId = t.CardId,
+                Price = t.Type == TradeEnum.FOR_PRICE ? t.Price : null,
+                WantCardId = t.Type == TradeEnum.FOR_CARD ? t.WantCardId : null,
+                CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+            }).ToList();
 
             return new TradeListResponse
             {
-                Trades = trades,
+                Trades = tradeResponses,
                 Total = total,
                 Limit = limit,
                 Offset = offset
@@ -130,12 +106,12 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<TradeDetailedResponse> GetOpenTradeById(Guid tradeId)
         {
-            var trade = await _context.OpenTrades.FindAsync(tradeId);
+            var trade = await _openTradeRepo.GetByIdAsync(tradeId);
             if (trade == null)
                 throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
 
-            var user = await _context.Users.FindAsync(trade.UserId);
-            var card = await _context.Cards.FindAsync(trade.CardId);
+            var user = await _userRepo.GetByIdAsync(trade.UserId);
+            var card = await _cardRepo.GetCardByIdRawAsync(trade.CardId);
             
             // TradeDetailedResponse extends TradeResponse and adds: Card (CardDetailedResponse), WantCard (CardDetailedResponse)
             var response = new TradeDetailedResponse
@@ -153,7 +129,7 @@ namespace CarDexBackend.Services
             // Populate Card property if card exists
             if (card != null)
             {
-                var vehicle = await _context.Vehicles.FindAsync(card.VehicleId);
+                var vehicle = await _vehicleRepo.GetByIdAsync(card.VehicleId);
                 response.Card = new CardDetailedResponse
                 {
                     Id = card.Id,
@@ -171,10 +147,10 @@ namespace CarDexBackend.Services
             // Populate WantCard property if wantCardId exists
             if (trade.WantCardId.HasValue)
             {
-                var wantCard = await _context.Cards.FindAsync(trade.WantCardId.Value);
+                var wantCard = await _cardRepo.GetCardByIdRawAsync(trade.WantCardId.Value);
                 if (wantCard != null)
                 {
-                    var wantVehicle = await _context.Vehicles.FindAsync(wantCard.VehicleId);
+                    var wantVehicle = await _vehicleRepo.GetByIdAsync(wantCard.VehicleId);
                     response.WantCard = new CardDetailedResponse
                     {
                         Id = wantCard.Id,
@@ -201,7 +177,7 @@ namespace CarDexBackend.Services
             var userId = _currentUserService.UserId;;
 
             // Validate the card exists and belongs to user
-            var card = await _context.Cards.FindAsync(request.CardId);
+            var card = await _cardRepo.GetCardByIdRawAsync(request.CardId);
             if (card == null)
                 throw new KeyNotFoundException(_sr["CardNotFoundError"]);
 
@@ -222,10 +198,10 @@ namespace CarDexBackend.Services
             var tradeId = Guid.NewGuid();
             var trade = new OpenTrade(tradeId, tradeType, userId, request.CardId, request.Price ?? 0, request.WantCardId);
 
-            _context.OpenTrades.Add(trade);
-            await _context.SaveChangesAsync();
+            await _openTradeRepo.AddAsync(trade);
+            await _openTradeRepo.SaveChangesAsync();
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepo.GetByIdAsync(userId);
 
             return new TradeResponse
             {
@@ -247,13 +223,13 @@ namespace CarDexBackend.Services
         {
             var buyerId = _currentUserService.UserId;;
 
-            var trade = await _context.OpenTrades.FindAsync(tradeId);
+            var trade = await _openTradeRepo.GetByIdAsync(tradeId);
             if (trade == null)
                 throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
 
-            var seller = await _context.Users.FindAsync(trade.UserId);
-            var buyer = await _context.Users.FindAsync(buyerId);
-            var sellerCard = await _context.Cards.FindAsync(trade.CardId);
+            var seller = await _userRepo.GetByIdAsync(trade.UserId);
+            var buyer = await _userRepo.GetByIdAsync(buyerId);
+            var sellerCard = await _cardRepo.GetCardByIdRawAsync(trade.CardId);
 
             if (seller == null || buyer == null || sellerCard == null)
                 throw new InvalidOperationException(_sr["InvalidTradeParticipantError"]);
@@ -275,12 +251,12 @@ namespace CarDexBackend.Services
                     throw new InvalidOperationException(_sr["GenericInsufficientCurrencyError"]);
 
                 // Transfer currency
-                buyer.Currency -= price;
-                seller.Currency += price;
+                buyer.DeductCurrency(price);
+                seller.AddCurrency(price);
 
                 // Create seller reward (currency) - Reward(Guid id, Guid userId, RewardEnum type, int amount, Guid? itemId = null)
                 sellerRewardEntity = new Reward(Guid.NewGuid(), seller.Id, RewardEnum.CURRENCY_FROM_TRADE, price, null);
-                _context.Rewards.Add(sellerRewardEntity);
+                await _rewardRepo.AddAsync(sellerRewardEntity);
                 
                 // Create buyer reward (card from seller)
                 buyerRewardEntity = new Reward(Guid.NewGuid(), buyer.Id, RewardEnum.CARD_FROM_TRADE, 0, sellerCard.Id);
@@ -291,7 +267,7 @@ namespace CarDexBackend.Services
                 if (request == null || !request.BuyerCardId.HasValue)
                     throw new ArgumentException(_sr["BuyerCardIdRequiredError"]);
 
-                var buyerCard = await _context.Cards.FindAsync(request.BuyerCardId.Value);
+                var buyerCard = await _cardRepo.GetCardByIdRawAsync(request.BuyerCardId.Value);
                 if (buyerCard == null)
                     throw new KeyNotFoundException(_sr["BuyerCardNotFoundError"]);
 
@@ -301,10 +277,11 @@ namespace CarDexBackend.Services
                 // Swap card ownership
                 buyerCard.UserId = seller.Id;
                 buyerCardId = buyerCard.Id;
+                await _cardRepo.UpdateAsync(buyerCard);
 
                 // Create seller reward (card from buyer)
                 sellerRewardEntity = new Reward(Guid.NewGuid(), seller.Id, RewardEnum.CARD_FROM_TRADE, 0, buyerCard.Id);
-                _context.Rewards.Add(sellerRewardEntity);
+                await _rewardRepo.AddAsync(sellerRewardEntity);
                 
                 // Create buyer reward (card from seller)
                 buyerRewardEntity = new Reward(Guid.NewGuid(), buyer.Id, RewardEnum.CARD_FROM_TRADE, 0, sellerCard.Id);
@@ -319,9 +296,14 @@ namespace CarDexBackend.Services
 
             // Transfer seller's card to buyer
             sellerCard.UserId = buyer.Id;
+            await _cardRepo.UpdateAsync(sellerCard);
+
+            // Update users currency
+            await _userRepo.UpdateAsync(buyer);
+            await _userRepo.UpdateAsync(seller);
 
             // Add buyer reward
-            _context.Rewards.Add(buyerRewardEntity);
+            await _rewardRepo.AddAsync(buyerRewardEntity);
 
             // CompletedTrade constructor: CompletedTrade(Guid id, TradeEnum type, Guid sellerUserId, Guid sellerCardId, Guid buyerUserId, int price = 0, Guid? buyerCardId = null)
             var completedTradeId = Guid.NewGuid();
@@ -335,9 +317,9 @@ namespace CarDexBackend.Services
                 buyerCardId
             );
 
-            _context.CompletedTrades.Add(completedTrade);
-            _context.OpenTrades.Remove(trade);
-            await _context.SaveChangesAsync();
+            await _completedTradeRepo.AddAsync(completedTrade);
+            await _openTradeRepo.DeleteAsync(trade);
+            await _openTradeRepo.SaveChangesAsync();
 
             var completedTradeResponse = new CompletedTradeResponse
             {
@@ -383,7 +365,7 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task DeleteTrade(Guid tradeId)
         {
-            var trade = await _context.OpenTrades.FindAsync(tradeId);
+            var trade = await _openTradeRepo.GetByIdAsync(tradeId);
             if (trade == null)
                 throw new KeyNotFoundException(_sr["TradeNotFound"]);
 
@@ -391,8 +373,8 @@ namespace CarDexBackend.Services
             if (trade.UserId != _currentUserService.UserId)
                 throw new InvalidOperationException(_sr["OnlyDeleteYourTradeError"]);
 
-            _context.OpenTrades.Remove(trade);
-            await _context.SaveChangesAsync();
+            await _openTradeRepo.DeleteAsync(trade);
+            await _openTradeRepo.SaveChangesAsync();
         }
 
         /// <summary>
@@ -400,12 +382,12 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<CompletedTradeResponse> GetCompletedTradeById(Guid tradeId)
         {
-            var trade = await _context.CompletedTrades.FindAsync(tradeId);
+            var trade = await _completedTradeRepo.GetByIdAsync(tradeId);
             if (trade == null)
                 throw new KeyNotFoundException(_sr["CompletedTradeNotFoundError"]);
 
-            var seller = await _context.Users.FindAsync(trade.SellerUserId);
-            var buyer = await _context.Users.FindAsync(trade.BuyerUserId);
+            var seller = await _userRepo.GetByIdAsync(trade.SellerUserId);
+            var buyer = await _userRepo.GetByIdAsync(trade.BuyerUserId);
 
             return new CompletedTradeResponse
             {
@@ -427,36 +409,34 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<TradeHistoryResponse> GetTradeHistory(Guid? userId, int limit, int offset)
         {
-            var query = _context.CompletedTrades.AsQueryable();
+            var (trades, total) = await _completedTradeRepo.GetHistoryAsync(userId, null, limit, offset);
 
-            if (userId.HasValue)
-                query = query.Where(t => t.SellerUserId == userId.Value || t.BuyerUserId == userId.Value);
+            // Fetch users
+            var userIds = new List<Guid>();
+            userIds.AddRange(trades.Select(t => t.SellerUserId));
+            userIds.AddRange(trades.Select(t => t.BuyerUserId));
+            userIds = userIds.Distinct().ToList();
 
-            query = query.OrderByDescending(t => t.ExecutedDate);
+            var users = await _userRepo.FindAsync(u => userIds.Contains(u.Id));
+            var userMap = users.ToDictionary(u => u.Id, u => u.Username);
 
-            var total = await query.CountAsync();
-
-            var trades = await query
-                .Skip(offset)
-                .Take(limit)
-                .Select(t => new CompletedTradeResponse
-                {
-                    Id = t.Id,
-                    Type = t.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
-                    SellerUserId = t.SellerUserId,
-                    SellerUsername = _context.Users.Where(u => u.Id == t.SellerUserId).Select(u => u.Username).FirstOrDefault() ?? _sr["UnknownMessage"],
-                    SellerCardId = t.SellerCardId,
-                    BuyerUserId = t.BuyerUserId,
-                    BuyerUsername = _context.Users.Where(u => u.Id == t.BuyerUserId).Select(u => u.Username).FirstOrDefault() ?? _sr["UnknownMessage"],
-                    BuyerCardId = t.BuyerCardId,
-                    Price = t.Price,
-                    ExecutedDate = DateTime.UtcNow
-                })
-                .ToListAsync();
+            var tradeResponses = trades.Select(t => new CompletedTradeResponse
+            {
+                Id = t.Id,
+                Type = t.Type.ToString(),  // Will be "FOR_CARD" or "FOR_PRICE"
+                SellerUserId = t.SellerUserId,
+                SellerUsername = userMap.ContainsKey(t.SellerUserId) ? userMap[t.SellerUserId] : _sr["UnknownMessage"],
+                SellerCardId = t.SellerCardId,
+                BuyerUserId = t.BuyerUserId,
+                BuyerUsername = userMap.ContainsKey(t.BuyerUserId) ? userMap[t.BuyerUserId] : _sr["UnknownMessage"],
+                BuyerCardId = t.BuyerCardId,
+                Price = t.Price,
+                ExecutedDate = DateTime.UtcNow
+            }).ToList();
 
             return new TradeHistoryResponse
             {
-                Trades = trades,
+                Trades = tradeResponses,
                 Total = total,
                 Limit = limit,
                 Offset = offset

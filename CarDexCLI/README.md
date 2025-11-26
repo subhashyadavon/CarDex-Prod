@@ -12,12 +12,13 @@ A command-line interface that shows realtime market data for CarDex.
 ### File Structure
 ```bash
 CarDexCLI/
-├── api_client.py      # API client wrapper (with dummy data)
-├── cli_client.py      # Main CLI application
-├── cli_display.py     # Display and formatting utilities
-├── test_suite.py      # Unit tests with coverage
-├── requirements.txt   # Python dependencies
-└── README.md          # This file!!
+├── api_client.py     # API client wrapper (with dummy data)
+├── cli_client.py     # Main CLI application
+├── cli_display.py    # Display and formatting utilities
+├── test_suite.py     # Unit tests with coverage
+├── requirements.txt  # Python dependencies
+├── config.py         # Global/Shared vars
+└── README.md         # This file!!
 ```
 
 ### How to Run
@@ -150,24 +151,22 @@ Fetch all card packs currently available in the CarDex shop.
  ╠╩╩╩╩╩╩╩╩╩╩╩╩╣
  │            │
  │ B O O S T  │  JDM Legends
- │    P A C K │  Classic Japanese sports cars
+ │    P A C K │  6 possible cards
  │            │
- │   ©2,000   │
+ │            │
  │            │
  ╠╦╦╦╦╦╦╦╦╦╦╦╦╣
  ╩╩╩╩╩╩╩╩╩╩╩╩╩╩
 ```
 #### EXAMPLE - BREAKDOWN
 ```bash
-# PACK
-# <price>
  ╦╦╦╦╦╦╦╦╦╦╦╦╦╦
  ╠╩╩╩╩╩╩╩╩╩╩╩╩╣
  │            │
- │ B O O S T  │  JDM Legends                   # <name>
- │    P A C K │  Classic Japanese sports cars  # <desc>
+ │ B O O S T  │  JDM Legends       # <name>
+ │    P A C K │  6 possible cards  # <cards> number of cards
  │            │
- │   ©2,000   │
+ │            │
  │            │
  ╠╦╦╦╦╦╦╦╦╦╦╦╦╣
  ╩╩╩╩╩╩╩╩╩╩╩╩╩╩

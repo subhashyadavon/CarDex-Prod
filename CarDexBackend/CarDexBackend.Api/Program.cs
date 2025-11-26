@@ -1,6 +1,8 @@
 using CarDexBackend.Api.Extensions;
 using CarDexBackend.Api.Services;
 using CarDexBackend.Services;
+using CarDexBackend.Repository.Interfaces;
+using CarDexBackend.Repository.Implementations;
 using CarDexBackend.Shared.Validator;
 using CarDexBackend.Api.GlobalExceptionHandler;
 
@@ -37,6 +39,15 @@ builder.Services.AddLocalization();
 
 // HTTP Context Accessor
 builder.Services.AddHttpContextAccessor();
+// Register Repositories
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICardRepository, CardRepository>();
+builder.Services.AddScoped<IPackRepository, PackRepository>();
+builder.Services.AddScoped<ICollectionRepository, CollectionRepository>();
+builder.Services.AddScoped<IRewardRepository, RewardRepository>();
+builder.Services.AddScoped<IOpenTradeRepository, OpenTradeRepository>();
+builder.Services.AddScoped<ICompletedTradeRepository, CompletedTradeRepository>();
 
 // Register business services
 builder.Services.AddScoped<IAuthService, AuthService>();
