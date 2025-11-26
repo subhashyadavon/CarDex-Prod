@@ -77,7 +77,9 @@ namespace CarDexBackend.Services
                 Theme = collection.Name,
                 Description = collection.Name,
                 CardCount = cards.Count,
-                Cards = cards
+                Cards = cards,
+                Price = collection.PackPrice,  
+                ImageUrl = collection.Image  
             };
         }
     }
