@@ -186,9 +186,10 @@ export interface CardWithVehicleListResponse {
 export interface CollectionCard {
   id: string;
   name: string;
-  grade: GradeEnum;   
+  grade: GradeEnum;
   value: number;
-  createdAt: string;  
+  createdAt: string;
+  imageUrl: string;
 }
 
 // Detailed collection response 
