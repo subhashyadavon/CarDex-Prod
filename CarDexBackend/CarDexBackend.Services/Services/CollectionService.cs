@@ -66,7 +66,8 @@ namespace CarDexBackend.Services
                         Name = $"{vehicle.Year} {vehicle.Make} {vehicle.Model}",
                         Grade = card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
                         Value = card.Value,
-                        CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                        CreatedAt = DateTime.UtcNow, // Not in DB, using current time
+                        ImageUrl = vehicle.Image,
                     })
                 .ToListAsync();
 
