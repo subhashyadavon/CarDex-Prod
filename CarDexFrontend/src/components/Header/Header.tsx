@@ -7,8 +7,8 @@ export type NavItem = "OPEN" | "GARAGE" | "TRADE";
 export type HeaderProps = {
   activeNav: NavItem;
   onNavChange: (nav: NavItem) => void;
-  coinBalance: number;
-  userLevel: number;
+  coinBalance?: number;
+  userLevel?: number;
   logoUrl?: string;
   coinIconUrl?: string;
   onLogout?: () => void; // Optional logout handler
@@ -61,9 +61,9 @@ export default function Header({
               "🪙"
             )}
           </span>
-          <span className="header-2">{coinBalance.toLocaleString()}</span>
+          <span className="header-2">{coinBalance !== undefined ? coinBalance.toLocaleString() : "0"}</span>
         </div>
-        <div className={`${styles.level} header-2`}>{userLevel}</div>
+        <div className={`${styles.level} header-2`}>{userLevel || "0"}</div>
         
         {/* Logout Button */}
         {onLogout && (
