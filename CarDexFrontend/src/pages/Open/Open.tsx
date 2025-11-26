@@ -1,21 +1,23 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PackShop from "../../components/Pack/PackShop";
-import packsData from "../../data/packs.json";
-import collectionsData from "../../data/collections.json";
-import vehiclesData from "../../data/vehicles.json";
 import styles from "./Open.module.css";
 
-type Pack = (typeof packsData)[number];
-type Collection = (typeof collectionsData)[number];
-type Vehicle = (typeof vehiclesData)[number];
+import { collectionService } from "../../services/collectionService";
+import type {
+  Collection,
+  CollectionDetailedResponse,
+  CollectionCard,
+} from "../../types/types";
+import Pack from "../../components/Pack/Pack";
 
+
+// Picks 3 cards randomly from the list of cards after opening a pack
 function pickThreeRandom<T>(arr: T[]): T[] {
   const copy = [...arr];
   const out: T[] = [];
   for (let i = 0; i < 3 && copy.length > 0; i++) {
     const idx = Math.floor(Math.random() * copy.length);
-    out.push(copy.splice(idx, 1)[0]); 
+    out.push(copy.splice(idx, 1)[0]);
   }
   return out;
 }
@@ -23,53 +25,59 @@ function pickThreeRandom<T>(arr: T[]): T[] {
 const Open: React.FC = () => {
   const navigate = useNavigate();
 
-  // Index vehicles once for quick lookup
-  const vehicleById = useMemo(() => {
-    const m = new Map<number, Vehicle>();
-    (vehiclesData as Vehicle[]).forEach((v) => m.set(v.id, v));
-    return m;
+  // Collections from backend  
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoadingCollections, setIsLoadingCollections] = useState(false);
+  const [collectionsError, setCollectionsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      setIsLoadingCollections(true);
+      setCollectionsError(null);
+      try {
+        const data = await collectionService.getAllCollections(); 
+        setCollections(data);
+      } catch (err) {
+        console.error("Failed to fetch collections:", err);
+        setCollectionsError("Could not load collections.");
+      } finally {
+        setIsLoadingCollections(false);
+      }
+    };
+
+    fetchCollections();
   }, []);
 
-  const ownedCards: { id: number }[] = []; // wire to your state/API later
+  const handleCollectionClick = async (index: number) => {
+    const collection = collections[index];
+    if (!collection) return;
 
-  const handlePackGridClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    const tile = (e.target as HTMLElement).closest<HTMLElement>(
-      "[data-pack-index]"
-    );
-    if (!tile) return;
+    try {
+      // fetches the cards from the collection
+      const detailed: CollectionDetailedResponse =
+        await collectionService.getCollectionById(collection.id);
 
-    const idxStr = tile.getAttribute("data-pack-index");
-    if (!idxStr) return;
+      const cards: CollectionCard[] = detailed.cards ?? [];
+      const picked = pickThreeRandom(cards);
 
-    const pack = (packsData as Pack[])[Number(idxStr)];
-    if (!pack) return;
-
-    // 1) Find the collection
-    const collection = (collectionsData as Collection[]).find(
-      (c) => c.id === pack.collectionId
-    );
-    if (!collection) {
-      // Navigate with empty cards if collection missing
-      navigate("/openedPack", { state: { packName: pack.name, cards: [] } });
-      return;
+      navigate("/openedPack", {
+        state: {
+          packName: detailed.name ?? collection.name,
+          cards: picked,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to fetch detailed collection:", err);
+      navigate("/openedPack", {
+        state: {
+          packName: collection.name,
+          cards: [],
+        },
+      });
     }
-
-    // 2) Build candidate vehicle objects
-    const candidates = (collection.vehicles ?? [])
-      .map((id) => vehicleById.get(id))
-      .filter(Boolean) as Vehicle[];
-
-    // 3) Pick 3 random vehicles
-    const picked = pickThreeRandom(candidates);
-
-    // 4) Navigate to OpenPack with the actual vehicle objects 
-    navigate("/openedPack", {
-      state: {
-        packName: pack.name,
-        cards: picked,
-      },
-    });
   };
+
+  const ownedCards: any[] = [];
 
   return (
     <div className={styles.container}>
@@ -85,15 +93,48 @@ const Open: React.FC = () => {
               No cards owned...
             </div>
           ) : (
-            ownedCards.map((card) => <div key={card.id} />)
+            ownedCards.map((card) => (
+              <div key={card.id} className={styles.ownedCardTile}>
+                <div className="body-2">Card #{card.id}</div>
+              </div>
+            ))
           )}
         </div>
       </section>
 
-      {/* Pack Shop (display-only). Clicks handled here */}
-      <div onClick={handlePackGridClick}>
-        <PackShop packs={packsData as Pack[]} />
-      </div>
+      {/* Collections Section */}
+      <section className={styles.shop}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>PACK SHOP</h1>
+        </header>
+
+        {isLoadingCollections ? (
+          <div className={`body-1 ${styles.emptyMessage}`}>
+            Loading collections...
+          </div>
+        ) : collectionsError ? (
+          <div className={`body-1 ${styles.emptyMessage}`}>
+            {collectionsError}
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {collections.map((collection, idx) => (
+              <div
+                key={collection.id}
+                data-collection-index={idx}
+                onClick={() => handleCollectionClick(idx)}
+              >
+                <Pack
+                  name={collection.name}
+                  packType="Collection"
+                  imageUrl={collection.image}
+                  price={collection.packPrice ?? 0}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };
