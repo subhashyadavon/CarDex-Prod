@@ -48,34 +48,42 @@ const Open: React.FC = () => {
     fetchCollections();
   }, []);
 
-  const handleCollectionClick = async (index: number) => {
-    const collection = collections[index];
-    if (!collection) return;
+const handleCollectionClick = async (index: number) => {
+  const collection = collections[index];
+  if (!collection) return;
 
-    try {
-      // fetches the cards from the collection
-      const detailed: CollectionDetailedResponse =
-        await collectionService.getCollectionById(collection.id);
+  try {
+    // fetches the cards from the collection
+    const detailed: CollectionDetailedResponse =
+      await collectionService.getCollectionById(collection.id);
 
-      const cards: CollectionCard[] = detailed.cards ?? [];
-      const picked = pickThreeRandom(cards);
+    const cardsWithImage =
+      detailed.cards?.map((card) => ({
+        ...card,
+        image: card.imageUrl, 
+      })) ?? [];
 
-      navigate("/openedPack", {
-        state: {
-          packName: detailed.name ?? collection.name,
-          cards: picked,
-        },
-      });
-    } catch (err) {
-      console.error("Failed to fetch detailed collection:", err);
-      navigate("/openedPack", {
-        state: {
-          packName: collection.name,
-          cards: [],
-        },
-      });
-    }
-  };
+    console.log(cardsWithImage);
+
+    const picked = pickThreeRandom(cardsWithImage);
+
+    // Navigate to the openedPack page with the picked cards
+    navigate("/openedPack", {
+      state: {
+        packName: detailed.name ?? collection.name,
+        cards: picked,
+      },
+    });
+  } catch (err) {
+    console.error("Failed to fetch detailed collection:", err);
+    navigate("/openedPack", {
+      state: {
+        packName: collection.name,
+        cards: [],
+      },
+    });
+  }
+};
 
   return (
     <div className={styles.container}>
