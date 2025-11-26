@@ -69,6 +69,8 @@ export interface Collection {
   name: string;
   image: string;
   packPrice: number;
+  price: number; 
+  imageUrl: string;
 }
 
 export interface OpenTrade {
@@ -197,4 +199,6 @@ export interface CollectionDetailedResponse {
   description: string;
   cardCount: number;
   cards: CollectionCard[];
+  price: number; // Add price here too
+  imageUrl: string;
 }
