@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./OpenedPack.module.css";
 
 type Vehicle = {
-  id: number;
+  id: string; // Assuming the id is a string based on your API response
   year: string;
   make: string;
   model: string;
@@ -11,7 +11,7 @@ type Vehicle = {
   stat2: number;
   statN: number;
   value: number;
-  image: string;
+  image: string; // image URL
 };
 
 type State = { packName?: string; cards?: Vehicle[] };
@@ -24,18 +24,25 @@ const OpenPack: React.FC = () => {
     ? `${state.packName} — Opened Cards`
     : "Opened Cards";
 
-  // Trigger animations on mount
-  // Used ChatGPT to add the animations
   const [play, setPlay] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setPlay(true), 60);
     return () => clearTimeout(t);
   }, []);
 
+  // Debugging log for cards and image URLs
+  useEffect(() => {
+    console.log("Cards Data:", cards);
+    cards.forEach((v) => {
+      console.log(`Card ID: ${v.id}, Image URL: ${v.image}`);
+    });
+  }, [cards]);
+
   return (
     <div className={`bg-gradient-dark ${styles.page}`}>
       <div className={styles.content}>
-        {/* Add animations*/}
+        {/* Add animations */}
         <section className={`${styles.panel} ${play ? styles.play : ""}`}>
           <h2 className="header-1" style={{ marginBottom: "0.75rem" }}>
             {heading}
@@ -54,11 +61,16 @@ const OpenPack: React.FC = () => {
                   title={`${v.year} ${v.make} ${v.model}`}
                 >
                   <div className={styles.cardImageWrap}>
-                    <img
-                      src={v.image}
-                      alt={`${v.make} ${v.model}`}
-                      className={styles.cardImage}
-                    />
+                    {/* Debugging: Log image URL */}
+                    {v.image ? (
+                      <img
+                        src={v.image}
+                        alt={`${v.make} ${v.model}`}
+                        className={styles.cardImage}
+                      />
+                    ) : (
+                      <div className={styles.noImage}>Image not available</div>
+                    )}
                   </div>
                   <div className={styles.cardMeta}>
                     <div className="card-2">
