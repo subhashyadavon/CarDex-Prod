@@ -4,10 +4,10 @@ import styles from "./Pack.module.css";
 import coinImage from "../../assets/coin.png";
 
 export type PackProps = {
-  name: string;           // "The Daily Booster"
-  packType: string;       // "BOOSTER PACK"
-  imageUrl: string;       // Main pack image (180x90)
-  price: number;          // 5000
+  name: string; // "The Daily Booster"
+  packType: string; // "BOOSTER PACK"
+  imageUrl: string; // Main pack image (180x90)
+  price?: number; // Made optional + safe default
   onClick?: () => void;
 };
 
@@ -18,6 +18,10 @@ export default function Pack({
   price,
   onClick,
 }: PackProps) {
+  // safe check for the numeric value
+  const safePrice =
+    typeof price === "number" && !Number.isNaN(price) ? price : 0;
+
   return (
     <article className={styles.pack} onClick={onClick}>
       {/* Header */}
@@ -36,10 +40,10 @@ export default function Pack({
       {/* Footer with Price */}
       <footer className={styles.footer}>
         <span className={styles.coinIcon} aria-hidden>
-            <img src={coinImage} alt="" className={styles.coinImage} />
+          <img src={coinImage} alt="" className={styles.coinImage} />
         </span>
         <span className={`${styles.price} card-2`}>
-          {price.toLocaleString()}
+          {safePrice.toLocaleString()}
         </span>
       </footer>
     </article>
