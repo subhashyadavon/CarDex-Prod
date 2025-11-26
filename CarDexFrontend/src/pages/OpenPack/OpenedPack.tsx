@@ -12,6 +12,7 @@ type Vehicle = {
   statN: number;
   value: number;
   image: string; // image URL
+  name: string; // Card name 
 };
 
 type State = { packName?: string; cards?: Vehicle[] };
@@ -31,13 +32,13 @@ const OpenPack: React.FC = () => {
     return () => clearTimeout(t);
   }, []);
 
-  // Debugging log for cards and image URLs
-  useEffect(() => {
-    console.log("Cards Data:", cards);
-    cards.forEach((v) => {
-      console.log(`Card ID: ${v.id}, Image URL: ${v.image}`);
-    });
-  }, [cards]);
+  // // Debugging log for cards and image URLs
+  // useEffect(() => {
+  //   console.log("Cards Data:", cards);
+  //   cards.forEach((v) => {
+  //     console.log(`Card ID: ${v.id}, Image URL: ${v.image}`);
+  //   });
+  // }, [cards]);
 
   return (
     <div className={`bg-gradient-dark ${styles.page}`}>
@@ -58,29 +59,23 @@ const OpenPack: React.FC = () => {
                 <article
                   key={v.id}
                   className={styles.cardTile}
-                  title={`${v.year} ${v.make} ${v.model}`}
+                  title={v.name} 
                 >
                   <div className={styles.cardImageWrap}>
-                    {/* Debugging: Log image URL */}
+                    
                     {v.image ? (
                       <img
                         src={v.image}
-                        alt={`${v.make} ${v.model}`}
+                        alt={v.name} // Use card's name for the alt text
                         className={styles.cardImage}
                       />
                     ) : (
                       <div className={styles.noImage}>Image not available</div>
                     )}
                   </div>
-                  <div className={styles.cardMeta}>
-                    <div className="card-2">
-                      {v.year} {v.make}
-                    </div>
-                    <div className="card-1">{v.model}</div>
-                    <div className="card-4">
-                      S1 {v.stat1} · S2 {v.stat2} · Wt {v.statN}
-                    </div>
-                  </div>
+
+                  {/* Show only the card name below the image */}
+                  <div className={styles.cardName}>{v.name}</div>
                 </article>
               ))
             )}
