@@ -203,3 +203,30 @@ export interface CollectionDetailedResponse {
   price: number; // Add price here too
   imageUrl: string;
 }
+
+/* =========================
+ * NEW: Pack / Card DTOs from backend
+ * ========================= */
+
+// NEW: matches backend PackResponse
+export interface PackResponse {
+  id: string;
+  collectionId: string;
+  collectionName: string;
+  purchasedAt: string;
+  isOpened: boolean;
+}
+
+// NEW: matches backend CardDetailedResponse (plus optional imageUrl)
+export interface CardDetailed {
+  id: string;
+  name: string;
+  grade: GradeEnum | string; // backend sends "FACTORY", "NISMO", etc.
+  value: number;
+  createdAt: string;
+  description: string;
+  vehicleId: string;
+  collectionId: string;
+  ownerId: string;
+  imageUrl?: string; // populated from Vehicle.Image on backend
+}
