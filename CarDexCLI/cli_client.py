@@ -122,7 +122,7 @@ class CLIClient:
             "desc": collection.get("description", "No description available"),
             "cardCount": collection.get("cardCount", 0),
             "description": collection.get("description", "No description available"),
-            "pack_price": 2000,  # Hardcoded for now - update when backend provides this
+            "pack_price": collection.get("price", 0),
             "vehicle_count": collection.get("cardCount", 0)
         }
         
@@ -269,7 +269,7 @@ Available Commands:
         while self.username == None:
             try:
                 username = input("[Username]: ")
-                password = getpass.getpass("[Password]: ", echo_char='*')
+                password = getpass.getpass("[Password]: ")
                 success = self.processLogin(username, password)
 
                 if(success):

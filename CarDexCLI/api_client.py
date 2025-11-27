@@ -6,7 +6,7 @@ from typing import List, Dict, Optional
 import requests
 
 # API Paths
-BASE_URL        = "http://localhost:5090"
+BASE_URL        = "http://localhost"
 GET_HEALTHCHECK = f"{BASE_URL}/health"
 POST_LOGIN      = f"{BASE_URL}/auth/login"
 GET_OPEN_TRADES = f"{BASE_URL}/trades"
