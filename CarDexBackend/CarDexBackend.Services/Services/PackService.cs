@@ -218,7 +218,9 @@ namespace CarDexBackend.Services
                     Description = $"{randomVehicle.Make} {randomVehicle.Model} - {grade} grade",
                     VehicleId = card.VehicleId.ToString(),
                     CollectionId = card.CollectionId.ToString(),
-                    OwnerId = card.UserId.ToString()
+                    OwnerId = card.UserId.ToString(),
+                    ImageUrl = randomVehicle.Image
+
                 });
             }
 
