@@ -13,7 +13,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Nissan GT-R",
       cardName: "R35 Premium Edition",
-      imageUrl: "/assets/cards/gtr-r35.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/skyline-gtr-r34-vspec.jpg",
       stat1Label: "POWER",
       stat1Value: "565",
       stat2Label: "WEIGHT",
@@ -34,7 +35,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Toyota Supra",
       cardName: "A80 Twin Turbo",
-      imageUrl: "/assets/cards/supra-a80.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/supra-mk4.jpg",
       stat1Label: "POWER",
       stat1Value: "320",
       stat2Label: "WEIGHT",
@@ -55,7 +57,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Nissan GT-R",
       cardName: "NISMO",
-      imageUrl: "/assets/cards/gtr-nismo.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/skyline-gtr-r34.jpg",
       stat1Label: "POWER",
       stat1Value: "600",
       stat2Label: "WEIGHT",
@@ -76,7 +79,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Mazda RX-7",
       cardName: "FD Spirit R",
-      imageUrl: "/assets/cards/rx7-fd.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/rx7-fd.jpg",
       stat1Label: "POWER",
       stat1Value: "276",
       stat2Label: "WEIGHT",
@@ -97,7 +101,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Honda NSX",
       cardName: "NA1 Type R",
-      imageUrl: "/assets/cards/nsx-na1.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/nsx.jpg",
       stat1Label: "POWER",
       stat1Value: "276",
       stat2Label: "WEIGHT",
@@ -118,7 +123,8 @@ const mockTrades: Trade[] = [
     card: {
       makeModel: "Subaru Impreza",
       cardName: "22B STi",
-      imageUrl: "/assets/cards/impreza-22b.png",
+      imageUrl:
+        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/evo-iv.jpg",
       stat1Label: "POWER",
       stat1Value: "276",
       stat2Label: "WEIGHT",
