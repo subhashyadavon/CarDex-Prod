@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header, { NavItem } from "./components/Header/Header";
 import "./App.css";
@@ -11,8 +11,28 @@ import Trade from "./pages/Trade/Trade";
 
 function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
+  const [userCurrency, setUserCurrency] = useState(0);
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  // Load user currency when component mounts or user changes
+  useEffect(() => {
+    if (user?.id) {
+      console.log('[App] User from auth context:', user);
+      console.log('[App] User currency value:', user.currency);
+      console.log('[App] User currency type:', typeof user.currency);
+      
+      // Use the currency directly from auth context
+      // The auth context gets this from the login response which includes full user data with currency
+      if (user.currency !== undefined && user.currency !== null) {
+        setUserCurrency(user.currency);
+        console.log('[App] Set userCurrency to:', user.currency);
+      } else {
+        console.warn('[App] User currency is undefined or null');
+        setUserCurrency(0);
+      }
+    }
+  }, [user?.id, user?.currency]);
 
   const handleLogout = async () => {
     await logout();
@@ -24,7 +44,7 @@ function AppContent() {
       <Header
         activeNav={activeNav}
         onNavChange={setActiveNav}
-        coinBalance={115999}
+        coinBalance={userCurrency}
         userLevel={22}
         logoUrl={logo}
         coinIconUrl={coinIcon}

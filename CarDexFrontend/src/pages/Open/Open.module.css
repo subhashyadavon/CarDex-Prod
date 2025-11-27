@@ -28,3 +28,9 @@
     opacity: 0.9;
     padding: 1rem;
 }
+.title {
+    /* existing styles... */
+    color: #ffffff;
+    margin-bottom: 1rem;
+    /* or var(--your-white-token) */
+}
