@@ -22,7 +22,7 @@ export const API_CONFIG = {
    * - Falls back to localhost:5083 if not set
    * - Change .env to switch between dev/prod without changing code
    */
-  BASE_URL: process.env.REACT_APP_API_URL || "http://localhost:5001",
+  BASE_URL: process.env.REACT_APP_API_URL || "http://localhost",
 
   /**
    * ENDPOINTS: All API endpoint paths organized by resource
