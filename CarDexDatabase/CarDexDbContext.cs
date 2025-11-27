@@ -2,6 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using CarDexBackend.Domain.Entities;
 using CarDexBackend.Domain.Enums;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CarDexDatabase
 {
@@ -58,7 +59,12 @@ namespace CarDexDatabase
                 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
-                    .HasDefaultValueSql("now()");
+                    .HasColumnType("timestamp with time zone")
+                    .ValueGeneratedOnAdd()
+                    .HasDefaultValueSql("timezone('utc', now())");
+
+                entity.Property(e => e.CreatedAt)
+                    .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             });
 
             // Configure Card entity

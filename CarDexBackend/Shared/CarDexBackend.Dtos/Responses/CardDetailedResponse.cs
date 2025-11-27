@@ -27,5 +27,8 @@ namespace CarDexBackend.Shared.Dtos.Responses
         /// The unique identifier of the user who owns this card.
         /// </summary>
         public string OwnerId { get; set; } = string.Empty;
+
+        public string? ImageUrl { get; set; }
+
     }
 }

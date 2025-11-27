@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Open.module.css";
 
 import { collectionService } from "../../services/collectionService";
-import type {
-  Collection,
-  CollectionDetailedResponse,
-  CollectionCard,
-} from "../../types/types";
+// NEW: use packService to purchase + open packs
+import { packService } from "../../services/packService";
+import type { Collection } from "../../types/types";
 import Pack from "../../components/Pack/Pack";
 
-// Picks 3 cards randomly from the list of cards after opening a pack
+// (Still here if you ever want to use it again)
 function pickThreeRandom<T>(arr: T[]): T[] {
   const copy = [...arr];
   const out: T[] = [];
@@ -28,6 +26,10 @@ const Open: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoadingCollections, setIsLoadingCollections] = useState(false);
   const [collectionsError, setCollectionsError] = useState<string | null>(null);
+
+  // NEW: track pack opening state + errors
+  const [isOpeningPackId, setIsOpeningPackId] = useState<string | null>(null);
+  const [packError, setPackError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -48,42 +50,43 @@ const Open: React.FC = () => {
     fetchCollections();
   }, []);
 
-const handleCollectionClick = async (index: number) => {
-  const collection = collections[index];
-  if (!collection) return;
+  // CHANGED: this now purchases + opens a real pack instead of faking it on the frontend
+  const handleCollectionClick = async (index: number) => {
+    const collection = collections[index];
+    if (!collection) return;
 
-  try {
-    // fetches the cards from the collection
-    const detailed: CollectionDetailedResponse =
-      await collectionService.getCollectionById(collection.id);
+    setPackError(null);
+    setIsOpeningPackId(collection.id);
 
-    const cardsWithImage =
-      detailed.cards?.map((card) => ({
-        ...card,
-        image: card.imageUrl, 
-      })) ?? [];
+    try {
+      // 1️⃣ Purchase a pack for this collection
+      const purchase = await packService.purchasePack(collection.id);
+      const packId = purchase.pack.id; // CHANGED: use backend PackResponse.Id
+      console.log("Purchased pack:", purchase);
 
-    console.log(cardsWithImage);
+      // 2️⃣ Open the pack that was just purchased
+      const opened = await packService.openPack(packId);
+      console.log("Opened pack:", opened);
 
-    const picked = pickThreeRandom(cardsWithImage);
-
-    // Navigate to the openedPack page with the picked cards
-    navigate("/openedPack", {
-      state: {
-        packName: detailed.name ?? collection.name,
-        cards: picked,
-      },
-    });
-  } catch (err) {
-    console.error("Failed to fetch detailed collection:", err);
-    navigate("/openedPack", {
-      state: {
-        packName: collection.name,
-        cards: [],
-      },
-    });
-  }
-};
+      // 3️⃣ Navigate to openedPack screen with the actual cards returned
+      navigate("/openedPack", {
+        state: {
+          packName: collection.name,
+          packId,
+          collectionId: collection.id,
+          cards: opened.cards, // CardDetailed[]
+          pack: opened.pack,
+        },
+      });
+    } catch (err: any) {
+      console.error("Failed to purchase/open pack:", err);
+      setPackError(
+        err?.response?.data?.message || "Could not open pack. Please try again."
+      );
+    } finally {
+      setIsOpeningPackId(null);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -102,22 +105,37 @@ const handleCollectionClick = async (index: number) => {
             {collectionsError}
           </div>
         ) : (
-          <div className={styles.grid}>
-            {collections.map((collection, idx) => (
-              <div
-                key={collection.id}
-                data-collection-index={idx}
-                onClick={() => handleCollectionClick(idx)}
-              >
-                <Pack
-                  name={collection.name}
-                  packType="Collection"
-                  imageUrl={collection.imageUrl}
-                  price={collection.price ?? 0}
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            {/* NEW: show any error from purchase/open */}
+            {packError && (
+              <div className={`body-1 ${styles.errorMessage}`}>{packError}</div>
+            )}
+
+            <div className={styles.grid}>
+              {collections.map((collection, idx) => (
+                // CHANGED: button for accessibility; can change back to <div> if preferred
+                <button
+                  key={collection.id}
+                  type="button"
+                  className={styles.packButton}
+                  data-collection-index={idx}
+                  onClick={() => handleCollectionClick(idx)}
+                  disabled={isOpeningPackId === collection.id}
+                >
+                  <Pack
+                    name={collection.name}
+                    packType="Collection"
+                    imageUrl={collection.imageUrl || collection.image}
+                    // use either price or packPrice, whichever is set
+                    price={collection.price ?? collection.packPrice ?? 0}
+                  />
+                  {isOpeningPackId === collection.id && (
+                    <span className={styles.loadingText}>Opening...</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </section>
     </div>
