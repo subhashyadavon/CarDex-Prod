@@ -42,9 +42,8 @@ export default function Header({
           <button
             key={item}
             onClick={() => onNavChange(item)}
-            className={`${styles.navButton} ${
-              activeNav === item ? styles.navActive : styles.navInactive
-            } header-1`}
+            className={`${styles.navButton} ${activeNav === item ? styles.navActive : styles.navInactive
+              } header-1`}
           >
             {item}
           </button>
@@ -63,8 +62,10 @@ export default function Header({
           </span>
           <span className="header-2">{coinBalance !== undefined ? coinBalance.toLocaleString() : "0"}</span>
         </div>
-        <div className={`${styles.level} header-2`}>{userLevel || "0"}</div>
-        
+        {userLevel !== undefined && userLevel !== null && (
+          <div className={`${styles.level} header-2`}>{userLevel}</div>
+        )}
+
         {/* Logout Button */}
         {onLogout && (
           <Button

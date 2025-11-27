@@ -21,7 +21,7 @@ function AppContent() {
       console.log('[App] User from auth context:', user);
       console.log('[App] User currency value:', user.currency);
       console.log('[App] User currency type:', typeof user.currency);
-      
+
       // Use the currency directly from auth context
       // The auth context gets this from the login response which includes full user data with currency
       if (user.currency !== undefined && user.currency !== null) {
@@ -45,7 +45,6 @@ function AppContent() {
         activeNav={activeNav}
         onNavChange={setActiveNav}
         coinBalance={userCurrency}
-        userLevel={22}
         logoUrl={logo}
         coinIconUrl={coinIcon}
         onLogout={handleLogout}
