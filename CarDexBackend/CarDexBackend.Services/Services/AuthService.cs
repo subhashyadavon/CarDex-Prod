@@ -77,7 +77,7 @@ namespace CarDexBackend.Services
                 Id = Guid.NewGuid(),
                 Username = request.Username,
                 Password = hashedPassword,
-                Currency = 0 // Default starting currency
+                Currency = 5000// Default starting currency
             };
 
             await _userRepo.AddAsync(user);

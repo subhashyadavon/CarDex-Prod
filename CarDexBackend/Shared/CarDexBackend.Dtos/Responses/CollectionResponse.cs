@@ -33,5 +33,15 @@ namespace CarDexBackend.Shared.Dtos.Responses
         /// The total number of cards included in this collection.
         /// </summary>
         public int CardCount { get; set; }
+
+        /// <summary>
+        /// The price of the collection.
+        /// </summary>
+        public int Price { get; set; }
+
+        /// <summary>
+        /// The string URL of the image for the collection.
+        /// </summary>
+        public string ImageUrl { get; set; }
     }
 }

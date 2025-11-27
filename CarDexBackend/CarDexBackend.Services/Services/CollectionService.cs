@@ -36,7 +36,9 @@ namespace CarDexBackend.Services
                     Name = c.Collection.Name,
                     Theme = c.Collection.Name, // Using name as theme since theme field doesn't exist in entity
                     Description = c.Collection.Name, // Using name as description since description field doesn't exist
-                    CardCount = c.CardCount
+                    CardCount = c.CardCount,
+                    Price = c.Collection.PackPrice,
+                    ImageUrl = c.Collection.Image
                 })
                 .ToList();
 
@@ -66,7 +68,8 @@ namespace CarDexBackend.Services
                     Name = $"{cv.Vehicle.Year} {cv.Vehicle.Make} {cv.Vehicle.Model}",
                     Grade = cv.Card.Grade.ToString(),  // Will be "FACTORY", "LIMITED_RUN", or "NISMO"
                     Value = cv.Card.Value,
-                    CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                    CreatedAt = DateTime.UtcNow,  // Not in DB, using current time
+                    ImageUrl = cv.Vehicle.Image  // Added from feature/pages
                 })
                 .ToList();
 
@@ -77,7 +80,9 @@ namespace CarDexBackend.Services
                 Theme = collection.Name,
                 Description = collection.Name,
                 CardCount = cards.Count,
-                Cards = cards
+                Cards = cards,
+                Price = collection.PackPrice,  
+                ImageUrl = collection.Image  
             };
         }
     }

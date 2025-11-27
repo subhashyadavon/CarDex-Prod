@@ -5,7 +5,11 @@
 
 import apiClient from '../api/apiClient';
 import { API_CONFIG } from '../config/api.config';
-import { Collection } from '../types/types';
+import { Collection, CollectionDetailedResponse } from '../types/types';
+
+interface CollectionListResponse {
+  collections: Collection[];
+}
 
 export const collectionService = {
   /**
@@ -28,6 +32,27 @@ export const collectionService = {
     const response = await apiClient.put<Collection>(
       API_CONFIG.ENDPOINTS.COLLECTIONS.UPDATE_COLLECTION(userId),
       collection
+    );
+    return response.data;
+  },
+
+  // Get all collections
+  getAllCollections: async (): Promise<Collection[]> => {
+    const response = await apiClient.get<CollectionListResponse>(
+      API_CONFIG.ENDPOINTS.COLLECTIONS.GET_ALL()
+    );
+    // unwrap to a plain array:
+    return response.data.collections;
+  },
+
+  /**
+   * Get a single collection by its GUID (detailed: with cards)
+   */
+  getCollectionById: async (
+    collectionId: string
+  ): Promise<CollectionDetailedResponse> => {
+    const response = await apiClient.get<CollectionDetailedResponse>(
+      API_CONFIG.ENDPOINTS.COLLECTIONS.GET_COLLECTION_BY_ID(collectionId)
     );
     return response.data;
   },

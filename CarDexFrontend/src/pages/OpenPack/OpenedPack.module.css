@@ -165,4 +165,13 @@
     animation-delay: 200ms, 920ms;
 }
 
+.cardName {
+    font-size: 1.1rem;
+    color:antiquewhite;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 

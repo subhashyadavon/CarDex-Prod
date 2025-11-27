@@ -33,5 +33,7 @@ namespace CarDexBackend.Shared.Dtos.Responses
         /// The date and time when this card was created or added to the system.
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }
