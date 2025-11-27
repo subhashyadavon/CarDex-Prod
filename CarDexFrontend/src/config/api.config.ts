@@ -22,7 +22,7 @@ export const API_CONFIG = {
    * - Falls back to localhost:5083 if not set
    * - Change .env to switch between dev/prod without changing code
    */
-  BASE_URL: process.env.REACT_APP_API_URL || "http://localhost:5001",
+  BASE_URL: process.env.REACT_APP_API_URL || "http://localhost/",
 
   /**
    * ENDPOINTS: All API endpoint paths organized by resource
@@ -56,6 +56,7 @@ export const API_CONFIG = {
       GET_ALL: "/packs", // GET: Fetch all packs
       GET_BY_ID: (id: string) => `/packs/${id}`, // GET: Fetch specific pack
       OPEN_PACK: (packId: string) => `/packs/${packId}/open`, // POST: Open pack, get cards
+      PURCHASE: "/pack/purchase",
     },
 
     // Trade management endpoints
@@ -84,7 +85,8 @@ export const API_CONFIG = {
       GET_ALL: () => `/collections`,
       GET_COLLECTION: (userId: string) => `/collections/${userId}`, // GET: User collection
       UPDATE_COLLECTION: (userId: string) => `/collections/${userId}`, // PUT: Update collection
-      GET_COLLECTION_BY_ID: (collectionId: string) => `/collections/${collectionId}`,
+      GET_COLLECTION_BY_ID: (collectionId: string) =>
+        `/collections/${collectionId}`,
     },
   },
 
