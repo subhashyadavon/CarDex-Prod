@@ -2,24 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./OpenedPack.module.css";
 
-type Vehicle = {
-  id: string; // Assuming the id is a string based on your API response
-  year: string;
-  make: string;
-  model: string;
-  stat1: number;
-  stat2: number;
-  statN: number;
-  value: number;
-  image: string; // image URL
-  name: string; // Card name 
-};
+// NEW: use the DTO that matches backend CardDetailedResponse
+import type { CardDetailed } from "../../types/types";
 
-type State = { packName?: string; cards?: Vehicle[] };
+// CHANGED: state now expects cards: CardDetailed[]
+type State = { packName?: string; cards?: CardDetailed[] };
 
 const OpenPack: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation() as { state: State };
+
+  // CHANGED: cards are CardDetailed[] from backend
   const cards = state?.cards ?? [];
   const heading = state?.packName
     ? `${state.packName} — Opened Cards`
@@ -31,14 +24,6 @@ const OpenPack: React.FC = () => {
     const t = setTimeout(() => setPlay(true), 60);
     return () => clearTimeout(t);
   }, []);
-
-  // // Debugging log for cards and image URLs
-  // useEffect(() => {
-  //   console.log("Cards Data:", cards);
-  //   cards.forEach((v) => {
-  //     console.log(`Card ID: ${v.id}, Image URL: ${v.image}`);
-  //   });
-  // }, [cards]);
 
   return (
     <div className={`bg-gradient-dark ${styles.page}`}>
@@ -55,18 +40,17 @@ const OpenPack: React.FC = () => {
                 No cards drawn.
               </div>
             ) : (
-              cards.map((v) => (
+              cards.map((c) => (
                 <article
-                  key={v.id}
+                  key={c.id}
                   className={styles.cardTile}
-                  title={v.name} 
+                  title={c.name} // CHANGED: use backend card name
                 >
                   <div className={styles.cardImageWrap}>
-                    
-                    {v.image ? (
+                    {c.imageUrl ? (
                       <img
-                        src={v.image}
-                        alt={v.name} // Use card's name for the alt text
+                        src={c.imageUrl}
+                        alt={c.name}
                         className={styles.cardImage}
                       />
                     ) : (
@@ -74,8 +58,8 @@ const OpenPack: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Show only the card name below the image */}
-                  <div className={styles.cardName}>{v.name}</div>
+                  {/* Show card name below the image */}
+                  <div className={styles.cardName}>{c.name}</div>
                 </article>
               ))
             )}
