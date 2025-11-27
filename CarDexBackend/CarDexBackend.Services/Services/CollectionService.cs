@@ -36,7 +36,7 @@ namespace CarDexBackend.Services
                     Name = c.Collection.Name,
                     Theme = c.Collection.Name, // Using name as theme since theme field doesn't exist in entity
                     Description = c.Collection.Name, // Using name as description since description field doesn't exist
-                    CardCount = c.CardCount,
+                    CardCount = c.Collection.Vehicles?.Length ?? 0,
                     Price = c.Collection.PackPrice,
                     ImageUrl = c.Collection.Image
                 })
