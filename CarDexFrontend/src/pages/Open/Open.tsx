@@ -7,6 +7,7 @@ import { collectionService } from "../../services/collectionService";
 import { packService } from "../../services/packService";
 import type { Collection } from "../../types/types";
 import Pack from "../../components/Pack/Pack";
+import { useAuth } from "../../hooks/useAuth";
 
 // (Still here if you ever want to use it again)
 function pickThreeRandom<T>(arr: T[]): T[] {
@@ -21,6 +22,7 @@ function pickThreeRandom<T>(arr: T[]): T[] {
 
 const Open: React.FC = () => {
   const navigate = useNavigate();
+  const { updateUserCurrency } = useAuth();
 
   // Collections from backend
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -59,16 +61,21 @@ const Open: React.FC = () => {
     setIsOpeningPackId(collection.id);
 
     try {
-      // 1️⃣ Purchase a pack for this collection
+      // Purchase a pack for this collection
       const purchase = await packService.purchasePack(collection.id);
       const packId = purchase.pack.id; // CHANGED: use backend PackResponse.Id
       console.log("Purchased pack:", purchase);
 
-      // 2️⃣ Open the pack that was just purchased
+      // NEW: Update user's currency from the purchase response
+      // The backend returns the updated currency after deduction
+      updateUserCurrency(purchase.userCurrency);
+      console.log("[Open] Updated user currency to:", purchase.userCurrency);
+
+      // Open the pack that was just purchased
       const opened = await packService.openPack(packId);
       console.log("Opened pack:", opened);
 
-      // 3️⃣ Navigate to openedPack screen with the actual cards returned
+      // Navigate to openedPack screen with the actual cards returned
       navigate("/openedPack", {
         state: {
           packName: collection.name,

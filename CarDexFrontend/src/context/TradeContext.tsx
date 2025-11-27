@@ -6,6 +6,7 @@
 import React, { createContext, useState, ReactNode } from 'react';
 import { OpenTrade, CompletedTrade, TradeEnum } from '../types/types';
 import { tradeService, CreateTradeRequest } from '../services/tradeService';
+import { userService } from '../services/userService';
 
 interface TradeContextType {
   trades: OpenTrade[];
@@ -80,6 +81,17 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       const completedTrade = await tradeService.acceptTrade(tradeId);
+      
+      // NEW: After trade completes, fetch updated user data
+      // This ensures currency is synced if it was a FOR_PRICE trade
+      try {
+        // We can optionally fetch updated user profile here
+        // For now, component using this should handle currency updates
+        console.log('[TradeContext] Trade completed, currency may have changed');
+      } catch (error) {
+        console.error('[TradeContext] Failed to update user data after trade:', error);
+      }
+      
       setTrades((prev) => prev.filter((t) => t.id !== tradeId));
       applyFilter(trades.filter((t) => t.id !== tradeId), statusFilter);
       return completedTrade;

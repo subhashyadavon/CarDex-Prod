@@ -43,6 +43,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;    // Login function
   register: (userData: RegisterRequest) => Promise<void>; // Register function
   logout: () => Promise<void>;                             // Logout function
+  updateUserCurrency: (newCurrency: number) => void;      // Update user currency after transactions
 }
 
 /**
@@ -191,6 +192,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * NOTE: We use 'finally' block to ensure cleanup happens even if
    * backend call fails (e.g., if user is offline)
    */
+  const updateUserCurrency = (newCurrency: number) => {
+    if (user) {
+      // Create updated user object with new currency
+      const updatedUser = { ...user, currency: newCurrency };
+      
+      // Update React state (triggers re-render of all components using useAuth)
+      setUser(updatedUser);
+      
+      // Save to localStorage (so it persists across refreshes)
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      console.log('[AuthContext] Updated currency to:', newCurrency);
+    }
+  };
+
+  /**
+   * logout: End user session
+   * 
+   * FLOW:
+   * 1. Tell backend to invalidate the session (optional, for security)
+   * 2. Clear state (user/token become null)
+   * 3. Clear localStorage (so user isn't auto-logged-in on refresh)
+   * 
+   * NOTE: We use 'finally' block to ensure cleanup happens even if
+   * backend call fails (e.g., if user is offline)
+   */
   const logout = async () => {
     try {
       // Tell backend to invalidate the session
@@ -225,6 +252,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    updateUserCurrency,
   };
 
   /**
