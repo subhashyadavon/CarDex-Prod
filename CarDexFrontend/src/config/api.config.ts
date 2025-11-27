@@ -56,7 +56,7 @@ export const API_CONFIG = {
       GET_ALL: "/packs", // GET: Fetch all packs
       GET_BY_ID: (id: string) => `/packs/${id}`, // GET: Fetch specific pack
       OPEN_PACK: (packId: string) => `/packs/${packId}/open`, // POST: Open pack, get cards
-      PURCHASE: "/pack/purchase",
+      PURCHASE: "/packs/purchase",
     },
 
     // Trade management endpoints
