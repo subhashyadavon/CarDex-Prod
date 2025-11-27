@@ -37,14 +37,29 @@ const Login: React.FC = () => {
       await login({ username, password });
       navigate("/app");
     } catch (err: any) {
-      const backendMessage =
-        err?.response?.data?.message || err?.response?.data || err?.message;
+      // Extract error message from various possible response formats
+      let errorMessage = "Invalid credentials. Please check your username and password.";
 
-      setAuthError(
-        backendMessage
-          ? `Login failed: ${backendMessage}`
-          : "Invalid username or password. Please try again."
-      );
+      if (err?.response?.data) {
+        // If data has a message property, use it
+        if (typeof err.response.data.message === 'string') {
+          errorMessage = err.response.data.message;
+        }
+        // If data is a string itself, use it
+        else if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        }
+        // If it's an object with error property
+        else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        }
+      }
+      // Fallback to error message if available
+      else if (err?.message && typeof err.message === 'string') {
+        errorMessage = err.message;
+      }
+
+      setAuthError(errorMessage);
     }
   };
 
