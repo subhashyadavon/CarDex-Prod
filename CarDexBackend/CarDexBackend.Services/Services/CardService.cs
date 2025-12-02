@@ -87,6 +87,31 @@ namespace CarDexBackend.Services
                 OwnerId = card.UserId.ToString()
             };
         }
+
+        /// <summary>
+        /// Retrieves detailed information about a specific vehicle.
+        /// <summary>
+        public async Task<VehicleDetailedResponse> GetVehicleById(Guid vehicleId)
+        {
+            var vehicle = await _vehicleRepo.GetByIdAsync(vehicleId);
+            if (vehicle == null)
+                throw new KeyNotFoundException(_sr["UnknownVehicleError"]);
+
+            var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : _sr["UnknownVehicle"];
+
+            return new VehicleDetailedResponse
+            {
+                Year = vehicle.Year,
+                Make = vehicle.Make,
+                Model = vehicle.Model,
+                Stat1 = vehicle.Stat1,
+                Stat2 = vehicle.Stat2,
+                Stat3 = vehicle.Stat3,
+                Value = vehicle.Value
+            };
+        }
+
+
     }
 }
 
