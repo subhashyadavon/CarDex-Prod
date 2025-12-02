@@ -113,13 +113,13 @@ namespace CarDexBackend.Services
             var user = await _userRepo.GetByUsernameAsync(request.Username);
             if (user == null)
             {
-                throw new UnauthorizedAccessException(_sr["InvalidCredentialsError"]);
+                throw new UnauthorizedAccessException("Username does not exist");
             }
 
             // Verify password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
-                throw new UnauthorizedAccessException(_sr["InvalidCredentialsError"]);
+                throw new UnauthorizedAccessException("Password incorrect");
             }
 
             // Generate JWT token
