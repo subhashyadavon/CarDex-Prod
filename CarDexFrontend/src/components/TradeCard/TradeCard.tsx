@@ -51,7 +51,7 @@ const TradeCard: React.FC<TradeCardProps> = ({ trade }) => {
         <div className={styles.infoRow}>
           <span className={`body-2 ${styles.label}`}>Price</span>
           <span className={`body-1 ${styles.price}`}>
-            {price.toLocaleString()} Cr
+            {price != null ? price.toLocaleString() : "-"} Cr
           </span>
         </div>
       </div>

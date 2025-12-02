@@ -1,12 +1,13 @@
+// src/context/TradeContext.tsx
+
 /**
  * Trade Context
  * Manages trade state, filtering, and trade operations
  */
 
-import React, { createContext, useState, ReactNode } from 'react';
-import { OpenTrade, CompletedTrade, TradeEnum } from '../types/types';
-import { tradeService, CreateTradeRequest } from '../services/tradeService';
-import { userService } from '../services/userService';
+import React, { createContext, useState, ReactNode } from "react";
+import { OpenTrade, CompletedTrade, TradeEnum } from "../types/types";
+import { tradeService, CreateTradeRequest } from "../services/tradeService";
 
 interface TradeContextType {
   trades: OpenTrade[];
@@ -22,7 +23,9 @@ interface TradeContextType {
   refreshTrades: () => Promise<void>;
 }
 
-export const TradeContext = createContext<TradeContextType | undefined>(undefined);
+export const TradeContext = createContext<TradeContextType | undefined>(
+  undefined
+);
 
 interface TradeProviderProps {
   children: ReactNode;
@@ -34,6 +37,14 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
   const [statusFilter, setStatusFilterState] = useState<TradeEnum | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const applyFilter = (tradeList: OpenTrade[], filter: TradeEnum | null) => {
+    if (filter === null) {
+      setFilteredTrades(tradeList);
+    } else {
+      setFilteredTrades(tradeList.filter((t) => t.type === filter));
+    }
+  };
+
   const loadTrades = async () => {
     setIsLoading(true);
     try {
@@ -41,7 +52,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
       setTrades(data);
       applyFilter(data, statusFilter);
     } catch (error) {
-      console.error('Failed to load trades:', error);
+      console.error("Failed to load trades:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -55,22 +66,30 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
       setTrades(data);
       applyFilter(data, statusFilter);
     } catch (error) {
-      console.error('Failed to load user trades:', error);
+      console.error("Failed to load user trades:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const createTrade = async (tradeData: CreateTradeRequest): Promise<OpenTrade> => {
+  const createTrade = async (
+    tradeData: CreateTradeRequest
+  ): Promise<OpenTrade> => {
     setIsLoading(true);
     try {
       const newTrade = await tradeService.createTrade(tradeData);
-      setTrades((prev) => [...prev, newTrade]);
-      applyFilter([...trades, newTrade], statusFilter);
+
+      // ✅ functional update so filtered state stays in sync
+      setTrades((prev) => {
+        const updated = [...prev, newTrade];
+        applyFilter(updated, statusFilter);
+        return updated;
+      });
+
       return newTrade;
     } catch (error) {
-      console.error('Failed to create trade:', error);
+      console.error("Failed to create trade:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -81,22 +100,20 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       const completedTrade = await tradeService.acceptTrade(tradeId);
-      
-      // NEW: After trade completes, fetch updated user data
-      // This ensures currency is synced if it was a FOR_PRICE trade
-      try {
-        // We can optionally fetch updated user profile here
-        // For now, component using this should handle currency updates
-        console.log('[TradeContext] Trade completed, currency may have changed');
-      } catch (error) {
-        console.error('[TradeContext] Failed to update user data after trade:', error);
-      }
-      
-      setTrades((prev) => prev.filter((t) => t.id !== tradeId));
-      applyFilter(trades.filter((t) => t.id !== tradeId), statusFilter);
+
+      console.log(
+        "[TradeContext] Trade completed, currency / inventory may have changed"
+      );
+
+      setTrades((prev) => {
+        const updated = prev.filter((t) => t.id !== tradeId);
+        applyFilter(updated, statusFilter);
+        return updated;
+      });
+
       return completedTrade;
     } catch (error) {
-      console.error('Failed to accept trade:', error);
+      console.error("Failed to accept trade:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -107,21 +124,17 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       await tradeService.cancelTrade(tradeId);
-      setTrades((prev) => prev.filter((t) => t.id !== tradeId));
-      applyFilter(trades.filter((t) => t.id !== tradeId), statusFilter);
+
+      setTrades((prev) => {
+        const updated = prev.filter((t) => t.id !== tradeId);
+        applyFilter(updated, statusFilter);
+        return updated;
+      });
     } catch (error) {
-      console.error('Failed to cancel trade:', error);
+      console.error("Failed to cancel trade:", error);
       throw error;
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const applyFilter = (tradeList: OpenTrade[], filter: TradeEnum | null) => {
-    if (filter === null) {
-      setFilteredTrades(tradeList);
-    } else {
-      setFilteredTrades(tradeList.filter((t) => t.type === filter));
     }
   };
 
@@ -148,5 +161,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     refreshTrades,
   };
 
-  return <TradeContext.Provider value={value}>{children}</TradeContext.Provider>;
+  return (
+    <TradeContext.Provider value={value}>{children}</TradeContext.Provider>
+  );
 };

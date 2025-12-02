@@ -18,6 +18,7 @@ services:
 
   cardex-db:
     image: postgres:16
+    platform: linux/amd64
     container_name: cardex-db
     environment:
       - POSTGRES_USER=postgres
