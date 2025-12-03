@@ -7,6 +7,8 @@
 **Cardex** is a digital trading card game where players collect, trade, and race cars.  
 Built as part of our COMP 4350 course project.  
 
+</br>
+
 ## Project Overview
 Cardex combines the excitement of collectible card games with the thrill of racing.  
 Players can:
@@ -21,7 +23,7 @@ Players can:
 - Branching Strategies: [Branching Strategies](/docs/Branching-Strategies.md)
 - Coding Conventions: [Coding Conventions](/docs/Coding-Conventions.md)
 
----
+</br>
 
 ## Team Members - Group 7
 - Alejandro Labra
@@ -31,7 +33,7 @@ Players can:
 - Ian Spellman
 - Subhash Yadav
 
----
+</br>
 
 ## Tech Stack 
 - **Frontend (Web):** React  
@@ -44,7 +46,7 @@ Players can:
 
 ## Project setup
 
-### 🧩 Prerequisites
+### Prerequisites
   - For normal run
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
     - python
@@ -54,7 +56,7 @@ Players can:
     - Git
     - Optional: Visual Studio 2022 or VS Code
 
-> Docker Dekstop must be running before continuing.  
+> Docker Desktop must be running before continuing.  
 
 ### Running Dev / Local
 ```bash
@@ -69,8 +71,6 @@ docker-compose up --build
 #   - Password:   `postgres`
 #   - Database: `  cardex`
 ```
-
-</br>
 
 ### Running Production
 ```bash
@@ -162,6 +162,7 @@ Specifically, AI assistance was used to:
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
 - Helping with writing documentation markdown (md) files.  
+
 
 
 
