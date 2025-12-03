@@ -19,11 +19,11 @@
 /* Keep the inner card nice and clean with rounded corners */
 .cardWrapper {
   display: flex;
-  justify-content: center;   
-  align-items: center;      
+  justify-content: center;
+  align-items: center;
   width: 100%;
   max-width: 360px;
-  margin: 0 auto;            
+  margin: 0 auto;
 }
 
 /* Block under the card */
@@ -69,4 +69,10 @@
 /* Price text */
 .price {
   font-weight: 700;
+}
+
+/* Full-width BUY button inside infoSection */
+.buyButton {
+  margin-top: 10px;
+  width: 100%;
 }

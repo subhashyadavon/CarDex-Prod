@@ -68,6 +68,8 @@ const mapOpenTradeToUiTrade = (trade: OpenTrade, card?: any): UiTrade => {
     id: String(trade.id),
     status: "open", // this page shows open trades
     price: displayPriceNumber, // "Price ... Cr" in TradeCard footer
+    // NEW: propagates whether the trade is price-based or card-based
+    tradeType: isForPrice ? "FOR_PRICE" : "FOR_CARD",
     card: {
       makeModel,
       cardName,
@@ -96,6 +98,7 @@ const TradeSection: React.FC = () => {
     isLoading,
     refreshTrades,
     createTrade,
+    acceptTrade, // NEW: to handle buying a trade
   } = useTrade();
 
   // Always treat filteredTrades as array
@@ -167,6 +170,17 @@ const TradeSection: React.FC = () => {
       trade.card.cardName.toLowerCase().includes(q)
     );
   });
+
+  // Handle buying a FOR_PRICE trade
+  const handleBuyTrade = async (tradeId: string) => {
+    try {
+      console.log("[TradeSection] Buying trade:", tradeId);
+      await acceptTrade(tradeId);
+      await refreshTrades();
+    } catch (err) {
+      console.error("[TradeSection] Failed to buy trade:", err);
+    }
+  };
 
   return (
     <div className={styles.tradeContainer}>
@@ -253,8 +267,8 @@ const TradeSection: React.FC = () => {
                   userId: user.id,
                   cardId: payload.offeredCardId,
                   type: TradeEnum.FOR_CARD,
-                  price: null,
-                  wantCardId: payload.requestedCardId ?? null,
+                  price: 0, // numeric zero instead of null
+                  wantCardId: payload.requestedCardId ?? null, // CARD ID we want
                 };
               }
 
@@ -278,7 +292,11 @@ const TradeSection: React.FC = () => {
 
           <div className={styles.tradeList}>
             {filteredUiTrades.map((trade) => (
-              <TradeCard key={trade.id} trade={trade} />
+              <TradeCard
+                key={trade.id}
+                trade={trade}
+                onBuy={handleBuyTrade}
+              />
             ))}
           </div>
         </>

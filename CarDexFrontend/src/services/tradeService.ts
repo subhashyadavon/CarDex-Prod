@@ -1,14 +1,15 @@
 // src/services/tradeService.ts
-import apiClient from '../api/apiClient';
-import { API_CONFIG } from '../config/api.config';
-import { OpenTrade, CompletedTrade, TradeEnum } from '../types/types';
+
+import apiClient from "../api/apiClient";
+import { API_CONFIG } from "../config/api.config";
+import { OpenTrade, CompletedTrade, TradeEnum } from "../types/types";
 
 export interface CreateTradeRequest {
-  userId: string;                // user creating the trade
-  cardId: string;                // card they are listing
-  type: TradeEnum;               // FOR_PRICE or FOR_CARD
-  price?: number | null;         // only for FOR_PRICE
-  wantCardId?: string | null;    // only for FOR_CARD
+  userId: string; // user creating the trade
+  cardId: string; // card they are listing
+  type: TradeEnum; // FOR_PRICE or FOR_CARD
+  price?: number | null; // only for FOR_PRICE (0 allowed)
+  wantCardId?: string | null; // only for FOR_CARD
 }
 
 export const tradeService = {
@@ -16,10 +17,8 @@ export const tradeService = {
    * Get all open trades
    */
   getOpenTrades: async (): Promise<OpenTrade[]> => {
-    const response = await apiClient.get(
-      API_CONFIG.ENDPOINTS.TRADES.GET_ALL
-    );
-    return response.data.trades;   
+    const response = await apiClient.get(API_CONFIG.ENDPOINTS.TRADES.GET_ALL);
+    return response.data.trades;
   },
 
   /**
@@ -49,12 +48,14 @@ export const tradeService = {
     const response = await apiClient.post<OpenTrade>(
       API_CONFIG.ENDPOINTS.TRADES.CREATE,
       {
-        // Map TS fields to backend contract; ASP.NET model binding is usually
-        // case-insensitive so this is safe:
         type: tradeData.type,
         userId: tradeData.userId,
         cardId: tradeData.cardId,
-        price: tradeData.price ?? null,
+        // keep 0 as 0, only undefined -> null
+        price:
+          tradeData.price === undefined || tradeData.price === null
+            ? null
+            : tradeData.price,
         wantCardId: tradeData.wantCardId ?? null,
       }
     );
