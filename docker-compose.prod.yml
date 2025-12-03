@@ -6,7 +6,7 @@ services:
       dockerfile: CarDexFrontend/Dockerfile
     container_name: cardex-frontend-prod
     ports:
-      - "80:80"
+      - "80:8080"
     depends_on:
       - cardex-api
     restart: always
