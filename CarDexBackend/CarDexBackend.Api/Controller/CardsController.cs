@@ -75,5 +75,13 @@ namespace CarDexBackend.Controllers
             var card = await _cardService.GetCardById(cardId);
             return Ok(card);
         }
+
+
+        [HttpGet("vehicle/{vehicleId:guid}")]
+        public async Task<IActionResult> GetVehicleById(Guid vehicleId)
+        {
+            var vehicle = await _cardService.GetVehicleById(vehicleId);
+            return Ok(vehicle);
+        }
     }
 }

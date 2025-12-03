@@ -47,5 +47,10 @@ namespace CarDexBackend.Services
         /// </returns>
         /// <exception cref="KeyNotFoundException">Thrown if the card does not exist.</exception>
         Task<CardDetailedResponse> GetCardById(Guid cardId);
+
+        /// <summary>
+        /// Retrieves detailed information about a specific vehicle.
+        /// </summary>
+        Task<VehicleDetailedResponse> GetVehicleById(Guid vehicleId);
     }
 }
