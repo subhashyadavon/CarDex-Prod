@@ -16,7 +16,6 @@ import { cardService, Vehicle } from "../../services/cardService";
 import { CarCardProps } from "../../components/Card/Card";
 import { CreateTradeRequest } from "../../services/tradeService";
 
-// Get the card id off an OpenTrade (handles cardId or card_id)
 const getTradeCardId = (trade: OpenTrade): string | null => {
   const t: any = trade;
   const raw = t.cardId ?? t.card_id ?? null;
@@ -24,7 +23,6 @@ const getTradeCardId = (trade: OpenTrade): string | null => {
   return String(raw);
 };
 
-// Get the user id off an OpenTrade (handles userId or user_id)
 const getTradeUserId = (trade: OpenTrade): string | null => {
   const t: any = trade;
   const raw = t.userId ?? t.user_id ?? null;
@@ -32,7 +30,6 @@ const getTradeUserId = (trade: OpenTrade): string | null => {
   return String(raw);
 };
 
-// GradeEnum -> rarity string used by Card component
 const gradeToRarity = (grade: GradeEnum | string): CarCardProps["rarity"] => {
   if (grade === GradeEnum.NISMO || grade === "NISMO") return "nismo";
   if (grade === GradeEnum.LIMITED_RUN || grade === "LIMITED_RUN")
@@ -75,7 +72,6 @@ const findVehicleForCard = (
   return null;
 };
 
-// Map OpenTrade + (optional) Card DTO + vehicles array -> UI Trade type used by <TradeCard />
 const mapOpenTradeToUiTrade = (
   trade: OpenTrade,
   card: any | undefined,
@@ -117,7 +113,6 @@ const mapOpenTradeToUiTrade = (
   const stat1 = vehicle?.stat1 ?? null;
   const stat2 = vehicle?.stat2 ?? null;
   const stat3 = vehicle?.stat3 ?? null;
-  const stat4 = null;
 
   const displayPriceNumber = tradePrice || cardValueNumber || 0;
 
@@ -265,7 +260,6 @@ const TradeSection: React.FC = () => {
 
   const handleBuyTrade = async (tradeId: string) => {
     try {
-      console.log("[TradeSection] Buying trade:", tradeId);
       await acceptTrade(tradeId);
       await refreshTrades();
     } catch (err) {
@@ -308,6 +302,18 @@ const TradeSection: React.FC = () => {
         >
           Sell Card
         </Button>
+
+        <Button
+          size="large"
+          variant="secondary"
+          onClick={() => {
+            refreshTrades().catch((err) =>
+              console.error("[TradeSection] Failed to refresh trades:", err)
+            );
+          }}
+        >
+          Refresh
+        </Button>
       </div>
 
       {showCreateModal && (
@@ -319,10 +325,7 @@ const TradeSection: React.FC = () => {
             );
           }}
           onSubmit={async (payload: CreateTradePayload) => {
-            if (!user) {
-              console.error("[TradeSection] Cannot create trade: no user");
-              return;
-            }
+            if (!user) return;
 
             try {
               const request: CreateTradeRequest = {
@@ -333,7 +336,6 @@ const TradeSection: React.FC = () => {
                 wantCardId: null,
               };
 
-              console.log("[TradeSection] Creating trade with payload:", request);
               await createTrade(request);
             } catch (err) {
               console.error("[TradeSection] Failed to create trade:", err);
