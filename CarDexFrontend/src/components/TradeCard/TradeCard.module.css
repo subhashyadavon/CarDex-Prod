@@ -16,7 +16,7 @@
   backdrop-filter: blur(14px);
 }
 
-/* Keep the inner card nice and clean with rounded corners */
+/* Wrap the inner Card nicely */
 .cardWrapper {
   display: flex;
   justify-content: center;
@@ -26,7 +26,56 @@
   margin: 0 auto;
 }
 
-/* Block under the card */
+/* Footer block under the card showing price / type */
+.footer {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--block-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.priceInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priceLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  color: var(--content-secondary);
+}
+
+.priceValue {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Full-width action bar at the very bottom of the card */
+.bottomActionBar {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+}
+
+/* Full-width BUY / YOUR LISTING button */
+.buyButton {
+  width: 100%;
+  height: 48px; /* matches large button height from design */
+}
+
+/* Extra clarity for disabled state while staying primary gradient */
+.buyButton:disabled,
+.buyButton[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- (optional leftovers from your earlier styles, safe to keep) --- */
+
 .infoSection {
   margin-top: 4px;
   padding: 8px 10px;
@@ -66,13 +115,19 @@
   font-weight: 600;
 }
 
-/* Price text */
 .price {
   font-weight: 700;
 }
 
-/* Full-width BUY button inside infoSection */
-.buyButton {
-  margin-top: 10px;
-  width: 100%;
+.priceLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  color: var(--content-secondary); /* make sure this isn't black */
+}
+
+.priceValue {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--content-primary);   /* this ensures price is visible */
 }

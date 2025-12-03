@@ -34,8 +34,8 @@ interface CreateTradeModalProps {
 }
 
 interface PlayerCard {
-  id: string;       // UI id (unique per row)
-  cardId: string;   // underlying card id used in payload
+  id: string;     // UI id (unique per row)
+  cardId: string; // underlying card id used in payload
   card: CarCardProps;
 }
 
@@ -45,6 +45,14 @@ interface PlayerCard {
 const getTradeCardId = (trade: OpenTrade): string | null => {
   const t: any = trade;
   const raw = t.cardId ?? t.card_id ?? null;
+  if (raw === null || raw === undefined) return null;
+  return String(raw);
+};
+
+// Get the user id off an OpenTrade (handles userId or user_id)
+const getTradeUserId = (trade: OpenTrade): string | null => {
+  const t: any = trade;
+  const raw = t.userId ?? t.user_id ?? null;
   if (raw === null || raw === undefined) return null;
   return String(raw);
 };
@@ -90,8 +98,6 @@ const findVehicleForCard = (
 
   if (!combined.trim()) return null;
 
-  // Example vehicle fields:
-  // { year, make, model, stat1, stat2, stat3, value }
   const byName = vehicles.find((v) => {
     const full = `${v.make} ${v.model}`.toLowerCase();
     return combined.includes(full) || full.includes(name.toLowerCase());
@@ -111,8 +117,8 @@ const mapCardWithVehicleToPlayerCard = (
   const value = card.value ?? 0;
 
   return {
-    id: String(card.id),           // UI id
-    cardId: String(card.id),       // underlying card id
+    id: String(card.id),      // UI id
+    cardId: String(card.id),  // underlying card id
     card: {
       makeModel: makeModel || "Unknown Vehicle",
       cardName: `${card.make} ${card.model}`.trim() || "Card",
@@ -167,22 +173,20 @@ const mapOpenTradeToPlayerCard = (
   const grade = card?.grade ?? "FACTORY";
   const rarity: CarCardProps["rarity"] = gradeToRarity(grade);
 
-  // Prefer card.value, then vehicle.value
   const cardValueNumber: number | undefined =
     card?.value != null ? card.value : vehicle?.value;
 
   const cardValueString =
     cardValueNumber != null ? cardValueNumber.toLocaleString() : "";
 
-  // Stats from vehicle
   const stat1 = vehicle?.stat1 ?? null;
   const stat2 = vehicle?.stat2 ?? null;
   const stat3 = vehicle?.stat3 ?? null;
 
   return {
-    // UI id = trade id (unique per open trade)
+    // UI id = trade id (unique per open trade row)
     id: String(trade.id),
-    // Underlying card id is what will go into wantCardId later
+    // This is the CARD ID that will be used as wantCardId
     cardId: safeCardId,
     card: {
       makeModel,
@@ -201,7 +205,6 @@ const mapOpenTradeToPlayerCard = (
       stat3Label: "BRAKING",
       stat3Value: stat3 != null ? String(stat3) : "--",
 
-      // 4th slot is VALUE (not torque)
       stat4Label: "VALUE",
       stat4Value: cardValueString || "--",
 
@@ -283,17 +286,31 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
     fetchVehicles();
   }, []);
 
-  // Use filteredTrades if available, otherwise raw trades
+  // All open trades (from context)
   const allOpenTrades: OpenTrade[] = Array.isArray(filteredTrades)
     ? filteredTrades
     : Array.isArray(trades)
     ? trades
     : [];
 
-  // Only show trades from other users AND with a valid card id
+  // Card IDs that are already in open trades for THIS user
+  const userOwnedCardIdsInOpenTrades = new Set(
+    allOpenTrades
+      .filter((t) => getTradeUserId(t) === user?.id)
+      .map((t) => getTradeCardId(t))
+      .filter((id): id is string => !!id)
+  );
+
+  // Build UI list for owned cards, but filter out any card already in user's open trades
+  const ownedCards: PlayerCard[] = ownedCardEntities
+    .map(mapCardWithVehicleToPlayerCard)
+    .filter((pc) => !userOwnedCardIdsInOpenTrades.has(pc.cardId));
+
+  // Only show trades from other users AND with a valid card id (for "Select Card to Buy")
   const otherUsersTrades = allOpenTrades.filter((t) => {
     const cid = getTradeCardId(t);
-    return t.user_id !== user?.id && !!cid;
+    const tradeUserId = getTradeUserId(t);
+    return tradeUserId !== user?.id && !!cid;
   });
 
   // 3) Fetch card details for buyable trades
@@ -328,11 +345,6 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
 
     fetchCards();
   }, [otherUsersTrades, cardCache]);
-
-  // Build UI list for owned cards
-  const ownedCards: PlayerCard[] = ownedCardEntities.map(
-    mapCardWithVehicleToPlayerCard
-  );
 
   // Build UI list for "Select Card to Buy" using real vehicle stats
   const buyableTradeCards: PlayerCard[] = otherUsersTrades.map((trade) => {
@@ -389,7 +401,9 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
             </div>
           ) : ownedCards.length === 0 ? (
             <div className={styles.cardRow}>
-              <span className="body-2">No cards available</span>
+              <span className="body-2">
+                No cards available (or all your cards are already in open trades).
+              </span>
             </div>
           ) : (
             <div className={styles.cardRow}>

@@ -28,6 +28,14 @@ const getTradeCardId = (trade: OpenTrade): string | null => {
   return String(raw);
 };
 
+// Get the user id off an OpenTrade (handles userId or user_id)
+const getTradeUserId = (trade: OpenTrade): string | null => {
+  const t: any = trade;
+  const raw = t.userId ?? t.user_id ?? null;
+  if (raw === null || raw === undefined) return null;
+  return String(raw);
+};
+
 // GradeEnum -> rarity string used by Card component
 const gradeToRarity = (grade: GradeEnum | string): CarCardProps["rarity"] => {
   if (grade === GradeEnum.NISMO || grade === "NISMO") return "nismo";
@@ -178,6 +186,11 @@ const mapOpenTradeToUiTrade = (
 
 // ---------- component ----------
 
+type TradeWithUi = {
+  open: OpenTrade;
+  ui: UiTrade;
+};
+
 const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -266,20 +279,34 @@ const TradeSection: React.FC = () => {
     fetchCards();
   }, [safeFilteredTrades, cardCache]);
 
-  // Convert to UI TradeCard format (using loaded card + vehicles where available)
-  const uiTrades: UiTrade[] = safeFilteredTrades.map((trade) => {
+  // Build combined list: original OpenTrade + mapped UiTrade (with isOwnTrade flag)
+  const tradesWithUi: TradeWithUi[] = safeFilteredTrades.map((trade) => {
     const tradeCardId = getTradeCardId(trade);
     const cardDetails = tradeCardId ? cardCache[tradeCardId] : undefined;
-    return mapOpenTradeToUiTrade(trade, cardDetails, vehicles);
+    const baseUi = mapOpenTradeToUiTrade(trade, cardDetails, vehicles);
+
+    const ownerId = getTradeUserId(trade);
+    const isOwnTrade = ownerId != null && user?.id === ownerId;
+
+    // Attach isOwnTrade onto the UiTrade object
+    const uiWithOwnerFlag: UiTrade = {
+      ...(baseUi as any),
+      isOwnTrade,
+    };
+
+    return {
+      open: trade,
+      ui: uiWithOwnerFlag,
+    };
   });
 
-  // Local search
-  const filteredUiTrades = uiTrades.filter((trade) => {
+  // Local search (uses mapped UI card data)
+  const filteredTradesWithUi = tradesWithUi.filter(({ ui }) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
     return (
-      trade.card.makeModel.toLowerCase().includes(q) ||
-      trade.card.cardName.toLowerCase().includes(q)
+      ui.card.makeModel.toLowerCase().includes(q) ||
+      ui.card.cardName.toLowerCase().includes(q)
     );
   });
 
@@ -396,15 +423,20 @@ const TradeSection: React.FC = () => {
       {/* Loading / Empty / List */}
       {isLoading ? (
         <p className={styles.emptyState}>Loading trades...</p>
-      ) : filteredUiTrades.length === 0 ? (
+      ) : filteredTradesWithUi.length === 0 ? (
         <p className={styles.emptyState}>No open trades currently.</p>
       ) : (
         <>
           <h2 className={`header-2 ${styles.sectionHeader}`}>Open Trades</h2>
 
           <div className={styles.tradeList}>
-            {filteredUiTrades.map((trade) => (
-              <TradeCard key={trade.id} trade={trade} onBuy={handleBuyTrade} />
+            {filteredTradesWithUi.map(({ ui }) => (
+              <TradeCard
+                key={ui.id}
+                trade={ui}
+                // Do NOT allow buying your own trade
+                onBuy={ui.isOwnTrade ? undefined : handleBuyTrade}
+              />
             ))}
           </div>
         </>

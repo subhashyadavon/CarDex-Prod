@@ -1,87 +1,82 @@
 import React from "react";
-import Card, { CarCardProps } from "../Card/Card";
-import Button from "../Button/Button";
 import styles from "./TradeCard.module.css";
 
-export type TradeStatus = "open" | "completed" | "cancelled";
+import Card, { CarCardProps } from "../Card/Card";
+import Button from "../Button/Button";
 
-export interface Trade {
+export type Trade = {
   id: string;
-  status: TradeStatus;
+  status: "open" | "completed";
   price: number;
+  tradeType?: "FOR_PRICE" | "FOR_CARD";
   card: CarCardProps;
-  tradeType: "FOR_PRICE" | "FOR_CARD";
-}
+  isOwnTrade?: boolean;
+};
 
-interface TradeCardProps {
+export interface TradeCardProps {
   trade: Trade;
   onBuy?: (tradeId: string) => void;
 }
 
 const TradeCard: React.FC<TradeCardProps> = ({ trade, onBuy }) => {
-  const { card, status, price, tradeType } = trade;
+  const { card, price, tradeType, status, isOwnTrade } = trade;
 
-  const statusLabel =
-    status === "open"
-      ? "Open"
-      : status === "completed"
-      ? "Completed"
-      : "Cancelled";
+  const isForPrice = tradeType === "FOR_PRICE";
+  const showPrice = isForPrice && price > 0;
 
-  const typeLabel = tradeType === "FOR_PRICE" ? "For Price" : "For Card";
-
-  const showBuy =
-    status === "open" &&
-    tradeType === "FOR_PRICE" &&
-    typeof onBuy === "function";
+  const handleBuyClick = () => {
+    if (!onBuy || isOwnTrade) return;
+    onBuy(trade.id);
+  };
 
   return (
     <div className={styles.tradeCard}>
-      {/* Card preview */}
       <div className={styles.cardWrapper}>
         <Card {...card} />
       </div>
 
-      {/* Info section including BUY button */}
-      <div className={styles.infoSection}>
-        <div className={styles.infoRow}>
-          <span className={`body-2 ${styles.label}`}>Status</span>
-          <span
-            className={
-              status === "open"
-                ? styles.statusOpen
-                : status === "completed"
-                ? styles.statusCompleted
-                : styles.statusCancelled
-            }
-          >
-            {statusLabel}
-          </span>
+      <div className={styles.footer}>
+        <div className={styles.priceInfo}>
+          {showPrice ? (
+            <>
+              <span className={styles.priceLabel}>Price</span>
+              <span className={styles.priceValue}>
+                {price.toLocaleString()} Cr
+              </span>
+            </>
+          ) : tradeType === "FOR_CARD" ? (
+            <span className={styles.priceLabel}>Card-for-card trade</span>
+          ) : (
+            <span className={styles.priceLabel}>&nbsp;</span>
+          )}
         </div>
-
-        <div className={styles.infoRow}>
-          <span className={`body-2 ${styles.label}`}>Type</span>
-          <span className="body-1">{typeLabel}</span>
-        </div>
-
-        <div className={styles.infoRow}>
-          <span className={`body-2 ${styles.label}`}>Price</span>
-          <span className={`body-1 ${styles.price}`}>
-            {price?.toLocaleString()} Cr
-          </span>
-        </div>
-
-        {showBuy && (
-          <Button
-            size="large"
-            variant="primary"
-            className={styles.buyButton}
-            onClick={() => onBuy!(trade.id)}
-          >
-            Buy
-          </Button>
-        )}
       </div>
+
+      {status === "open" && (
+        <div className={styles.bottomActionBar}>
+          {isOwnTrade ? (
+            <Button
+              size="large"
+              variant="primary"
+              disabled
+              className={styles.buyButton}
+            >
+              Your listing
+            </Button>
+          ) : (
+            onBuy && (
+              <Button
+                size="large"
+                variant="primary"
+                className={styles.buyButton}
+                onClick={handleBuyClick}
+              >
+                Buy
+              </Button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 };
