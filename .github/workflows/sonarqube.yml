@@ -40,13 +40,15 @@ jobs:
 
       - name: Begin SonarQube analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION_BACKEND }}
         run: |
           dotnet sonarscanner begin \
             /k:"cardex-backend" \
+            /o:"${SONAR_ORGANIZATION_BACKEND}" \
             /d:sonar.host.url="${SONAR_HOST_URL}" \
-            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.token="${SONAR_TOKEN_BACKEND}" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/GlobalExceptionHandler.cs,**/*Extensions.cs" \
@@ -68,8 +70,8 @@ jobs:
 
       - name: End SonarQube analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN_BACKEND}"
 
   frontend-analysis:
     name: Frontend SonarQube Analysis
@@ -99,12 +101,13 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           projectBaseDir: CarDexFrontend
           args: >
             -Dsonar.projectKey=cardex-frontend
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_FRONTEND }}
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx

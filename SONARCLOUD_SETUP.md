@@ -87,28 +87,20 @@ Now you need to add the SonarCloud credentials to your GitHub repository:
 3. **Secret**: `https://sonarcloud.io`
 4. Click **"Add secret"**
 
-### Step 6: Update Workflow with Organization
+#### Add SONAR_ORGANIZATION
 
-You need to update the workflow file with your SonarCloud organization name:
-
-1. Open `.github/workflows/sonarqube.yml`
-2. Find the backend analysis section (around line 47)
-3. Add your organization key to the `dotnet sonarscanner begin` command:
-   ```yaml
-   /o:"your-organization-key" \
-   ```
-4. Find the frontend analysis section (around line 107)
-5. Add your organization to the args:
-   ```yaml
-   -Dsonar.organization=your-organization-key
-   ```
+1. Click **"New repository secret"** again
+2. **Name**: `SONAR_ORGANIZATION`
+3. **Secret**: Your SonarCloud organization key
+4. Click **"Add secret"**
 
 **To find your organization key:**
 - Go to SonarCloud
-- Click on your organization name
+- Click on your organization name (top left)
 - The organization key is shown in the URL: `https://sonarcloud.io/organizations/YOUR-ORG-KEY`
+- Or go to **My Organizations** and copy the key from there
 
-### Step 7: Trigger the Analysis
+### Step 6: Trigger the Analysis
 
 Now that everything is set up, trigger the workflow:
 
@@ -123,7 +115,7 @@ Now that everything is set up, trigger the workflow:
 4. You should see the **"SonarQube Analysis"** workflow running
 5. Wait for it to complete
 
-### Step 8: View Results in SonarCloud
+### Step 7: View Results in SonarCloud
 
 1. Go back to [https://sonarcloud.io](https://sonarcloud.io)
 2. You should see both projects:
