@@ -2,9 +2,6 @@
 
 A command-line interface that shows realtime market data for CarDex.
 
-> **NOTE**  
-> We have a section near the bottom which addresses which **User Stories** and acceptance criteria this CLI currently meets.
-
 </br>
 
 ## Frontend Brief
@@ -22,7 +19,6 @@ CarDexCLI/
 ```
 
 ### How to Run
-While we develop a Makefile for single-command running, you can run this frontend using:
 ```bash
 # While inside /CarDexCLI
 
@@ -204,21 +200,3 @@ Stop the CLI.
 
 ### `vroom`
 What could this secret command do...?
-
-</br>
-</br>
-
-# Sprint Progress
-As mentioned above, this CLI currently relates to the following **User Stores**; this list will grow over the next sprint.
-
-## 1. [Pack Purchases](https://github.com/VSHAH1210/CarDex/issues/4)
-- User can browse available packs from different collections (JDM, Muscle, Supercars, etc.)
-- Each pack displays its collection name and currency cost
-
-## 2. [Listing Card for Sale](https://github.com/VSHAH1210/CarDex/issues/7)
-- User can view active listings, up to 5 at a time.
-
-## 3. [Completing Marketplace Transactions](https://github.com/VSHAH1210/CarDex/issues/9)
-- User can browse active marketplace listings (both currency sales and card trades)
-- Trade history is recorded with execution date and details, as shown by recently executed trades
-
