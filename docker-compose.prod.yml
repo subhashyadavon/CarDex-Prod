@@ -1,11 +1,12 @@
 services:
   cardex-frontend:
+    image: ghcr.io/subhashyadavon/cardex-frontend:latest
     build:
       context: .
       dockerfile: CarDexFrontend/Dockerfile
     container_name: cardex-frontend-prod
     ports:
-      - "5009:80"
+      - "80:80"
     depends_on:
       - cardex-api
     restart: always
@@ -13,12 +14,13 @@ services:
       - cardex-prod-network
 
   cardex-api:
+    image: ghcr.io/subhashyadavon/cardex-backend:latest
     build:
       context: .
       dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
     container_name: cardex-api-prod
     ports:
-      - "80:8080"
+      - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
