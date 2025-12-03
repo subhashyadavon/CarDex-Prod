@@ -174,8 +174,33 @@ Fetch all card packs currently available in the CarDex shop.
 
 </br>
 
+### `collections` - View all available collections and their prices
+Fetch all collections, showing vehicle count and price.  
+
+#### EXAMPLE - RAW OUTPUT
+```bash
+[1] JDM Legends
+--------------------------------------------------------------------------------
+  Price:       ©50,000
+  Vehicles:    3
+  Description: JDM Legends
+```
+
+#### EXAMPLE - BREAKDOWN
+```bash
+[1] JDM Legends             # <name>
+--------------------------------------------------------------------------------
+  Price:       ©50,000      # <price>
+  Vehicles:    3            # <count> number of vehicles inside
+  Description: JDM Legends  # <desc>
+```
+
+</br>
+
 ### `exit`
 Stop the CLI.
+
+</br>
 
 ### `vroom`
 What could this secret command do...?
