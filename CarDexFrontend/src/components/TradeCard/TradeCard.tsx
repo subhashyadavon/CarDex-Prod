@@ -8,7 +8,7 @@ export type Trade = {
   id: string;
   status: "open" | "completed";
   price: number;
-  tradeType?: "FOR_PRICE" | "FOR_CARD";
+  tradeType?: "FOR_PRICE";
   card: CarCardProps;
   isOwnTrade?: boolean;
 };
@@ -19,10 +19,9 @@ export interface TradeCardProps {
 }
 
 const TradeCard: React.FC<TradeCardProps> = ({ trade, onBuy }) => {
-  const { card, price, tradeType, status, isOwnTrade } = trade;
+  const { card, price, status, isOwnTrade } = trade;
 
-  const isForPrice = tradeType === "FOR_PRICE";
-  const showPrice = isForPrice && price > 0;
+  const showPrice = price > 0;
 
   const handleBuyClick = () => {
     if (!onBuy || isOwnTrade) return;
@@ -44,8 +43,6 @@ const TradeCard: React.FC<TradeCardProps> = ({ trade, onBuy }) => {
                 {price.toLocaleString()} Cr
               </span>
             </>
-          ) : tradeType === "FOR_CARD" ? (
-            <span className={styles.priceLabel}>Card-for-card trade</span>
           ) : (
             <span className={styles.priceLabel}>&nbsp;</span>
           )}

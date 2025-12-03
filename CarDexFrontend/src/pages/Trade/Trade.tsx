@@ -16,8 +16,6 @@ import { cardService, Vehicle } from "../../services/cardService";
 import { CarCardProps } from "../../components/Card/Card";
 import { CreateTradeRequest } from "../../services/tradeService";
 
-// ---------- helpers ----------
-
 // Get the card id off an OpenTrade (handles cardId or card_id)
 const getTradeCardId = (trade: OpenTrade): string | null => {
   const t: any = trade;
@@ -42,19 +40,12 @@ const gradeToRarity = (grade: GradeEnum | string): CarCardProps["rarity"] => {
   return "factory";
 };
 
-/**
- * Try to find the best matching vehicle for a given card.
- * We support:
- *  - Exact match by vehicleId (if backend ever sends id)
- *  - Fuzzy match by make+model appearing in card.name / description
- */
 const findVehicleForCard = (
   card: any | undefined,
   vehicles: Vehicle[]
 ): Vehicle | null => {
   if (!card || vehicles.length === 0) return null;
 
-  // 1. Try by explicit vehicle id if present
   const rawVehicleId =
     (card as any)?.vehicleId ??
     (card as any)?.vehicle_id ??
@@ -68,15 +59,12 @@ const findVehicleForCard = (
     if (byId) return byId;
   }
 
-  // 2. Try by matching make+model against card text
   const name: string = (card?.name ?? "").toString();
   const description: string = (card?.description ?? "").toString();
   const combined = `${name} ${description}`.toLowerCase();
 
   if (!combined.trim()) return null;
 
-  // Example vehicle fields:
-  // { year, make, model, stat1, stat2, stat3, value, imageUrl }
   const byName = vehicles.find((v) => {
     const full = `${v.make} ${v.model}`.toLowerCase();
     return combined.includes(full) || full.includes(name.toLowerCase());
@@ -93,14 +81,11 @@ const mapOpenTradeToUiTrade = (
   card: any | undefined,
   vehicles: Vehicle[]
 ): UiTrade => {
-  const isForPrice = trade.type === TradeEnum.FOR_PRICE;
-
   const tradeCardId = getTradeCardId(trade);
 
   const name: string | undefined = card?.name;
   const description: string | undefined = card?.description;
 
-  // Resolve vehicle from list
   const vehicle = findVehicleForCard(card, vehicles);
 
   const make = vehicle?.make ?? undefined;
@@ -121,7 +106,6 @@ const mapOpenTradeToUiTrade = (
   const grade = card?.grade ?? "FACTORY";
   const rarity: CarCardProps["rarity"] = gradeToRarity(grade);
 
-  // Prefer card.value, then vehicle.value
   const cardValueNumber: number | undefined =
     card?.value != null ? card.value : vehicle?.value;
 
@@ -130,26 +114,13 @@ const mapOpenTradeToUiTrade = (
 
   const tradePrice = trade.price ?? 0;
 
-  // ---- vehicle stats -> Card stats ----
-  // From backend: stat1, stat2, stat3
   const stat1 = vehicle?.stat1 ?? null;
   const stat2 = vehicle?.stat2 ?? null;
   const stat3 = vehicle?.stat3 ?? null;
-
-  // For now we only have 3 stats; stat4 is VALUE in UI
   const stat4 = null;
 
-  // Price shown in the TradeCard footer
-  // FOR_PRICE -> use tradePrice (fallback to card value)
-  // FOR_CARD  -> force 0 so it doesn't show the card's value as "price"
-  let displayPriceNumber: number;
-  if (isForPrice) {
-    displayPriceNumber = tradePrice || cardValueNumber || 0;
-  } else {
-    displayPriceNumber = 0;
-  }
+  const displayPriceNumber = tradePrice || cardValueNumber || 0;
 
-  // 👇 Resolve image URL: prefer vehicle.imageUrl from backend sample
   const vehicleImageUrl =
     vehicle?.imageUrl ||
     (vehicle as any)?.image ||
@@ -158,35 +129,27 @@ const mapOpenTradeToUiTrade = (
 
   return {
     id: String(trade.id),
-    status: "open", // this page shows open trades
-    price: displayPriceNumber, // "Price ... Cr" in TradeCard footer
-    tradeType: isForPrice ? "FOR_PRICE" : "FOR_CARD",
+    status: "open",
+    price: displayPriceNumber,
+    tradeType: "FOR_PRICE",
     card: {
       makeModel,
       cardName,
       imageUrl: vehicleImageUrl,
-
-      // Map DB stats into UI stats with your existing labels
       stat1Label: "POWER",
       stat1Value: stat1 != null ? String(stat1) : "--",
-
       stat2Label: "WEIGHT",
       stat2Value: stat2 != null ? String(stat2) : "--",
-
       stat3Label: "BRAKING",
       stat3Value: stat3 != null ? String(stat3) : "--",
-
       stat4Label: "VALUE",
       stat4Value: cardValueString || "--",
-
       grade,
       value: cardValueString,
       rarity,
     },
   };
 };
-
-// ---------- component ----------
 
 type TradeWithUi = {
   open: OpenTrade;
@@ -195,9 +158,7 @@ type TradeWithUi = {
 
 const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [modalMode, setModalMode] = useState<"sell" | "trade">("trade");
 
   const { user } = useAuth();
 
@@ -210,21 +171,16 @@ const TradeSection: React.FC = () => {
     acceptTrade,
   } = useTrade();
 
-  // Always treat filteredTrades as array
-  const safeFilteredTrades: OpenTrade[] = Array.isArray(filteredTrades)
+  const safeFilteredTrades: OpenTrade[] = (Array.isArray(filteredTrades)
     ? filteredTrades
-    : [];
+    : []
+  ).filter((t) => t.type === TradeEnum.FOR_PRICE);
 
-  // Cache of card details keyed by card id
   const [cardCache, setCardCache] = useState<Record<string, any>>({});
-
-  // Vehicles list from /cards/vehicles
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
-  // Only load trades once
   const hasLoadedRef = useRef(false);
 
-  // Load open trades once
   useEffect(() => {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
@@ -234,7 +190,6 @@ const TradeSection: React.FC = () => {
     );
   }, [loadTrades]);
 
-  // Load ALL vehicles once (for stats)
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -248,7 +203,6 @@ const TradeSection: React.FC = () => {
     fetchVehicles();
   }, []);
 
-  // When trades change, fetch card details for any card ids we don't have yet
   useEffect(() => {
     const allCardIds = safeFilteredTrades
       .map((t) => getTradeCardId(t))
@@ -281,7 +235,6 @@ const TradeSection: React.FC = () => {
     fetchCards();
   }, [safeFilteredTrades, cardCache]);
 
-  // Build combined list: original OpenTrade + mapped UiTrade (with isOwnTrade flag)
   const tradesWithUi: TradeWithUi[] = safeFilteredTrades.map((trade) => {
     const tradeCardId = getTradeCardId(trade);
     const cardDetails = tradeCardId ? cardCache[tradeCardId] : undefined;
@@ -290,7 +243,6 @@ const TradeSection: React.FC = () => {
     const ownerId = getTradeUserId(trade);
     const isOwnTrade = ownerId != null && user?.id === ownerId;
 
-    // Attach isOwnTrade onto the UiTrade object
     const uiWithOwnerFlag: UiTrade = {
       ...(baseUi as any),
       isOwnTrade,
@@ -302,7 +254,6 @@ const TradeSection: React.FC = () => {
     };
   });
 
-  // Local search (uses mapped UI card data)
   const filteredTradesWithUi = tradesWithUi.filter(({ ui }) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
@@ -312,7 +263,6 @@ const TradeSection: React.FC = () => {
     );
   });
 
-  // Handle buying a FOR_PRICE trade
   const handleBuyTrade = async (tradeId: string) => {
     try {
       console.log("[TradeSection] Buying trade:", tradeId);
@@ -325,7 +275,6 @@ const TradeSection: React.FC = () => {
 
   return (
     <div className={styles.tradeContainer}>
-      {/* Toolbar */}
       <div className={styles.tradeToolbar}>
         <TextInput
           type="search"
@@ -354,18 +303,6 @@ const TradeSection: React.FC = () => {
           size="large"
           variant="secondary"
           onClick={() => {
-            setModalMode("trade");
-            setShowCreateModal(true);
-          }}
-        >
-          Trade Card
-        </Button>
-
-        <Button
-          size="large"
-          variant="secondary"
-          onClick={() => {
-            setModalMode("sell");
             setShowCreateModal(true);
           }}
         >
@@ -373,13 +310,10 @@ const TradeSection: React.FC = () => {
         </Button>
       </div>
 
-      {/* Create Trade Modal */}
       {showCreateModal && (
         <CreateTradeModal
-          mode={modalMode}
           onClose={() => {
             setShowCreateModal(false);
-            // Reload trades whenever modal closes
             refreshTrades().catch((err) =>
               console.error("[TradeSection] Failed to refresh trades:", err)
             );
@@ -391,27 +325,13 @@ const TradeSection: React.FC = () => {
             }
 
             try {
-              let request: CreateTradeRequest;
-
-              if (payload.type === "currency") {
-                // FOR_PRICE trade
-                request = {
-                  userId: user.id,
-                  cardId: payload.offeredCardId,
-                  type: TradeEnum.FOR_PRICE,
-                  price: payload.price ?? 0,
-                  wantCardId: null,
-                };
-              } else {
-                // FOR_CARD trade
-                request = {
-                  userId: user.id,
-                  cardId: payload.offeredCardId,
-                  type: TradeEnum.FOR_CARD,
-                  price: 0, // numeric zero instead of null
-                  wantCardId: payload.requestedCardId ?? null, // CARD ID we want
-                };
-              }
+              const request: CreateTradeRequest = {
+                userId: user.id,
+                cardId: payload.offeredCardId,
+                type: TradeEnum.FOR_PRICE,
+                price: payload.price ?? 0,
+                wantCardId: null,
+              };
 
               console.log("[TradeSection] Creating trade with payload:", request);
               await createTrade(request);
@@ -422,7 +342,6 @@ const TradeSection: React.FC = () => {
         />
       )}
 
-      {/* Loading / Empty / List */}
       {isLoading ? (
         <p className={styles.emptyState}>Loading trades...</p>
       ) : filteredTradesWithUi.length === 0 ? (
@@ -436,7 +355,6 @@ const TradeSection: React.FC = () => {
               <TradeCard
                 key={ui.id}
                 trade={ui}
-                // Do NOT allow buying your own trade
                 onBuy={ui.isOwnTrade ? undefined : handleBuyTrade}
               />
             ))}
