@@ -36,4 +36,3 @@ jobs:
         with:
           name: coverage-report
           path: CarDexFrontend/coverage/lcov-report
-
