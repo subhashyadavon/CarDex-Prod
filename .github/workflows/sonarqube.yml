@@ -1,0 +1,115 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  backend-analysis:
+    name: Backend SonarQube Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.414
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar-backend
+          restore-keys: ${{ runner.os }}-sonar-backend
+
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Restore dependencies
+        run: dotnet restore CarDexBackend/CarDexBackend.sln
+
+      - name: Begin SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION_BACKEND }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${SONAR_ORGANIZATION}_cardex-backend" \
+            /o:"${SONAR_ORGANIZATION}" \
+            /d:sonar.host.url="${SONAR_HOST_URL}" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+            /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/GlobalExceptionHandler.cs,**/*Extensions.cs" \
+            /d:sonar.exclusions="**/Migrations/**" \
+            /d:sonar.test.exclusions="**/tests/**"
+
+      - name: Build solution
+        run: dotnet build CarDexBackend/CarDexBackend.sln --no-restore --configuration Release
+
+      - name: Run tests with coverage
+        run: |
+          dotnet test CarDexBackend/CarDexBackend.sln \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory TestResults \
+            --logger "trx" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: End SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
+
+  frontend-analysis:
+    name: Frontend SonarQube Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: CarDexFrontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: CarDexFrontend
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: CarDexFrontend
+        run: npm test -- --coverage --watchAll=false --coverageReporters=lcov
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          projectBaseDir: CarDexFrontend
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION_FRONTEND }}_cardex-frontend
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_FRONTEND }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx
+            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx,**/node_modules/**,**/build/**,**/dist/**,**/coverage/**
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
