@@ -19,9 +19,27 @@ Players can:
 ## Documentation
 
 - Project Proposal: [Sprint 0 Proposal](./sprint0.md)
-- (NEW) App Architecture: [Architecture Breakdown](./docs/architecture.md)
-- Branching Strategies: [Branching Strategies](/docs/Branching-Strategies.md)
-- Coding Conventions: [Coding Conventions](/docs/Coding-Conventions.md)
+
+### Core Project Docs (`/docs`)
+
+- Architecture Overview: [architecture.md](./docs/architecture.md)
+- Branching Strategy: [Branching Strategies](./docs/Branching-Strategies.md)
+- Coding Conventions: [Coding Conventions](./docs/Coding-Conventions.md)
+- JWT Authentication Flow: [JWT Authentication Implementation](./docs/JWT-Authentication-Implementation.md)
+- Reproducibility & API Profiling: [Reproducibility Report](./docs/ReproducibilityReport.md)
+- Database Schema Changes: [Schema Update Summary](./docs/Schema_Update_Summary.md)
+- Testing Strategy: [Testing Plan](./docs/Testing-Plan.md)
+
+### Infrastructure & Deployment
+
+- Docker Setup: [CarDex Docker Instructions](./DOCKER_INSTRUCTIONS.md)
+
+### Frontend Docs (`/CarDexFrontend`)
+
+- Frontend Docs Index: [Documentation Index](./CarDexFrontend/DOCUMENTATION_INDEX.md)
+- Frontend Implementation Summary: [Implementation Summary](./CarDexFrontend/IMPLEMENTATION_SUMMARY.md)
+- Frontend Infrastructure: [Infrastructure README](./CarDexFrontend/INFRASTRUCTURE_README.md)
+
 
 </br>
 
@@ -162,6 +180,7 @@ Specifically, AI assistance was used to:
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
 - Helping with writing documentation markdown (md) files.  
+
 
 
 
