@@ -65,14 +65,46 @@ const Register: React.FC = () => {
       setSuccessMessage("Account created successfully. Redirecting...");
       navigate("/app");
     } catch (err: any) {
-      const backendMessage =
-        err?.response?.data?.message || err?.response?.data || err?.message;
+      console.error("Registration error:", err);
+      let backendMessage = "Registration failed. Please try again.";
 
-      setAuthError(
-        backendMessage
-          ? `Registration failed: ${backendMessage}`
-          : "Registration failed. Please try again."
-      );
+      if (err?.response?.data) {
+        const data = err.response.data;
+        if (typeof data === "string") {
+          backendMessage = data;
+        } else if (data.message) {
+          backendMessage = data.message;
+        } else if (data.errors) {
+          // Handle ASP.NET Core ProblemDetails with 'errors'
+          const errorValues = Object.values(data.errors).flat();
+          if (errorValues.length > 0) {
+            backendMessage = errorValues.join(" ");
+          }
+        } else if (typeof data === "object") {
+          // Fallback for other object structures
+          try {
+            const values = Object.values(data).flat();
+            // Filter out non-string values to avoid [object Object]
+            const stringValues = values.filter(v => typeof v === "string");
+            if (stringValues.length > 0) {
+              backendMessage = stringValues.join(" ");
+            } else {
+              backendMessage = JSON.stringify(data);
+            }
+          } catch (e) {
+            // ignore parsing errors
+          }
+        }
+      } else if (err?.message) {
+        backendMessage = err.message;
+      }
+
+      // Custom overrides for specific messages
+      if (backendMessage.toLowerCase().includes("username already exists")) {
+        backendMessage = "Username already exists, Try different one!";
+      }
+
+      setAuthError(backendMessage);
     }
   };
 
@@ -89,7 +121,7 @@ const Register: React.FC = () => {
         <img src={logo} alt="CarDex Logo" className={styles.logo} />
 
         <div className={styles.card}>
-          
+
           <Input
             size="large"
             type="text"
@@ -130,8 +162,8 @@ const Register: React.FC = () => {
               showErrors && !confirmPassword
                 ? "Please confirm your password"
                 : password && confirmPassword && password !== confirmPassword
-                ? "Passwords do not match"
-                : ""
+                  ? "Passwords do not match"
+                  : ""
             }
           />
 
@@ -156,21 +188,21 @@ const Register: React.FC = () => {
           )}
 
           {/*subtle link back to Login for users who already have an account */}
-          <p
-            className="body-2"
-            style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9 , color: "white"}}
-          >
-            Already have an account?{" "}
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate("/login")}
-              onKeyDown={(e) => e.key === "Enter" && navigate("/login")}
-              style={{ textDecoration: "underline", cursor: "pointer" }}
+          {authError === "Username already exists, Try different one!" && (
+            <p
+              className="body-2"
+              style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9, color: "white" }}
             >
-              Log in
-            </span>
-          </p>
+              Already have an account?{" "}
+              <Button
+                type="button"
+                onClick={() => navigate("/login")}
+                className={styles.submitButton} // make it look like a link
+              >
+                Log in
+              </Button>
+            </p>
+          )}
         </div>
       </div>
     </div>

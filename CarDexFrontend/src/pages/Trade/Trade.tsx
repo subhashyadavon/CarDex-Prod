@@ -1,164 +1,274 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TextInput from "../../components/TextInput/TextInput";
 import Button from "../../components/Button/Button";
-import TradeCard, { Trade } from "../../components/TradeCard/TradeCard";
-import CreateTradeModal from "../../components/CreateTradeModal/CreateTradeModal"; // ✅ NEW
+import TradeCard, {
+  Trade as UiTrade,
+} from "../../components/TradeCard/TradeCard";
+import CreateTradeModal, {
+  CreateTradePayload,
+} from "../../components/CreateTradeModal/CreateTradeModal";
 import styles from "./Trade.module.css";
 
-const mockTrades: Trade[] = [
-  {
-    id: "t1",
+import { useTrade } from "../../hooks/useTrade";
+import { useAuth } from "../../hooks/useAuth";
+import { OpenTrade, TradeEnum, GradeEnum } from "../../types/types";
+import { cardService, Vehicle } from "../../services/cardService";
+import { CarCardProps } from "../../components/Card/Card";
+import { CreateTradeRequest } from "../../services/tradeService";
+
+const getTradeCardId = (trade: OpenTrade): string | null => {
+  const t: any = trade;
+  const raw = t.cardId ?? t.card_id ?? null;
+  if (raw === null || raw === undefined) return null;
+  return String(raw);
+};
+
+const getTradeUserId = (trade: OpenTrade): string | null => {
+  const t: any = trade;
+  const raw = t.userId ?? t.user_id ?? null;
+  if (raw === null || raw === undefined) return null;
+  return String(raw);
+};
+
+const gradeToRarity = (grade: GradeEnum | string): CarCardProps["rarity"] => {
+  if (grade === GradeEnum.NISMO || grade === "NISMO") return "nismo";
+  if (grade === GradeEnum.LIMITED_RUN || grade === "LIMITED_RUN")
+    return "limited";
+  return "factory";
+};
+
+const findVehicleForCard = (
+  card: any | undefined,
+  vehicles: Vehicle[]
+): Vehicle | null => {
+  if (!card || vehicles.length === 0) return null;
+
+  const rawVehicleId =
+    (card as any)?.vehicleId ??
+    (card as any)?.vehicle_id ??
+    null;
+
+  if (rawVehicleId != null) {
+    const idStr = String(rawVehicleId);
+    const byId = vehicles.find(
+      (v) => v.id != null && String(v.id) === idStr
+    );
+    if (byId) return byId;
+  }
+
+  const name: string = (card?.name ?? "").toString();
+  const description: string = (card?.description ?? "").toString();
+  const combined = `${name} ${description}`.toLowerCase();
+
+  if (!combined.trim()) return null;
+
+  const byName = vehicles.find((v) => {
+    const full = `${v.make} ${v.model}`.toLowerCase();
+    return combined.includes(full) || full.includes(name.toLowerCase());
+  });
+
+  if (byName) return byName;
+
+  return null;
+};
+
+const mapOpenTradeToUiTrade = (
+  trade: OpenTrade,
+  card: any | undefined,
+  vehicles: Vehicle[]
+): UiTrade => {
+  const tradeCardId = getTradeCardId(trade);
+
+  const name: string | undefined = card?.name;
+  const description: string | undefined = card?.description;
+
+  const vehicle = findVehicleForCard(card, vehicles);
+
+  const make = vehicle?.make ?? undefined;
+  const model = vehicle?.model ?? undefined;
+  const year = vehicle?.year ?? undefined;
+
+  const makeModel =
+    (make && model && `${make} ${model}`) ||
+    description ||
+    name ||
+    (tradeCardId ? `Card #${tradeCardId}` : "Card");
+
+  const cardName =
+    name ||
+    description ||
+    (make && model ? `${year ?? ""} ${make} ${model}`.trim() : makeModel);
+
+  const grade = card?.grade ?? "FACTORY";
+  const rarity: CarCardProps["rarity"] = gradeToRarity(grade);
+
+  const cardValueNumber: number | undefined =
+    card?.value != null ? card.value : vehicle?.value;
+
+  const cardValueString =
+    cardValueNumber != null ? cardValueNumber.toLocaleString() : "";
+
+  const tradePrice = trade.price ?? 0;
+
+  const stat1 = vehicle?.stat1 ?? null;
+  const stat2 = vehicle?.stat2 ?? null;
+  const stat3 = vehicle?.stat3 ?? null;
+
+  const displayPriceNumber = tradePrice || cardValueNumber || 0;
+
+  const vehicleImageUrl =
+    vehicle?.imageUrl ||
+    (vehicle as any)?.image ||
+    card?.imageUrl ||
+    "/assets/cards/placeholder-card.png";
+
+  return {
+    id: String(trade.id),
     status: "open",
-    price: 125000,
+    price: displayPriceNumber,
+    tradeType: "FOR_PRICE",
     card: {
-      makeModel: "Nissan GT-R",
-      cardName: "R35 Premium Edition",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/skyline-gtr-r34-vspec.jpg",
+      makeModel,
+      cardName,
+      imageUrl: vehicleImageUrl,
       stat1Label: "POWER",
-      stat1Value: "565",
+      stat1Value: stat1 != null ? String(stat1) : "--",
       stat2Label: "WEIGHT",
-      stat2Value: "1740",
+      stat2Value: stat2 != null ? String(stat2) : "--",
       stat3Label: "BRAKING",
-      stat3Value: "9.1",
-      stat4Label: "TORQUE",
-      stat4Value: "467",
-      grade: "FACTORY",
-      value: "125,000",
-      rarity: "factory",
+      stat3Value: stat3 != null ? String(stat3) : "--",
+      stat4Label: "VALUE",
+      stat4Value: cardValueString || "--",
+      grade,
+      value: cardValueString,
+      rarity,
     },
-  },
-  {
-    id: "t2",
-    status: "open",
-    price: 210000,
-    card: {
-      makeModel: "Toyota Supra",
-      cardName: "A80 Twin Turbo",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/supra-mk4.jpg",
-      stat1Label: "POWER",
-      stat1Value: "320",
-      stat2Label: "WEIGHT",
-      stat2Value: "1560",
-      stat3Label: "BRAKING",
-      stat3Value: "8.7",
-      stat4Label: "TORQUE",
-      stat4Value: "315",
-      grade: "LIMITED",
-      value: "210,000",
-      rarity: "limited",
-    },
-  },
-  {
-    id: "t3",
-    status: "completed",
-    price: 340000,
-    card: {
-      makeModel: "Nissan GT-R",
-      cardName: "NISMO",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/skyline-gtr-r34.jpg",
-      stat1Label: "POWER",
-      stat1Value: "600",
-      stat2Label: "WEIGHT",
-      stat2Value: "1720",
-      stat3Label: "BRAKING",
-      stat3Value: "9.6",
-      stat4Label: "TORQUE",
-      stat4Value: "481",
-      grade: "NISMO",
-      value: "340,000",
-      rarity: "nismo",
-    },
-  },
-  {
-    id: "t4",
-    status: "open",
-    price: 95000,
-    card: {
-      makeModel: "Mazda RX-7",
-      cardName: "FD Spirit R",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/rx7-fd.jpg",
-      stat1Label: "POWER",
-      stat1Value: "276",
-      stat2Label: "WEIGHT",
-      stat2Value: "1280",
-      stat3Label: "BRAKING",
-      stat3Value: "8.4",
-      stat4Label: "TORQUE",
-      stat4Value: "231",
-      grade: "LIMITED",
-      value: "95,000",
-      rarity: "limited",
-    },
-  },
-  {
-    id: "t5",
-    status: "cancelled",
-    price: 180000,
-    card: {
-      makeModel: "Honda NSX",
-      cardName: "NA1 Type R",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/nsx.jpg",
-      stat1Label: "POWER",
-      stat1Value: "276",
-      stat2Label: "WEIGHT",
-      stat2Value: "1350",
-      stat3Label: "BRAKING",
-      stat3Value: "8.9",
-      stat4Label: "TORQUE",
-      stat4Value: "217",
-      grade: "FACTORY",
-      value: "180,000",
-      rarity: "factory",
-    },
-  },
-  {
-    id: "t6",
-    status: "open",
-    price: 265000,
-    card: {
-      makeModel: "Subaru Impreza",
-      cardName: "22B STi",
-      imageUrl:
-        "https://kucmypknqwnnmmdhduto.supabase.co/storage/v1/object/public/images/vehicles/evo-iv.jpg",
-      stat1Label: "POWER",
-      stat1Value: "276",
-      stat2Label: "WEIGHT",
-      stat2Value: "1270",
-      stat3Label: "BRAKING",
-      stat3Value: "8.8",
-      stat4Label: "TORQUE",
-      stat4Value: "268",
-      grade: "LIMITED",
-      value: "265,000",
-      rarity: "limited",
-    },
-  },
-];
+  };
+};
+
+type TradeWithUi = {
+  open: OpenTrade;
+  ui: UiTrade;
+};
 
 const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // ✅ NEW: modal state (tiny addition)
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [modalMode, setModalMode] = useState<"sell" | "trade">("trade");
 
-  const filteredTrades = mockTrades.filter((trade) => {
+  const { user } = useAuth();
+
+  const {
+    filteredTrades,
+    loadTrades,
+    isLoading,
+    refreshTrades,
+    createTrade,
+    acceptTrade,
+  } = useTrade();
+
+  const safeFilteredTrades: OpenTrade[] = (Array.isArray(filteredTrades)
+    ? filteredTrades
+    : []
+  ).filter((t) => t.type === TradeEnum.FOR_PRICE);
+
+  const [cardCache, setCardCache] = useState<Record<string, any>>({});
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
+    loadTrades().catch((err) =>
+      console.error("[TradeSection] Failed to load trades:", err)
+    );
+  }, [loadTrades]);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const vehiclesResponse = await cardService.getAllVehicles();
+        setVehicles(vehiclesResponse);
+      } catch (err) {
+        console.error("[TradeSection] Failed to load vehicles:", err);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
+  useEffect(() => {
+    const allCardIds = safeFilteredTrades
+      .map((t) => getTradeCardId(t))
+      .filter((id): id is string => !!id);
+
+    const missingIds = allCardIds.filter((id) => !(id in cardCache));
+
+    if (missingIds.length === 0) return;
+
+    const fetchCards = async () => {
+      try {
+        const results = await Promise.all(
+          missingIds.map((id) => cardService.getCardById(id))
+        );
+
+        setCardCache((prev) => {
+          const next: Record<string, any> = { ...prev };
+          results.forEach((card: any) => {
+            if (card && card.id != null) {
+              next[String(card.id)] = card;
+            }
+          });
+          return next;
+        });
+      } catch (err) {
+        console.error("[TradeSection] Failed to load cards for trades:", err);
+      }
+    };
+
+    fetchCards();
+  }, [safeFilteredTrades, cardCache]);
+
+  const tradesWithUi: TradeWithUi[] = safeFilteredTrades.map((trade) => {
+    const tradeCardId = getTradeCardId(trade);
+    const cardDetails = tradeCardId ? cardCache[tradeCardId] : undefined;
+    const baseUi = mapOpenTradeToUiTrade(trade, cardDetails, vehicles);
+
+    const ownerId = getTradeUserId(trade);
+    const isOwnTrade = ownerId != null && user?.id === ownerId;
+
+    const uiWithOwnerFlag: UiTrade = {
+      ...(baseUi as any),
+      isOwnTrade,
+    };
+
+    return {
+      open: trade,
+      ui: uiWithOwnerFlag,
+    };
+  });
+
+  const filteredTradesWithUi = tradesWithUi.filter(({ ui }) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
     return (
-      trade.card.makeModel.toLowerCase().includes(q) ||
-      trade.card.cardName.toLowerCase().includes(q)
+      ui.card.makeModel.toLowerCase().includes(q) ||
+      ui.card.cardName.toLowerCase().includes(q)
     );
   });
 
+  const handleBuyTrade = async (tradeId: string) => {
+    try {
+      await acceptTrade(tradeId);
+      await refreshTrades();
+    } catch (err) {
+      console.error("[TradeSection] Failed to buy trade:", err);
+    }
+  };
+
   return (
     <div className={styles.tradeContainer}>
-      {/* Toolbar */}
       <div className={styles.tradeToolbar}>
         <TextInput
           type="search"
@@ -171,59 +281,84 @@ const TradeSection: React.FC = () => {
           className={styles.searchInput}
         />
 
-        <Button size="large" variant="primary">
+        <Button
+          size="large"
+          variant="primary"
+          onClick={() => {
+            refreshTrades().catch((err) =>
+              console.error("[TradeSection] Failed to refresh trades:", err)
+            );
+          }}
+        >
           Search
         </Button>
 
-        {/* ✅ Hook up modal open */}
         <Button
           size="large"
           variant="secondary"
           onClick={() => {
-            setModalMode("trade");
-            setShowCreateModal(true);
-          }}
-        >
-          Trade Card
-        </Button>
-
-        {/* ✅ Hook up modal open */}
-        <Button
-          size="large"
-          variant="secondary"
-          onClick={() => {
-            setModalMode("sell");
             setShowCreateModal(true);
           }}
         >
           Sell Card
         </Button>
+
+        <Button
+          size="large"
+          variant="secondary"
+          onClick={() => {
+            refreshTrades().catch((err) =>
+              console.error("[TradeSection] Failed to refresh trades:", err)
+            );
+          }}
+        >
+          Refresh
+        </Button>
       </div>
 
-      {/* ✅ Render modal if open */}
       {showCreateModal && (
         <CreateTradeModal
-          mode={modalMode}
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={(payload) => {
-            // later: send to backend
-            console.log("Create trade payload:", payload);
+          onClose={() => {
+            setShowCreateModal(false);
+            refreshTrades().catch((err) =>
+              console.error("[TradeSection] Failed to refresh trades:", err)
+            );
+          }}
+          onSubmit={async (payload: CreateTradePayload) => {
+            if (!user) return;
+
+            try {
+              const request: CreateTradeRequest = {
+                userId: user.id,
+                cardId: payload.offeredCardId,
+                type: TradeEnum.FOR_PRICE,
+                price: payload.price ?? 0,
+                wantCardId: null,
+              };
+
+              await createTrade(request);
+            } catch (err) {
+              console.error("[TradeSection] Failed to create trade:", err);
+            }
           }}
         />
       )}
 
-      {/* Empty State */}
-      {filteredTrades.length === 0 ? (
+      {isLoading ? (
+        <p className={styles.emptyState}>Loading trades...</p>
+      ) : filteredTradesWithUi.length === 0 ? (
         <p className={styles.emptyState}>No open trades currently.</p>
       ) : (
         <>
-          {/* Section Header */}
           <h2 className={`header-2 ${styles.sectionHeader}`}>Open Trades</h2>
 
-          {/* List of TradeCards */}
           <div className={styles.tradeList}>
-            {filteredTrades.map((trade) => (
-              <TradeCard key={trade.id} trade={trade} />
+            {filteredTradesWithUi.map(({ ui }) => (
+              <TradeCard
+                key={ui.id}
+                trade={ui}
+                onBuy={ui.isOwnTrade ? undefined : handleBuyTrade}
+              />
             ))}
           </div>
         </>

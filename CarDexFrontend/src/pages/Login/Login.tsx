@@ -41,8 +41,12 @@ const Login: React.FC = () => {
       let errorMessage = "Invalid credentials. Please check your username and password.";
 
       if (err?.response?.data) {
+        // Check for 'detail' field first (standard ProblemDetails from GlobalExceptionHandler)
+        if (err.response.data.detail) {
+          errorMessage = err.response.data.detail;
+        }
         // If data has a message property, use it
-        if (typeof err.response.data.message === 'string') {
+        else if (typeof err.response.data.message === 'string') {
           errorMessage = err.response.data.message;
         }
         // If data is a string itself, use it
@@ -109,24 +113,26 @@ const Login: React.FC = () => {
             {isLoading ? "Logging in..." : "Login"}
           </Button>
 
-          <p
-            className="body-2"
-            style={{
-              textAlign: "center",
-              marginTop: "0.75rem",
-              opacity: 0.9,
-              color: "white",
-            }}
-          >
-            Don’t have an account?{" "}
-            <Button
-              type="button"
-              onClick={() => navigate("/register")}
-              className={styles.submitButton} // make it look like a link
+          {authError === "Username does not exist" && (
+            <p
+              className="body-2"
+              style={{
+                textAlign: "center",
+                marginTop: "0.75rem",
+                opacity: 0.9,
+                color: "white",
+              }}
             >
-              Create one
-            </Button>
-          </p>
+              Don’t have an account?{" "}
+              <Button
+                type="button"
+                onClick={() => navigate("/register")}
+                className={styles.submitButton} // make it look like a link
+              >
+                Create one
+              </Button>
+            </p>
+          )}
 
           {displayError && (
             <p className={`${styles.errorMessage} body-2`}>{displayError}</p>

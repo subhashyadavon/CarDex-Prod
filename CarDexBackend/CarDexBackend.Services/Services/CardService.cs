@@ -87,6 +87,62 @@ namespace CarDexBackend.Services
                 OwnerId = card.UserId.ToString()
             };
         }
+
+        /// <summary>
+        /// Retrieves detailed information about a specific vehicle.
+        /// <summary>
+        public async Task<VehicleDetailedResponse> GetVehicleById(Guid vehicleId)
+        {
+            var vehicle = await _vehicleRepo.GetByIdAsync(vehicleId);
+            if (vehicle == null)
+                throw new KeyNotFoundException(_sr["UnknownVehicleError"]);
+
+            var vehicleName = vehicle != null ? $"{vehicle.Year} {vehicle.Make} {vehicle.Model}" : _sr["UnknownVehicle"];
+
+            return new VehicleDetailedResponse
+            {
+                Id = vehicleId,
+                Year = vehicle.Year,
+                Make = vehicle.Make,
+                Model = vehicle.Model,
+                Stat1 = vehicle.Stat1,
+                Stat2 = vehicle.Stat2,
+                Stat3 = vehicle.Stat3,
+                Value = vehicle.Value,
+                ImageUrl = vehicle.Image
+            };
+        }
+
+
+        /// <summary>
+        /// Retrieves a list with detailed information about all vehicles.
+        /// </summary>
+        public async Task<VehicleListResponse> GetAllVehicles()
+        {
+            var vehicles = await _vehicleRepo.GetAllAsync();
+
+            var vehicleResponses = new List<VehicleDetailedResponse>();
+            foreach (var v in vehicles)
+            {
+                vehicleResponses.Add(new VehicleDetailedResponse
+                {
+                    Id = v.Id,
+                    Year = v.Year,
+                    Make = v.Make,
+                    Model = v.Model,
+                    Stat1 = v.Stat1,
+                    Stat2 = v.Stat2,
+                    Stat3 = v.Stat3,
+                    Value = v.Value,
+                    ImageUrl = v.Image
+                });
+            }
+
+            return new VehicleListResponse
+            {
+                Vehicles = vehicleResponses
+            };
+        }
     }
 }
 

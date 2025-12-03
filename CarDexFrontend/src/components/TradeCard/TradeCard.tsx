@@ -1,30 +1,32 @@
-// src/components/TradeCard/TradeCard.tsx
 import React from "react";
-import Card, { CarCardProps } from "../Card/Card";
 import styles from "./TradeCard.module.css";
 
-export type TradeStatus = "open" | "completed" | "cancelled";
+import Card, { CarCardProps } from "../Card/Card";
+import Button from "../Button/Button";
 
-export interface Trade {
+export type Trade = {
   id: string;
-  status: TradeStatus;
+  status: "open" | "completed";
   price: number;
+  tradeType?: "FOR_PRICE";
   card: CarCardProps;
-}
+  isOwnTrade?: boolean;
+};
 
-interface TradeCardProps {
+export interface TradeCardProps {
   trade: Trade;
+  onBuy?: (tradeId: string) => void;
 }
 
-const TradeCard: React.FC<TradeCardProps> = ({ trade }) => {
-  const { card, status, price } = trade;
+const TradeCard: React.FC<TradeCardProps> = ({ trade, onBuy }) => {
+  const { card, price, status, isOwnTrade } = trade;
 
-  const statusLabel =
-    status === "open"
-      ? "Open"
-      : status === "completed"
-      ? "Completed"
-      : "Cancelled";
+  const showPrice = price > 0;
+
+  const handleBuyClick = () => {
+    if (!onBuy || isOwnTrade) return;
+    onBuy(trade.id);
+  };
 
   return (
     <div className={styles.tradeCard}>
@@ -32,29 +34,46 @@ const TradeCard: React.FC<TradeCardProps> = ({ trade }) => {
         <Card {...card} />
       </div>
 
-      <div className={styles.infoSection}>
-        <div className={styles.infoRow}>
-          <span className={`body-2 ${styles.label}`}>Status</span>
-          <span
-            className={
-              status === "open"
-                ? styles.statusOpen
-                : status === "completed"
-                ? styles.statusCompleted
-                : styles.statusCancelled
-            }
-          >
-            {statusLabel}
-          </span>
-        </div>
-
-        <div className={styles.infoRow}>
-          <span className={`body-2 ${styles.label}`}>Price</span>
-          <span className={`body-1 ${styles.price}`}>
-            {price.toLocaleString()} Cr
-          </span>
+      <div className={styles.footer}>
+        <div className={styles.priceInfo}>
+          {showPrice ? (
+            <>
+              <span className={styles.priceLabel}>Price</span>
+              <span className={styles.priceValue}>
+                {price.toLocaleString()} Cr
+              </span>
+            </>
+          ) : (
+            <span className={styles.priceLabel}>&nbsp;</span>
+          )}
         </div>
       </div>
+
+      {status === "open" && (
+        <div className={styles.bottomActionBar}>
+          {isOwnTrade ? (
+            <Button
+              size="large"
+              variant="primary"
+              disabled
+              className={styles.buyButton}
+            >
+              Your listing
+            </Button>
+          ) : (
+            onBuy && (
+              <Button
+                size="large"
+                variant="primary"
+                className={styles.buyButton}
+                onClick={handleBuyClick}
+              >
+                Buy
+              </Button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 };
