@@ -65,7 +65,7 @@ export const API_CONFIG = {
       GET_BY_ID: (id: string) => `/trades/${id}`, // GET: Specific trade
       GET_USER_TRADES: (userId: string) => `/trades/user/${userId}`, // GET: User's trades
       CREATE: "/trades", // POST: Create new trade
-      ACCEPT: (tradeId: string) => `/trades/${tradeId}/accept`, // POST: Accept trade
+      ACCEPT: (tradeId: string) => `/trades/${tradeId}/execute`, // POST: Accept trade
       CANCEL: (tradeId: string) => `/trades/${tradeId}/cancel`, // DELETE: Cancel trade
     },
 

@@ -80,7 +80,7 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
     try {
       const newTrade = await tradeService.createTrade(tradeData);
 
-      // ✅ functional update so filtered state stays in sync
+      // keep trades + filteredTrades in sync
       setTrades((prev) => {
         const updated = [...prev, newTrade];
         applyFilter(updated, statusFilter);
@@ -99,12 +99,14 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
   const acceptTrade = async (tradeId: string): Promise<CompletedTrade> => {
     setIsLoading(true);
     try {
+      // tradeService.acceptTrade will call POST /trades/{id}/execute with buyerCardId: null
       const completedTrade = await tradeService.acceptTrade(tradeId);
 
       console.log(
         "[TradeContext] Trade completed, currency / inventory may have changed"
       );
 
+      // remove completed trade from open trades
       setTrades((prev) => {
         const updated = prev.filter((t) => t.id !== tradeId);
         applyFilter(updated, statusFilter);
