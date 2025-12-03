@@ -42,11 +42,12 @@ Players can:
 
 </br>
 
-## Backend Setup (CarDexBackend)
+## Project setup
 
 ### 🧩 Prerequisites
   - For normal run
     - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+    - python
   - For testing
     - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (v8.0.414)
     - reportgenerator (dotnet tool)
@@ -55,12 +56,12 @@ Players can:
 
 > Docker Dekstop must be running before continuing.  
 
-#### RUNNING DEV / LOCAL
+### Running Dev / Local
 ```bash
 # From the project root
 docker-compose up --build
 
-# Access the application as follows
+# Access the applications as follows
 # API Base URL: `http://localhost:5001`
 # Swagger UI:   `http://localhost:5001/swagger`
 # Database:     `localhost:5432`
@@ -71,7 +72,7 @@ docker-compose up --build
 
 </br>
 
-#### RUNNING PROD
+### Running Production
 ```bash
 # From the project root
 docker-compose -f docker-compose.prod.yml --env-file .env up --build -d
@@ -81,7 +82,55 @@ docker-compose -f docker-compose.prod.yml --env-file .env up --build -d
 
 </br>
 
-#### RUNNING TESTS - NORMAL
+## Project Apps
+
+### Using react
+Access the WebApp at `http://localhost/app`, given the Docker containers are running.
+
+#### RUNNING TESTS - NORMAL (WITHOUT WATCH MODE)
+```bash
+# While in /CarDexFrontend
+# Note: On windows you may need to be in administrator mode to run the tests.
+#       Using cmd does not require that.
+npm test -- --watchAll=false
+```
+
+#### RUNNING TEST - WITH COVERAGE 
+```bash
+# While in /CarDexFrontend
+# The coverage report will be generated in `/CarDexFrontend/coverage/lcov-report`
+npm test -- --coverage --watchAll=false
+
+# Open the report in your browser (Windows)
+# You can also just simply open the index.html file
+start coverage/lcov-report/index.html
+```
+
+</br>
+
+### Using python
+
+#### RUNNING CLI
+```bash
+# While inside /CarDexCLI
+
+# Run the CLI
+python cli_client.py
+```
+
+#### RUNNING TESTS
+```bash
+# While inside /CarDexCLI
+
+# Run tests
+pytest test_suite.py -v --cov=.
+```
+
+</br>
+
+### DotNet
+
+#### RUNNING TEST - NORMAL
 ```bash
 # From the project root
 # This runs all unit tests across the backend layer
@@ -103,63 +152,6 @@ start coveragereport/index.html
 ```
 
 </br>
-
-### Run: Tests
-Ensure you are in the directory `/CarDexFrontend`.  
-> **NOTE: On windows you may need to be in administrator mode to run the tests. Using cmd does not require that.**  
-
-#### NORMAL (WITHOUT WATCH MODE)
-```bash
-# While in /CarDexFrontend
-npm test -- --watchAll=false
-```
-
-#### WITH COVERAGE 
-```bash
-# While in /CarDexFrontend
-# The coverage report will be generated in `/CarDexFrontend/coverage/lcov-report`
-npm test -- --coverage --watchAll=false
-
-# Open the report in your browser (Windows)
-# You can also just simply open the index.html file
-start coverage/lcov-report/index.html
-```
-
-</br>
-
-## Frontend Setup - Python
-
-### 🧩 Prerequisites
-  - python
-
-
-```bash
-# Check version
-python --version
-
-# While inside /CarDexCLI
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### How to Run
-
-#### RUNNING CLI
-```bash
-# While inside /CarDexCLI
-
-# Run the CLI
-python cli_client.py
-```
-
-#### RUNNING TESTS
-```bash
-# While inside /CarDexCLI
-
-# Run tests
-pytest test_suite.py -v --cov=.
-```
-
 </br>
 
 ## AI Disclaimer
@@ -170,5 +162,6 @@ Specifically, AI assistance was used to:
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
 - Helping with writing documentation markdown (md) files.  
+
 
 
