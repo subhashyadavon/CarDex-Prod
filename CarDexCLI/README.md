@@ -38,24 +38,24 @@ This CLI currently has ~99% code test coverage, as shown by the `pytest` coverag
 ===================== test session starts ===============================================
 cachedir: .pytest_cache
 plugins: cov-4.1.0
-collected 54
-items
+collected 99 items
 
-test_suite.py::TestApiClient::TestInitialization::test_initializes_with_default_server_url PASSED    [1%]
-test_suite.py::TestApiClient::TestInitialization::test_initializes_with_custom_server_url  PASSED    [3%]
+test_suite.py::TestApiClient::TestInitialization::test_initializes_with_default_values   PASSED    [1%]
+test_suite.py::TestApiClient::TestConnection::test_successfully_connects_to_server       PASSED    [3%]
 ...
-test_suite.py::TestCarDexCLI::TestApplicationFlow::test_handles_eof_error_gracefully       PASSED  [100%]
+test_suite.py::TestCLIClient::TestApplicationFlow::test_goodbye_message_on_normal_exit   PASSED  [100%]
 
 
--- coverage: platform win32, python 3.13.1-final-0 --
-Name                              Stmts   Miss  Cover
------------------------------------------------------
-api_client.py                        21      0   100%
-cli_client.py                        73      3    96%
-cli_display.py                      120      0   100%
-test_suite.py                       354      0   100%
------------------------------------------------------
-TOTAL                               568      3    99%
+---------- coverage: platform win32, python 3.13.1-final-0 -----------
+Name             Stmts   Miss  Cover
+------------------------------------
+api_client.py      104      0   100%
+cli_client.py      161      3    98%
+cli_display.py     127      1    99%
+config.py            7      7     0%
+test_suite.py      772      0   100%
+------------------------------------
+TOTAL             1171     11    99%
 ```
 
 </br>
