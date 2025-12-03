@@ -14,7 +14,7 @@ RUN npm ci --only=production=false
 COPY CarDexFrontend/ .
 
 # Build argument for API URL (can be overridden at build time)
-ARG REACT_APP_API_URL=http://localhost:5009
+ARG REACT_APP_API_URL=http://localhost:8080
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Build the application
