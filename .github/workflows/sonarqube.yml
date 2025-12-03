@@ -46,9 +46,9 @@ jobs:
         run: |
           dotnet sonarscanner begin \
             /k:"cardex-backend" \
-            /o:"${SONAR_ORGANIZATION_BACKEND}" \
+            /o:"${SONAR_ORGANIZATION}" \
             /d:sonar.host.url="${SONAR_HOST_URL}" \
-            /d:sonar.token="${SONAR_TOKEN_BACKEND}" \
+            /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Program.cs,**/GlobalExceptionHandler.cs,**/*Extensions.cs" \
@@ -71,7 +71,7 @@ jobs:
       - name: End SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
-        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN_BACKEND}"
+        run: dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
 
   frontend-analysis:
     name: Frontend SonarQube Analysis
