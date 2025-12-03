@@ -12,7 +12,7 @@ import { Card, CardWithVehicleListResponse } from "../types/types";
  * Adjust fields if your backend returns slightly different names.
  */
 export type Vehicle = {
-  id?: string;        // sometimes vehicles may not expose id in the DTO
+  id?: string; // sometimes vehicles may not expose id in the DTO
   year: number | string;
   make: string;
   model: string;
@@ -20,7 +20,8 @@ export type Vehicle = {
   stat2: number;
   stat3: number;
   value: number;
-  image?: string;
+  image?: string;      // legacy / alt field
+  imageUrl?: string;   // 👈 main field from your API sample
 };
 
 export const cardService = {

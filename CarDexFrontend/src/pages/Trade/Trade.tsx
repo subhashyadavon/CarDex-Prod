@@ -1,5 +1,3 @@
-// src/pages/Trade/Trade.tsx
-
 import React, { useState, useEffect, useRef } from "react";
 import TextInput from "../../components/TextInput/TextInput";
 import Button from "../../components/Button/Button";
@@ -78,7 +76,7 @@ const findVehicleForCard = (
   if (!combined.trim()) return null;
 
   // Example vehicle fields:
-  // { year, make, model, stat1, stat2, stat3, value }
+  // { year, make, model, stat1, stat2, stat3, value, imageUrl }
   const byName = vehicles.find((v) => {
     const full = `${v.make} ${v.model}`.toLowerCase();
     return combined.includes(full) || full.includes(name.toLowerCase());
@@ -151,6 +149,13 @@ const mapOpenTradeToUiTrade = (
     displayPriceNumber = 0;
   }
 
+  // 👇 Resolve image URL: prefer vehicle.imageUrl from backend sample
+  const vehicleImageUrl =
+    vehicle?.imageUrl ||
+    (vehicle as any)?.image ||
+    card?.imageUrl ||
+    "/assets/cards/placeholder-card.png";
+
   return {
     id: String(trade.id),
     status: "open", // this page shows open trades
@@ -159,10 +164,7 @@ const mapOpenTradeToUiTrade = (
     card: {
       makeModel,
       cardName,
-      imageUrl:
-        card?.imageUrl ||
-        (vehicle as any)?.image || // vehicle.image if present
-        "/assets/cards/placeholder-card.png",
+      imageUrl: vehicleImageUrl,
 
       // Map DB stats into UI stats with your existing labels
       stat1Label: "POWER",

@@ -1,5 +1,3 @@
-// src/components/CreateTradeModal/CreateTradeModal.tsx
-
 import React, { useState, useEffect } from "react";
 import styles from "./CreateTradeModal.module.css";
 import "../../App.css";
@@ -34,7 +32,7 @@ interface CreateTradeModalProps {
 }
 
 interface PlayerCard {
-  id: string;     // UI id (unique per row)
+  id: string; // UI id (unique per row)
   cardId: string; // underlying card id used in payload
   card: CarCardProps;
 }
@@ -93,7 +91,7 @@ const findVehicleForCard = (
 
   // 2. Try by matching make+model against card text
   const name: string = (card?.name ?? "").toString();
-  const description: string = (card?.description ?? "").toString();
+  const description: string | undefined = (card?.description ?? "").toString();
   const combined = `${name} ${description}`.toLowerCase();
 
   if (!combined.trim()) return null;
@@ -117,8 +115,8 @@ const mapCardWithVehicleToPlayerCard = (
   const value = card.value ?? 0;
 
   return {
-    id: String(card.id),      // UI id
-    cardId: String(card.id),  // underlying card id
+    id: String(card.id), // UI id
+    cardId: String(card.id), // underlying card id
     card: {
       makeModel: makeModel || "Unknown Vehicle",
       cardName: `${card.make} ${card.model}`.trim() || "Card",
@@ -183,6 +181,13 @@ const mapOpenTradeToPlayerCard = (
   const stat2 = vehicle?.stat2 ?? null;
   const stat3 = vehicle?.stat3 ?? null;
 
+  // 👇 Resolve image URL same way as in Trade.tsx
+  const vehicleImageUrl =
+    vehicle?.imageUrl ||
+    (vehicle as any)?.image ||
+    card?.imageUrl ||
+    "/assets/cards/placeholder-card.png";
+
   return {
     // UI id = trade id (unique per open trade row)
     id: String(trade.id),
@@ -191,10 +196,7 @@ const mapOpenTradeToPlayerCard = (
     card: {
       makeModel,
       cardName,
-      imageUrl:
-        card?.imageUrl ||
-        (vehicle as any)?.image ||
-        "/assets/cards/placeholder-card.png",
+      imageUrl: vehicleImageUrl,
 
       stat1Label: "POWER",
       stat1Value: stat1 != null ? String(stat1) : "--",
