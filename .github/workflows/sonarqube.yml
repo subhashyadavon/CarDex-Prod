@@ -45,7 +45,7 @@ jobs:
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION_BACKEND }}
         run: |
           dotnet sonarscanner begin \
-            /k:"cardex-backend" \
+            /k:"subhashyadavon_cardex-backend" \
             /o:"${SONAR_ORGANIZATION}" \
             /d:sonar.host.url="${SONAR_HOST_URL}" \
             /d:sonar.token="${SONAR_TOKEN}" \
@@ -106,7 +106,7 @@ jobs:
         with:
           projectBaseDir: CarDexFrontend
           args: >
-            -Dsonar.projectKey=cardex-frontend
+            -Dsonar.projectKey=subhashyadavon_cardex-frontend
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_FRONTEND }}
             -Dsonar.sources=src
             -Dsonar.tests=src
