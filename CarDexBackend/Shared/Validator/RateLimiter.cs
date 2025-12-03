@@ -11,7 +11,7 @@ namespace CarDexBackend.Shared.Validator
     {
         private readonly ILogger<RateLimiter> _logger;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<DateTime>> _userRequests = new();
-        private const int MaxRequestsPerMinute = 50;
+        private const int MaxRequestsPerMinute = 5000;
         private const int TimeWindowSeconds = 60;
 
         public RateLimiter(ILogger<RateLimiter> logger)
