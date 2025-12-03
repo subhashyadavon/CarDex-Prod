@@ -68,6 +68,14 @@ namespace CarDexBackend.Api.Extensions
                             EXCEPTION
                                 WHEN duplicate_object THEN null;
                             END $$;
+
+                            -- Ensure the new enum value exists even if the type was already created
+                            DO $$ BEGIN
+                                ALTER TYPE reward_enum ADD VALUE IF NOT EXISTS 'CURRENCY_FROM_TRADE';
+                            EXCEPTION
+                                WHEN duplicate_object THEN null;
+                                WHEN OTHERS THEN null; -- Handle cases where it might fail safely
+                            END $$;
                         ";
                         context.Database.ExecuteSqlRaw(sql);
 
