@@ -8,6 +8,7 @@
 import React, { createContext, useState, ReactNode } from "react";
 import { OpenTrade, CompletedTrade, TradeEnum } from "../types/types";
 import { tradeService, CreateTradeRequest } from "../services/tradeService";
+import { useAuth } from "../hooks/useAuth";
 
 interface TradeContextType {
   trades: OpenTrade[];
@@ -36,6 +37,8 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
   const [filteredTrades, setFilteredTrades] = useState<OpenTrade[]>([]);
   const [statusFilter, setStatusFilterState] = useState<TradeEnum | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { user, updateUserCurrency } = useAuth();
 
   const applyFilter = (tradeList: OpenTrade[], filter: TradeEnum | null) => {
     if (filter === null) {
@@ -99,12 +102,26 @@ export const TradeProvider: React.FC<TradeProviderProps> = ({ children }) => {
   const acceptTrade = async (tradeId: string): Promise<CompletedTrade> => {
     setIsLoading(true);
     try {
+      // Find the trade before we execute it to get the price
+      const trade = trades.find((t) => t.id === tradeId);
+
       // tradeService.acceptTrade will call POST /trades/{id}/execute with buyerCardId: null
       const completedTrade = await tradeService.acceptTrade(tradeId);
 
       console.log(
         "[TradeContext] Trade completed, currency / inventory may have changed"
       );
+
+      // Update user currency if it was a price trade
+      if (trade && trade.type === TradeEnum.FOR_PRICE && user) {
+        const price = trade.price || 0;
+        // Ensure we don't go below 0 (though backend validation prevents this too)
+        const currentCurrency = user.currency || 0;
+        const newCurrency = Math.max(0, currentCurrency - price);
+
+        console.log(`[TradeContext] Deducting ${price} from ${currentCurrency}. New: ${newCurrency}`);
+        updateUserCurrency(newCurrency);
+      }
 
       // remove completed trade from open trades
       setTrades((prev) => {
