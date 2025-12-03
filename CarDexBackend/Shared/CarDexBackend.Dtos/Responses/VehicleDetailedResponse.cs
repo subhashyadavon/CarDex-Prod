@@ -5,6 +5,7 @@ namespace CarDexBackend.Shared.Dtos.Responses
     /// </summary>
     public class VehicleDetailedResponse
     {
+        public Guid Id { get; set; }
         public string Year { get; set; } = string.Empty;
         public string Make { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
@@ -12,6 +13,6 @@ namespace CarDexBackend.Shared.Dtos.Responses
         public int Stat2 { get; set; }
         public int Stat3 { get; set; }
         public int Value { get; set; }
-
+        public string ImageUrl { get; set; }
     }
 }

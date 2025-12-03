@@ -101,13 +101,15 @@ namespace CarDexBackend.Services
 
             return new VehicleDetailedResponse
             {
+                Id = vehicleId,
                 Year = vehicle.Year,
                 Make = vehicle.Make,
                 Model = vehicle.Model,
                 Stat1 = vehicle.Stat1,
                 Stat2 = vehicle.Stat2,
                 Stat3 = vehicle.Stat3,
-                Value = vehicle.Value
+                Value = vehicle.Value,
+                ImageUrl = vehicle.Image
             };
         }
 
@@ -124,13 +126,15 @@ namespace CarDexBackend.Services
             {
                 vehicleResponses.Add(new VehicleDetailedResponse
                 {
+                    Id = v.Id,
                     Year = v.Year,
                     Make = v.Make,
                     Model = v.Model,
                     Stat1 = v.Stat1,
                     Stat2 = v.Stat2,
                     Stat3 = v.Stat3,
-                    Value = v.Value
+                    Value = v.Value,
+                    ImageUrl = v.Image
                 });
             }
 
