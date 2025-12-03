@@ -104,25 +104,6 @@ start coveragereport/index.html
 
 </br>
 
-## Frontend Setup - React
-
-### 🧩 Prerequisites
-  - [Node.js](https://nodejs.org/) (v18.0 or higher)
-  - npm (comes with Node.js)
-  - Optional: VS Code with TypeScript extensions
-
-
-```bash
-# Check installation
-node --version
-npm --version
-
-# Clone
-git clone https://github.com/VSHAH1210/CarDex.git
-cd CarDexFrontend
-npm install
-```
-
 ### Run: Tests
 Ensure you are in the directory `/CarDexFrontend`.  
 > **NOTE: On windows you may need to be in administrator mode to run the tests. Using cmd does not require that.**  
@@ -189,4 +170,5 @@ Specifically, AI assistance was used to:
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
 - Helping with writing documentation markdown (md) files.  
+
 
