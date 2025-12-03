@@ -1,4 +1,17 @@
 services:
+  cardex-frontend:
+    build:
+      context: .
+      dockerfile: CarDexFrontend/Dockerfile
+    container_name: cardex-frontend-prod
+    ports:
+      - "5009:80"
+    depends_on:
+      - cardex-api
+    restart: always
+    networks:
+      - cardex-prod-network
+
   cardex-api:
     build:
       context: .
