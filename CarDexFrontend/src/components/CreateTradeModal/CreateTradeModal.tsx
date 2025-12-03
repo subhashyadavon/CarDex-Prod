@@ -9,7 +9,7 @@ import TextInput from "../TextInput/TextInput";
 import Card, { CarCardProps } from "../Card/Card";
 
 import { useAuth } from "../../hooks/useAuth";
-import { cardService } from "../../services/cardService";
+import { cardService, Vehicle } from "../../services/cardService";
 import { useTrade } from "../../hooks/useTrade";
 import {
   CardWithVehicle,
@@ -34,7 +34,8 @@ interface CreateTradeModalProps {
 }
 
 interface PlayerCard {
-  id: string;
+  id: string;       // UI id (unique per row)
+  cardId: string;   // underlying card id used in payload
   card: CarCardProps;
 }
 
@@ -56,6 +57,51 @@ const gradeToRarity = (grade: GradeEnum | string): CarCardProps["rarity"] => {
   return "factory";
 };
 
+/**
+ * Try to find the best matching vehicle for a given card.
+ * We support:
+ *  - Exact match by vehicleId (if backend ever sends id)
+ *  - Fuzzy match by make+model appearing in card.name / description
+ */
+const findVehicleForCard = (
+  card: any | undefined,
+  vehicles: Vehicle[]
+): Vehicle | null => {
+  if (!card || vehicles.length === 0) return null;
+
+  // 1. Try by explicit vehicle id if present
+  const rawVehicleId =
+    (card as any)?.vehicleId ??
+    (card as any)?.vehicle_id ??
+    null;
+
+  if (rawVehicleId != null) {
+    const idStr = String(rawVehicleId);
+    const byId = vehicles.find(
+      (v) => v.id != null && String(v.id) === idStr
+    );
+    if (byId) return byId;
+  }
+
+  // 2. Try by matching make+model against card text
+  const name: string = (card?.name ?? "").toString();
+  const description: string = (card?.description ?? "").toString();
+  const combined = `${name} ${description}`.toLowerCase();
+
+  if (!combined.trim()) return null;
+
+  // Example vehicle fields:
+  // { year, make, model, stat1, stat2, stat3, value }
+  const byName = vehicles.find((v) => {
+    const full = `${v.make} ${v.model}`.toLowerCase();
+    return combined.includes(full) || full.includes(name.toLowerCase());
+  });
+
+  if (byName) return byName;
+
+  return null;
+};
+
 // Map CardWithVehicle -> PlayerCard (for user's own cards)
 const mapCardWithVehicleToPlayerCard = (
   card: CardWithVehicle
@@ -65,7 +111,8 @@ const mapCardWithVehicleToPlayerCard = (
   const value = card.value ?? 0;
 
   return {
-    id: String(card.id),
+    id: String(card.id),           // UI id
+    cardId: String(card.id),       // underlying card id
     card: {
       makeModel: makeModel || "Unknown Vehicle",
       cardName: `${card.make} ${card.model}`.trim() || "Card",
@@ -85,33 +132,82 @@ const mapCardWithVehicleToPlayerCard = (
   };
 };
 
-// Map OpenTrade -> PlayerCard-ish card for "Select Card to Buy"
-const mapOpenTradeToPlayerCard = (trade: OpenTrade): PlayerCard => {
-  const isForPrice = trade.type === TradeEnum.FOR_PRICE;
-  const displayPrice = trade.price?.toLocaleString() ?? "-";
-
+/**
+ * Map OpenTrade + card DTO + vehicles list -> PlayerCard
+ * Used for "Select Card to Buy" – shows REAL car stats instead of placeholder trade metadata.
+ */
+const mapOpenTradeToPlayerCard = (
+  trade: OpenTrade,
+  card: any | undefined,
+  vehicles: Vehicle[]
+): PlayerCard => {
   const cardId = getTradeCardId(trade);
   const safeCardId = cardId ?? "Unknown";
 
-  return {
-    // IMPORTANT: this is the CARD ID we want in return
-    id: safeCardId,
+  const name: string | undefined = card?.name;
+  const description: string | undefined = card?.description;
 
+  const vehicle = findVehicleForCard(card, vehicles);
+
+  const make = vehicle?.make ?? undefined;
+  const model = vehicle?.model ?? undefined;
+  const year = vehicle?.year ?? undefined;
+
+  const makeModel =
+    (make && model && `${make} ${model}`) ||
+    description ||
+    name ||
+    `Card #${safeCardId}`;
+
+  const cardName =
+    name ||
+    description ||
+    (make && model ? `${year ?? ""} ${make} ${model}`.trim() : makeModel);
+
+  const grade = card?.grade ?? "FACTORY";
+  const rarity: CarCardProps["rarity"] = gradeToRarity(grade);
+
+  // Prefer card.value, then vehicle.value
+  const cardValueNumber: number | undefined =
+    card?.value != null ? card.value : vehicle?.value;
+
+  const cardValueString =
+    cardValueNumber != null ? cardValueNumber.toLocaleString() : "";
+
+  // Stats from vehicle
+  const stat1 = vehicle?.stat1 ?? null;
+  const stat2 = vehicle?.stat2 ?? null;
+  const stat3 = vehicle?.stat3 ?? null;
+
+  return {
+    // UI id = trade id (unique per open trade)
+    id: String(trade.id),
+    // Underlying card id is what will go into wantCardId later
+    cardId: safeCardId,
     card: {
-      makeModel: `Card #${safeCardId}`,
-      cardName: isForPrice ? "For Currency" : "For Card",
-      imageUrl: "/assets/cards/placeholder-card.png",
-      stat1Label: "PRICE",
-      stat1Value: displayPrice,
-      stat2Label: "TYPE",
-      stat2Value: isForPrice ? "For Currency" : "For Card",
-      stat3Label: "OWNER",
-      stat3Value: trade.user_id,
-      stat4Label: "CARD ID",
-      stat4Value: safeCardId,
-      grade: "FACTORY",
-      value: displayPrice,
-      rarity: "factory",
+      makeModel,
+      cardName,
+      imageUrl:
+        card?.imageUrl ||
+        (vehicle as any)?.image ||
+        "/assets/cards/placeholder-card.png",
+
+      stat1Label: "POWER",
+      stat1Value: stat1 != null ? String(stat1) : "--",
+
+      stat2Label: "WEIGHT",
+      stat2Value: stat2 != null ? String(stat2) : "--",
+
+      stat3Label: "BRAKING",
+      stat3Value: stat3 != null ? String(stat3) : "--",
+
+      // 4th slot is VALUE (not torque)
+      stat4Label: "VALUE",
+      stat4Value: cardValueString || "--",
+
+      grade,
+      value: cardValueString,
+      rarity,
     },
   };
 };
@@ -132,9 +228,23 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
   const [tradeType, setTradeType] = useState<TradeKind>(
     mode === "sell" ? "currency" : "card"
   );
+
   const [offeredCardId, setOfferedCardId] = useState<string | null>(null);
   const [requestedCardId, setRequestedCardId] = useState<string | null>(null);
+
+  // Separate UI selection ids so only one visible card highlights per section
+  const [selectedOfferedUiId, setSelectedOfferedUiId] = useState<string | null>(
+    null
+  );
+  const [selectedRequestedUiId, setSelectedRequestedUiId] = useState<
+    string | null
+  >(null);
+
   const [price, setPrice] = useState("");
+
+  // Vehicles + card cache for "Select Card to Buy"
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [cardCache, setCardCache] = useState<Record<string, any>>({});
 
   // 1) Load user's own cards (for "Select Card to Sell")
   useEffect(() => {
@@ -159,10 +269,19 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
     fetchUserCards();
   }, [user?.id]);
 
-  // Build UI list for owned cards
-  const ownedCards: PlayerCard[] = ownedCardEntities.map(
-    mapCardWithVehicleToPlayerCard
-  );
+  // 2) Load all vehicles once (for "Select Card to Buy" stats)
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const vehiclesResponse = await cardService.getAllVehicles();
+        setVehicles(vehiclesResponse);
+      } catch (err) {
+        console.error("[CreateTradeModal] Failed to load vehicles:", err);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
 
   // Use filteredTrades if available, otherwise raw trades
   const allOpenTrades: OpenTrade[] = Array.isArray(filteredTrades)
@@ -177,9 +296,50 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
     return t.user_id !== user?.id && !!cid;
   });
 
-  const buyableTradeCards: PlayerCard[] = otherUsersTrades.map(
-    mapOpenTradeToPlayerCard
+  // 3) Fetch card details for buyable trades
+  useEffect(() => {
+    const allCardIds = otherUsersTrades
+      .map((t) => getTradeCardId(t))
+      .filter((id): id is string => !!id);
+
+    const missingIds = allCardIds.filter((id) => !(id in cardCache));
+
+    if (missingIds.length === 0) return;
+
+    const fetchCards = async () => {
+      try {
+        const results = await Promise.all(
+          missingIds.map((id) => cardService.getCardById(id))
+        );
+
+        setCardCache((prev) => {
+          const next: Record<string, any> = { ...prev };
+          results.forEach((card: any) => {
+            if (card && card.id != null) {
+              next[String(card.id)] = card;
+            }
+          });
+          return next;
+        });
+      } catch (err) {
+        console.error("[CreateTradeModal] Failed to load trade cards:", err);
+      }
+    };
+
+    fetchCards();
+  }, [otherUsersTrades, cardCache]);
+
+  // Build UI list for owned cards
+  const ownedCards: PlayerCard[] = ownedCardEntities.map(
+    mapCardWithVehicleToPlayerCard
   );
+
+  // Build UI list for "Select Card to Buy" using real vehicle stats
+  const buyableTradeCards: PlayerCard[] = otherUsersTrades.map((trade) => {
+    const cid = getTradeCardId(trade);
+    const cardDetails = cid ? cardCache[cid] : undefined;
+    return mapOpenTradeToPlayerCard(trade, cardDetails, vehicles);
+  });
 
   const canSubmit =
     !!offeredCardId &&
@@ -237,9 +397,12 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
                 <div
                   key={item.id}
                   className={`${styles.cardWrapper} ${
-                    offeredCardId === item.id ? styles.selected : ""
+                    selectedOfferedUiId === item.id ? styles.selected : ""
                   }`}
-                  onClick={() => setOfferedCardId(item.id)}
+                  onClick={() => {
+                    setOfferedCardId(item.cardId);
+                    setSelectedOfferedUiId(item.id);
+                  }}
                 >
                   <Card {...item.card} />
                 </div>
@@ -305,9 +468,12 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
                   <div
                     key={item.id}
                     className={`${styles.cardWrapper} ${
-                      requestedCardId === item.id ? styles.selected : ""
+                      selectedRequestedUiId === item.id ? styles.selected : ""
                     }`}
-                    onClick={() => setRequestedCardId(item.id)}
+                    onClick={() => {
+                      setRequestedCardId(item.cardId);
+                      setSelectedRequestedUiId(item.id);
+                    }}
                   >
                     <Card {...item.card} />
                   </div>

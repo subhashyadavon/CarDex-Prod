@@ -19,7 +19,7 @@ export const API_CONFIG = {
   /**
    * BASE_URL: The root URL of the backend API
    * - Loaded from .env file (REACT_APP_API_URL)
-   * - Falls back to localhost:5083 if not set
+   * - Falls back to localhost if not set
    * - Change .env to switch between dev/prod without changing code
    */
   BASE_URL: process.env.REACT_APP_API_URL || "http://localhost/",
@@ -49,6 +49,10 @@ export const API_CONFIG = {
       GET_ALL: "/cards", // GET: Fetch all cards
       GET_BY_ID: (id: string) => `/cards/${id}`, // GET: Fetch specific card
       GET_USER_CARDS: (userId: string) => `/cards/user/${userId}`, // GET: User's cards
+
+      // Vehicle stats endpoints from backend (Swagger: /cards/vehicles and /cards/vehicle/{vehicleId})
+      GET_ALL_VEHICLES: "/cards/vehicles", // GET: Fetch all vehicles
+      GET_VEHICLE_BY_ID: (vehicleId: string) => `/cards/vehicle/${vehicleId}`, // GET: Fetch vehicle by ID
     },
 
     // Pack management endpoints
@@ -56,7 +60,7 @@ export const API_CONFIG = {
       GET_ALL: "/packs", // GET: Fetch all packs
       GET_BY_ID: (id: string) => `/packs/${id}`, // GET: Fetch specific pack
       OPEN_PACK: (packId: string) => `/packs/${packId}/open`, // POST: Open pack, get cards
-      PURCHASE: "/packs/purchase",
+      PURCHASE: "/packs/purchase", // POST: Purchase pack
     },
 
     // Trade management endpoints
