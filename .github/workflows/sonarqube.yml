@@ -45,8 +45,8 @@ jobs:
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION_BACKEND }}
         run: |
           dotnet sonarscanner begin \
-            /k:"${SONAR_ORGANIZATION_BACKEND}_cardex-backend" \
-            /o:"${SONAR_ORGANIZATION_BACKEND}" \
+            /k:"${SONAR_ORGANIZATION}_cardex-backend" \
+            /o:"${SONAR_ORGANIZATION}" \
             /d:sonar.host.url="${SONAR_HOST_URL}" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
