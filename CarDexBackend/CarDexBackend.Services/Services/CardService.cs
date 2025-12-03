@@ -112,6 +112,33 @@ namespace CarDexBackend.Services
         }
 
 
+        /// <summary>
+        /// Retrieves a list with detailed information about all vehicles.
+        /// </summary>
+        public async Task<VehicleListResponse> GetAllVehicles()
+        {
+            var vehicles = await _vehicleRepo.GetAllAsync();
+
+            var vehicleResponses = new List<VehicleDetailedResponse>();
+            foreach (var v in vehicles)
+            {
+                vehicleResponses.Add(new VehicleDetailedResponse
+                {
+                    Year = v.Year,
+                    Make = v.Make,
+                    Model = v.Model,
+                    Stat1 = v.Stat1,
+                    Stat2 = v.Stat2,
+                    Stat3 = v.Stat3,
+                    Value = v.Value
+                });
+            }
+
+            return new VehicleListResponse
+            {
+                Vehicles = vehicleResponses
+            };
+        }
     }
 }
 

@@ -77,11 +77,28 @@ namespace CarDexBackend.Controllers
         }
 
 
-        [HttpGet("vehicle/{vehicleId:guid}")]
+        /// <summary>
+        /// Retrieves detailed information about a specific vehicle.
+        /// </summary>
+        [HttpGet("vehicles/{vehicleId:guid}")]
+        [ProducesResponseType(typeof(VehicleDetailedResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetVehicleById(Guid vehicleId)
         {
             var vehicle = await _cardService.GetVehicleById(vehicleId);
             return Ok(vehicle);
+        }
+
+        /// <summary>
+        /// Retrieves detailed information about all vehicles.
+        /// </summary>
+        [HttpGet("vehicles")]
+        [ProducesResponseType(typeof(VehicleListResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAllVehicles()
+        {
+            var vehicles = await _cardService.GetAllVehicles();
+            return Ok(vehicles);
         }
     }
 }

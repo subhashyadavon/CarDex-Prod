@@ -52,5 +52,10 @@ namespace CarDexBackend.Services
         /// Retrieves detailed information about a specific vehicle.
         /// </summary>
         Task<VehicleDetailedResponse> GetVehicleById(Guid vehicleId);
+
+        /// <summary>
+        /// Retrieves a list with detailed information about all vehicles.
+        /// </summary>
+        Task<VehicleListResponse> GetAllVehicles();
     }
 }
