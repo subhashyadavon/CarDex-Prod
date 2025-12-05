@@ -179,7 +179,9 @@ We think that the freedom this course gives students in choosing everything rela
 > I solved several frontend logic issues independently, without using LLMs.
 
 #### Ansh
-> 
+> I used ChatGPT extensively when implementing the AuthContext provider to manage global authentication state across our React frontend and handle connections to the .NET Core backend. When I asked it to help create the context structure with login, logout, and token management functions it initially generated a basic provider that stored user data in state but didn't persist sessions across page refreshes which ended up forcing users to re-login constantly. I had to rewrite the implementation to use localStorage for token persistence. The AI was helpful for suggesting the overall structure and the best way forward but it didn't account for alot of the issues that I came across when building this context provider such as storing a token so that user doesn't have to constantly login. This experience taught me that while AI can quickly suggest common authentication flows, understanding React's rendering behavior, properly managing side effects with hooks, and handling real-world scenarios it still does require careful testing and refinement beyond what the AI initially provides.
+
+> I also used AI to help me with alot of the concepts and techniques that I wasn't aware of as the tech stack that we were using was something I haven't worked extensively with therefore I found AI (Claude) to be very helpful to understand and break down the concepts into small and easy to understand chunks. 
 
 #### Vansh
 > I used AI to solve a lot of problems while working on the frontend features like opening of packs etc. 
