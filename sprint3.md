@@ -18,8 +18,43 @@
 ## 2. Security Analysis
 
 ### Chosen Tool & Report
+For this project, we used **SonarCloud** (hosted SonarQube) as the Static Application Security Testing (SAST) tool.  
+SonarCloud supports both languages used in this project:
 
-### 5 Decected Problems
+- **Frontend:** React + TypeScript  
+- **Backend:** C# (.NET Web API)
+
+**How we ran it:**
+We integrated SonarCloud into our CI/CD pipeline using GitHub Actions. The workflow (`.github/workflows/sonarqube.yml`) triggers on every push to main/develop branches and pull requests. It performs two parallel jobs:
+1. **Backend Analysis:** Installs .NET scanner, builds the solution, runs tests with coverage, and uploads results to SonarCloud.
+2. **Frontend Analysis:** Installs dependencies, runs tests with coverage, and uses the official SonarSource action to scan the code.
+
+### 5 Detected Problems
+
+1. **Security Hotspot: Hardcoded User ID** (Critical)
+   - **Location:** `CarDexBackend/CarDexBackend.Services/Services/TradeService.cs`
+   - **Issue:** A `_testUserId` field was hardcoded with a specific GUID. Even if unused in production, hardcoded credentials or IDs are a security risk.
+   - **Fix:** Removed the unused field and associated TODO comment.
+
+2. **Security Hotspot: Standard Output Logging** (Medium)
+   - **Location:** `CarDexBackend/CarDexBackend.Api/Extensions/DatabaseExtensions.cs`
+   - **Issue:** Using `Console.WriteLine` for logging database connection status. Standard output logging can be lost or expose sensitive info in some environments.
+   - **Fix:** Replaced with `ILogger<CarDexDbContext>` to use the framework's structured logging system.
+
+3. **Code Smell: Redundant Semicolons** (Low)
+   - **Location:** `CarDexBackend/CarDexBackend.Services/Services/TradeService.cs`
+   - **Issue:** Double semicolons `;;` found in multiple lines (e.g., `var userId = _currentUserService.UserId;;`). This adds noise and indicates sloppy editing.
+   - **Fix:** Removed the redundant semicolons.
+
+4. **Code Smell: Generic Exception Handling** (Low)
+   - **Location:** `CarDexBackend/CarDexBackend.Services/Services/AuthService.cs`
+   - **Issue:** Catching `Exception` generally (`catch (Exception ex)`) without specific handling logic. This can mask underlying issues.
+   - **Mitigation:** Logged the specific error with context before re-throwing or handling.
+
+5. **Code Smell: TODO Comments** (Info)
+   - **Location:** Various files
+   - **Issue:** `TODO` comments left in the code (e.g., "Replace with actual authenticated user ID"). These indicate unfinished work that could be technical debt or security gaps.
+   - **Fix:** Addressed the specific TODO in `TradeService.cs` by removing the temporary code it referred to.
 
 ### Critical/High Vulnerabilities and Fixes
 
@@ -28,9 +63,29 @@
 
 ## 3. Continuous Integration & Deployment (CI/CD)
 
-### CI Execution
+We utilized **GitHub Actions** for our Continuous Integration and Continuous Delivery (CI/CD) pipeline. This ensures that every commit is automatically tested, built, and deployed (or ready for deployment).
 
-### CD Execution
+### Pipelines
+
+- **[Backend CI](.github/workflows/backend-ci.yml)**: Builds .NET solution and runs unit/integration tests.
+- **[Frontend CI](.github/workflows/frontend-ci.yml)**: Installs dependencies and runs React tests.
+- **[SonarQube Analysis](.github/workflows/sonarqube.yml)**: Performs static code analysis and security scans.
+- **[Backend CD](.github/workflows/backend-docker.yml)**: Builds and pushes Docker image to GitHub Container Registry.
+- **[Frontend CD](.github/workflows/frontend-docker.yml)**: Builds and pushes Docker image to GitHub Container Registry.
+
+### Snapshots
+
+#### Backend CI Execution
+> `![Backend CI Execution](docs/backend_ci_snapshot.png)`
+
+#### Frontend CI Execution
+> `![Frontend CI Execution](docs/frontend_ci_snapshot.png)`
+
+#### Backend CD Execution
+> `![Backend CD Execution](docs/backend_cd_snapshot.png)`
+
+#### Frontend CD Execution
+> `![Frontend CD Execution](docs/frontend_cd_snapshot.png)`
 
 </br>
 </br>
@@ -54,7 +109,11 @@ We think that the freedom this course gives students in choosing everything rela
 > 
 
 ### Subhash 
+> I made extensive use of AI tools throughout the project, which helped me move faster and manage a wide range of development tasks effectively. Starting from sprint 1, my contribution was implementing the domain model code based on the existing design of Users, Cards, Vehicles, Trades and other models into working, maintainable backend logic. This ensured the system’s relationships and behaviours were correctly represented in the application. Also, the unit tests for the domain models were written.
 >
+> Then, I implemented critical security features, including the JWT authentication system to secure API endpoints and a custom Rate Limiter to prevent abuse. I also took full ownership of the DevOps lifecycle, architecting the CI/CD pipelines using GitHub Actions to automate testing and deployment, and containerizing the entire stack with Docker for consistent production environments.
+>
+> I also wrote comprehensive regression tests for the backend services, ensuring that new features didn't break existing functionality. For the repository layer, I utilized an AI agent to generate the bulk of the boilerplate code; this allowed me to focus on the business logic while maintaining a clean and consistent data access pattern. Additionally, I stepped in to resolve various frontend logic issues and the Login and Register pages UI based on HCI principles.
 
 #### Ansh
 > 
