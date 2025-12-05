@@ -133,37 +133,26 @@ We think that the freedom this course gives students in choosing everything rela
 > I used AI tools throughout the project, which helped me work faster and manage many development tasks effectively. Below are my contributions and how LLMs supported me.
 >
 > Domain Model
->
 > I implemented the entire domain model on my own. I converted the designs for Users, Cards, Vehicles, Trades, and other models into working, maintainable backend logic. I also wrote unit tests for these domain models, with LLMs helping generate some of the test cases.
 >
 > Security Features
->
 > I built important security features mostly on my own as I wanted to learn more about it, including:
->
 > JWT authentication to secure API endpoints  
->
 > A custom rate limiter to prevent abuse
 >
 > DevOps and CI/CD
->
 > I took full ownership of the DevOps lifecycle. My work included:
->
 > Designing CI/CD pipelines using GitHub Actions.  
->
 > Containerizing the entire stack with Docker to ensure consistent production environments.
->
 > Security Analysis using SonarCloud with LLMs generating sonarqube.yml file.
 >
 > Backend Regression Tests
->
 > I wrote complete regression tests for the backend services, with LLMs generating many of the test cases. These tests ensured new features did not break existing functionality.
 >
 > Repository Layer
->
 >I used an AI agent to generate most of the boilerplate repository code, allowing me to focus on business logic while keeping the data access layer clean and consistent.
 >
 > Frontend Fixes
->
 > I solved several frontend logic issues independently, without using LLMs.
 
 #### Ansh
