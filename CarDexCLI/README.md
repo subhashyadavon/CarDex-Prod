@@ -19,6 +19,7 @@ CarDexCLI/
 ```
 
 ### How to Run
+> Ensure the docker containers are running, so the CLI can connect to the database. See README.md in the root for details.
 ```bash
 # While inside /CarDexCLI
 
