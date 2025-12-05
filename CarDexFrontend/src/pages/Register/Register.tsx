@@ -36,6 +36,29 @@ const Register: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const extractErrorMessage = (err: any): string => {
+    if (err?.response?.data) {
+      const data = err.response.data;
+      if (typeof data === "string") return data;
+      if (data.message) return data.message;
+      if (data.errors) {
+        const errorValues = Object.values(data.errors).flat();
+        if (errorValues.length > 0) return errorValues.join(" ");
+      }
+      if (typeof data === "object") {
+        try {
+          const values = Object.values(data).flat();
+          const stringValues = values.filter(v => typeof v === "string");
+          if (stringValues.length > 0) return stringValues.join(" ");
+          return JSON.stringify(data);
+        } catch (e) {
+          // ignore parsing errors
+        }
+      }
+    }
+    return err?.message || "Registration failed. Please try again.";
+  };
+
   const handleSubmit = async () => {
     // Reset messages
     setAuthError(null);
@@ -59,45 +82,11 @@ const Register: React.FC = () => {
 
       await register({ username, password });
 
-      // If the backend doesn’t auto-login on register, either:
-      // 1) navigate to login page, or
-      // 2) navigate to /app if tokens are returned. Here we show a success and push to /app.
       setSuccessMessage("Account created successfully. Redirecting...");
       navigate("/app");
     } catch (err: any) {
       console.error("Registration error:", err);
-      let backendMessage = "Registration failed. Please try again.";
-
-      if (err?.response?.data) {
-        const data = err.response.data;
-        if (typeof data === "string") {
-          backendMessage = data;
-        } else if (data.message) {
-          backendMessage = data.message;
-        } else if (data.errors) {
-          // Handle ASP.NET Core ProblemDetails with 'errors'
-          const errorValues = Object.values(data.errors).flat();
-          if (errorValues.length > 0) {
-            backendMessage = errorValues.join(" ");
-          }
-        } else if (typeof data === "object") {
-          // Fallback for other object structures
-          try {
-            const values = Object.values(data).flat();
-            // Filter out non-string values to avoid [object Object]
-            const stringValues = values.filter(v => typeof v === "string");
-            if (stringValues.length > 0) {
-              backendMessage = stringValues.join(" ");
-            } else {
-              backendMessage = JSON.stringify(data);
-            }
-          } catch (e) {
-            // ignore parsing errors
-          }
-        }
-      } else if (err?.message) {
-        backendMessage = err.message;
-      }
+      let backendMessage = extractErrorMessage(err);
 
       // Custom overrides for specific messages
       if (backendMessage.toLowerCase().includes("username already exists")) {
@@ -187,22 +176,19 @@ const Register: React.FC = () => {
             </p>
           )}
 
-          {/*subtle link back to Login for users who already have an account */}
-          {authError === "Username already exists, Try different one!" && (
-            <p
-              className="body-2"
-              style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9, color: "white" }}
+          <p
+            className="body-2"
+            style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9, color: "white" }}
+          >
+            Already have an account?{" "}
+            <Button
+              type="button"
+              onClick={() => navigate("/login")}
+              className={styles.submitButton} // make it look like a link
             >
-              Already have an account?{" "}
-              <Button
-                type="button"
-                onClick={() => navigate("/login")}
-                className={styles.submitButton} // make it look like a link
-              >
-                Log in
-              </Button>
-            </p>
-          )}
+              Log in
+            </Button>
+          </p>
         </div>
       </div>
     </div>

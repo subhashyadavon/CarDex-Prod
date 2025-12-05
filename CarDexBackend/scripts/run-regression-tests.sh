@@ -23,7 +23,7 @@ dotnet test CarDexBackend.sln \
     --results-directory:./TestResults/Regression
 
 # Check exit code
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     echo ""
     echo "✅ All regression tests passed!"
     echo ""

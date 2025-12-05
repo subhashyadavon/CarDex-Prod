@@ -113,26 +113,24 @@ const Login: React.FC = () => {
             {isLoading ? "Logging in..." : "Login"}
           </Button>
 
-          {authError === "Username does not exist" && (
-            <p
-              className="body-2"
-              style={{
-                textAlign: "center",
-                marginTop: "0.75rem",
-                opacity: 0.9,
-                color: "white",
-              }}
+          <p
+            className="body-2"
+            style={{
+              textAlign: "center",
+              marginTop: "0.75rem",
+              opacity: 0.9,
+              color: "white",
+            }}
+          >
+            Don’t have an account?{" "}
+            <Button
+              type="button"
+              onClick={() => navigate("/register")}
+              className={styles.submitButton} // make it look like a link
             >
-              Don’t have an account?{" "}
-              <Button
-                type="button"
-                onClick={() => navigate("/register")}
-                className={styles.submitButton} // make it look like a link
-              >
-                Create one
-              </Button>
-            </p>
-          )}
+              Create one
+            </Button>
+          </p>
 
           {displayError && (
             <p className={`${styles.errorMessage} body-2`}>{displayError}</p>

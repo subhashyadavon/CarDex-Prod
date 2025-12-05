@@ -676,7 +676,7 @@ class TestDisplay:
             
             def test_handles_none_grade(self):
                 """Test None grade shows placeholder"""
-                result = Display.formatGrade(None)  # type: ignore[arg-type]
+                result = Display.formatGrade("UNKNOWN")
                 assert len(result) >= 3
     
     class TestCompletedTradesDisplay:

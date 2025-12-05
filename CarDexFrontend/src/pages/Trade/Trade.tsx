@@ -214,13 +214,13 @@ const TradeSection: React.FC = () => {
         );
 
         setCardCache((prev) => {
-          const next: Record<string, any> = { ...prev };
-          results.forEach((card: any) => {
+          const newEntries = results.reduce((acc: Record<string, any>, card: any) => {
             if (card && card.id != null) {
-              next[String(card.id)] = card;
+              acc[String(card.id)] = card;
             }
-          });
-          return next;
+            return acc;
+          }, {});
+          return { ...prev, ...newEntries };
         });
       } catch (err) {
         console.error("[TradeSection] Failed to load cards for trades:", err);
