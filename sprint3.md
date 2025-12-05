@@ -2,16 +2,33 @@
 
 </br>
 
-## 1. Load Testing
-
+## 1. Load Testing  
 ### Load Testing Environment
-
+Our load testing environment used Apache JMeter. With JMeter we were able to simulate concurrent users, with support for accessing our authorization headers to make api calls. JMeter also allowed us to run multi-step scenarios to simulate real-user flow.  
+We defined a Thread Group to define a virtual number of users, the provided [.jmx](/CarDex/docs/load-testing-results/CarDex%20Load%20Test.jmx). is set to 100 users by default. A summary report and aggregrate is provided at the end of load testing to view throughput, error % and other useful metrics.  
+### Load Testing Cases  
+We made test cases around realistic usage of CarDex from a user's perspective.
+Some example test cases:
+- Authentication & User Data
+  - Login and extract the accessToken
+  - Get the authenticated user profile
+- Card & Pack retrieval (Read-heavy, lots of cards)
+  - GET /cards is called
+  - GET /cards/{cardId} to fetch specific cards
+  - GET /users/{userId}/packs to fetch user-owned packs
+- Trade & Trade history retrieval (Ready-heavy, lots of completed and open trades)
+  - GET /trades is called
+  - GET /trades/history is called
+For further examples, check out the included [.jmx](/CarDex/docs/load-testing-results/CarDex%20Load%20Test.jmx) file.
 ### Test Report
-
+#### Summary Report
+![Load Testing Summary Report](/CarDex/docs/load-testing-results/Load-Testing-Summary.png)
+#### Aggregate Report
+![Load Testing Aggregate Report](/CarDex/docs/load-testing-results/Load-Testing-Aggregate.png)
 ### Interesting Bottleneck
-
+An interesting (but not unsurprising bottleneck) is fetching a user's cards. It's obvious now, but in hindsight we might not have considered how rapidly a user's collection of cards might grow. As a user collects more cards the api call to fetch their cards grows as well. If this app were to gain popularity, this could be a major problem for scalability.
 ### Were non-functional requirements met?
-
+Per our `sprint0.md` worksheet, we wanted to scale to 100 users concurrently without degradation. Many of our endpoints are small and have small response sizes, and they return quickly. Our larger payloads do slow-down as the amount of data to fetch grows which is a problem at that user size. Could we meet or exceed our requirements with more resources? Yes, for example we could increase our Supabase tier which means the database could host more connections. We might also add caching to frequently seen data, like collections, packs, or individual user cards.
 </br>
 </br>
 
@@ -127,7 +144,13 @@ We think that the freedom this course gives students in choosing everything rela
 > It follows that, given our permissible usage of AI in this project, I used AI from the start to plan out everything related to the architecture and data model. The queries usually started with an explanation of the project and a definition of the domain objects (Vehicles, Cards, Trades, etc.), alongside a request on how to best setup the data model to maximize parallel development. I used the MVVM method from the start because I have experience with Client - API/Controllers - Database layering systems. Responses were usually very accurate and helped me brainstorm the high-level decisions, but they did attempt to overcomplicate things if I kept a chat going for too long. Additionally, I helped define all the styles and design of the app inside Figma, which was then ported over to React-friendly files, such as .css files and classes. As a final note, since we mentioned how the data model itself had major, unknown gaps in it from the start, the AI I used also did not catch these issues. Whether that was an issue in the lack of detail in my prompts, or the AI simply did what it was told without worry about potential gaps, we will never know; use AI as a supplementary tool, not a strict guide!
 
 #### Ian
-> 
+> I used AI tools, primarily ChatGPT (or Gemini when ChatGPT would break), throughout this project as a way to speed up learning and quickly improve my clarity on complex ideas. One example was when I needed to write XML documentation comments for controllers and backend services, I would write the content of the comment myself, then ask ChatGPT to format it cleanly according to C# conventions so it would be consistent throughout my work in the project.
+>
+> I also used ChatGPT to understand broader architectural concepts, like how to structure our API for parallel development between frontend, backend, and our database layers, so that I could make sure I was a useful teammate when developing our API layer.
+>
+> Many times I would simply use ChatGPT as a "superpowered Google search" to quickly get explanations of unfamiliar API ideas or .NET functionality. I frequently find myself using it to quickly remember the best order of steps to assist for my git workflow.
+>
+> Overall, using AI tools helped me learn faster, but I still had to validate a lot of it's results against documentation or our project's constraints, which improved my understanding and confidence in the code I wrote.
 
 ### Subhash 
 > I made extensive use of AI tools throughout the project, which helped me move faster and manage a wide range of development tasks effectively. Starting from sprint 1, my contribution was implementing the domain model code based on the existing design of Users, Cards, Vehicles, Trades and other models into working, maintainable backend logic. This ensured the system’s relationships and behaviours were correctly represented in the application. Also, the unit tests for the domain models were written.
