@@ -13,6 +13,8 @@ class CLIClient:
 
     """Main CLI application for CarDex"""
     
+    UNKNOWN_VEHICLE = "Unknown Vehicle"
+    
     def __init__(self, api_client=None):
 
         """Initialize CLI with an API client"""
@@ -55,13 +57,13 @@ class CLIClient:
         # Extract seller card details
         seller_card = trade.get("sellerCardDetails", {})
         transformed["grade"] = seller_card.get("grade", "FACTORY").upper()
-        transformed["vehicle"] = seller_card.get("name", "Unknown Vehicle")
-        transformed["seller_vehicle"] = seller_card.get("name", "Unknown Vehicle")
+        transformed["vehicle"] = seller_card.get("name", CLIClient.UNKNOWN_VEHICLE)
+        transformed["seller_vehicle"] = seller_card.get("name", CLIClient.UNKNOWN_VEHICLE)
         
         # Extract buyer card details (if card-for-card trade)
         buyer_card = trade.get("buyerCardDetails")
         if buyer_card:
-            transformed["buyer_vehicle"] = buyer_card.get("name", "Unknown Vehicle")
+            transformed["buyer_vehicle"] = buyer_card.get("name", CLIClient.UNKNOWN_VEHICLE)
         else:
             transformed["buyer_vehicle"] = None
         
@@ -92,12 +94,12 @@ class CLIClient:
         # Extract card details
         card = trade.get("cardDetails", {})
         transformed["grade"] = card.get("grade", "FACTORY").upper()
-        transformed["vehicle"] = card.get("name", "Unknown Vehicle")
+        transformed["vehicle"] = card.get("name", CLIClient.UNKNOWN_VEHICLE)
         
         # Extract want card details (if card-for-card trade)
         want_card = trade.get("wantCardDetails")
         if want_card:
-            transformed["want_vehicle"] = want_card.get("name", "Unknown Vehicle")
+            transformed["want_vehicle"] = want_card.get("name", CLIClient.UNKNOWN_VEHICLE)
             transformed["type"] = "FOR_CARD"
         else:
             transformed["want_vehicle"] = None
