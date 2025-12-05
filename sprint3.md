@@ -76,16 +76,16 @@ We utilized **GitHub Actions** for our Continuous Integration and Continuous Del
 ### Snapshots
 
 #### Backend CI Execution
-> `![Backend CI Execution](docs/backend_ci_snapshot.png)`
+> ![Backend CI Execution](docs/backend_ci_snapshot.png)
 
 #### Frontend CI Execution
-> `![Frontend CI Execution](docs/frontend_ci_snapshot.png)`
+> ![Frontend CI Execution](docs/frontend_ci_snapshot.png)
 
 #### Backend CD Execution
-> `![Backend CD Execution](docs/backend_cd_snapshot.png)`
+> ![Backend CD Execution](docs/backend_cd_snapshot.png)
 
 #### Frontend CD Execution
-> `![Frontend CD Execution](docs/frontend_cd_snapshot.png)`
+> ![Frontend CD Execution](docs/frontend_cd_snapshot.png)
 
 </br>
 </br>
