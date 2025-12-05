@@ -14,6 +14,7 @@ class CLIClient:
     """Main CLI application for CarDex"""
     
     UNKNOWN_VEHICLE = "Unknown Vehicle"
+    EXIT_MESSAGE = "\n\nExiting CarDex Live Market."
     
     def __init__(self, api_client=None):
 
@@ -279,10 +280,10 @@ Available Commands:
                     self.showWelcome()
 
             except KeyboardInterrupt:
-                print("\n\nExiting CarDex Live Market.")
+                print(self.EXIT_MESSAGE)
                 return
             except EOFError:
-                print("\n\nExiting CarDex Live Market.")
+                print(self.EXIT_MESSAGE)
                 return
         
         # Main command loop
@@ -292,10 +293,10 @@ Available Commands:
                 command = input("cardex> ").strip()
                 self.running = self.processCommand(command)
             except KeyboardInterrupt:
-                print("\n\nExiting CarDex Live Market.")
+                print(self.EXIT_MESSAGE)
                 return
             except EOFError:
-                print("\n\nExiting CarDex Live Market.")
+                print(self.EXIT_MESSAGE)
                 return
         
         print("Goodbye!")
