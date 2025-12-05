@@ -130,11 +130,30 @@ We think that the freedom this course gives students in choosing everything rela
 > 
 
 ### Subhash 
-> I made extensive use of AI tools throughout the project, which helped me move faster and manage a wide range of development tasks effectively. Starting from sprint 1, my contribution was implementing the domain model code based on the existing design of Users, Cards, Vehicles, Trades and other models into working, maintainable backend logic. This ensured the system’s relationships and behaviours were correctly represented in the application. Also, the unit tests for the domain models were written.
+> I used AI tools throughout the project, which helped me work faster and manage many development tasks effectively. Below are my contributions and how LLMs supported me.
 >
-> Then, I implemented critical security features, including the JWT authentication system to secure API endpoints and a custom Rate Limiter to prevent abuse. I also took full ownership of the DevOps lifecycle, architecting the CI/CD pipelines using GitHub Actions to automate testing and deployment, and containerizing the entire stack with Docker for consistent production environments.
+> Domain Model
+> I implemented the entire domain model on my own. I converted the designs for Users, Cards, Vehicles, Trades, and other models into working, maintainable backend logic. I also wrote unit tests for these domain models, with LLMs helping generate some of the test cases.
 >
-> I also wrote comprehensive regression tests for the backend services, ensuring that new features didn't break existing functionality. For the repository layer, I utilized an AI agent to generate the bulk of the boilerplate code; this allowed me to focus on the business logic while maintaining a clean and consistent data access pattern. Additionally, I stepped in to resolve various frontend logic issues.
+> Security Features
+> I built important security features mostly on my own as I wanted to learn more about it, including:
+> JWT authentication to secure API endpoints  
+> A custom rate limiter to prevent abuse
+>
+> DevOps and CI/CD
+> I took full ownership of the DevOps lifecycle. My work included:
+> Designing CI/CD pipelines using GitHub Actions.  
+> Containerizing the entire stack with Docker to ensure consistent production environments.
+> Security Analysis using SonarCloud with LLMs generating sonarqube.yml file.
+>
+> Backend Regression Tests
+> I wrote complete regression tests for the backend services, with LLMs generating many of the test cases. These tests ensured new features did not break existing functionality.
+>
+> Repository Layer
+>I used an AI agent to generate most of the boilerplate repository code, allowing me to focus on business logic while keeping the data access layer clean and consistent.
+>
+> Frontend Fixes
+> I solved several frontend logic issues independently, without using LLMs.
 
 #### Ansh
 > 
