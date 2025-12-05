@@ -58,6 +58,27 @@ We integrated SonarCloud into our CI/CD pipeline using GitHub Actions. The workf
 
 ### Critical/High Vulnerabilities and Fixes
 
+- **Commit:** [Use [[ instead of [ for safer conditional tests](https://github.com/subhashyadavon/CarDex/commit/f398d998)
+  - Updated `CarDexBackend/scripts/run-regression-tests.sh` to use `[[` for safer and more feature-rich conditional tests.
+
+- **Commit:** [Refactor CLI client to use constant for Unknown Vehicle](https://github.com/subhashyadavon/CarDex/commit/05f42b05)
+  - Defined `UNKNOWN_VEHICLE` constant in `CarDexCLI/cli_client.py` to avoid duplicated literals.
+
+- **Commit:** [Refactor CLI client to use constant for Exit Message](https://github.com/subhashyadavon/CarDex/commit/d3e17e80)
+  - Defined `EXIT_MESSAGE` constant in `CarDexCLI/cli_client.py` to avoid duplicated literals.
+
+- **Commit:** [Fix type mismatch in test_handles_none_grade](https://github.com/subhashyadavon/CarDex/commit/98481f90)
+  - Updated `CarDexCLI/test_suite.py` to pass a string instead of `None` to `formatGrade` to fix type mismatch.
+
+- **Commit:** [Refactor Register.tsx to reduce cognitive complexity](https://github.com/subhashyadavon/CarDex/commit/6277aeea)
+  - Extracted error parsing logic in `CarDexFrontend/src/pages/Register/Register.tsx` to `extractErrorMessage` helper function to reduce cognitive complexity.
+
+- **Commit:** [Refactor Trade.tsx to reduce nesting depth](https://github.com/subhashyadavon/CarDex/commit/efd1ec7d)
+  - Refactored `useEffect` in `CarDexFrontend/src/pages/Trade/Trade.tsx` to use `reduce` and object spread for card cache updates, reducing nesting depth.
+
+
+
+
 </br>
 </br>
 
@@ -113,7 +134,7 @@ We think that the freedom this course gives students in choosing everything rela
 >
 > Then, I implemented critical security features, including the JWT authentication system to secure API endpoints and a custom Rate Limiter to prevent abuse. I also took full ownership of the DevOps lifecycle, architecting the CI/CD pipelines using GitHub Actions to automate testing and deployment, and containerizing the entire stack with Docker for consistent production environments.
 >
-> I also wrote comprehensive regression tests for the backend services, ensuring that new features didn't break existing functionality. For the repository layer, I utilized an AI agent to generate the bulk of the boilerplate code; this allowed me to focus on the business logic while maintaining a clean and consistent data access pattern. Additionally, I stepped in to resolve various frontend logic issues and the Login and Register pages UI based on HCI principles.
+> I also wrote comprehensive regression tests for the backend services, ensuring that new features didn't break existing functionality. For the repository layer, I utilized an AI agent to generate the bulk of the boilerplate code; this allowed me to focus on the business logic while maintaining a clean and consistent data access pattern. Additionally, I stepped in to resolve various frontend logic issues.
 
 #### Ansh
 > 
