@@ -3,6 +3,7 @@ using CarDexBackend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Npgsql.NameTranslation;
 using Npgsql;
 
@@ -40,6 +41,7 @@ namespace CarDexBackend.Api.Extensions
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<CarDexDbContext>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<CarDexDbContext>>();
                 int maxRetries = 10;
                 int delaySeconds = 2;
 
@@ -80,19 +82,19 @@ namespace CarDexBackend.Api.Extensions
                         context.Database.ExecuteSqlRaw(sql);
 
                         context.Database.EnsureCreated();
-                        Console.WriteLine("✓ Database connection established successfully!");
+                        logger.LogInformation("✓ Database connection established successfully!");
                         return app;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"✗ Database connection failed (Attempt {i + 1}/{maxRetries}): {ex.Message}");
+                        logger.LogError(ex, "✗ Database connection failed (Attempt {Attempt}/{MaxRetries}): {Message}", i + 1, maxRetries, ex.Message);
                         if (i == maxRetries - 1)
                         {
-                            Console.WriteLine("Giving up after multiple attempts.");
+                            logger.LogError("Giving up after multiple attempts.");
                         }
                         else
                         {
-                            Console.WriteLine($"Retrying in {delaySeconds} seconds...");
+                            logger.LogWarning("Retrying in {DelaySeconds} seconds...", delaySeconds);
                             System.Threading.Thread.Sleep(delaySeconds * 1000);
                         }
                     }
