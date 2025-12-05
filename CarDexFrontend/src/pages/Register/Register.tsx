@@ -176,22 +176,19 @@ const Register: React.FC = () => {
             </p>
           )}
 
-          {/*subtle link back to Login for users who already have an account */}
-          {authError === "Username already exists, Try different one!" && (
-            <p
-              className="body-2"
-              style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9, color: "white" }}
+          <p
+            className="body-2"
+            style={{ textAlign: "center", marginTop: "0.75rem", opacity: 0.9, color: "white" }}
+          >
+            Already have an account?{" "}
+            <Button
+              type="button"
+              onClick={() => navigate("/login")}
+              className={styles.submitButton} // make it look like a link
             >
-              Already have an account?{" "}
-              <Button
-                type="button"
-                onClick={() => navigate("/login")}
-                className={styles.submitButton} // make it look like a link
-              >
-                Log in
-              </Button>
-            </p>
-          )}
+              Log in
+            </Button>
+          </p>
         </div>
       </div>
     </div>
