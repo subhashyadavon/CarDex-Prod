@@ -140,7 +140,11 @@ We think that the freedom this course gives students in choosing everything rela
 > 
 
 #### Vansh
-> 
+> I used AI to solve a lot of problems while working on the frontend features like opening of packs etc. 
+>
+> One example is the pack-opening animation in our frontend. I knew what I wanted it to look like cards rotating with a smooth reveal, but I wasn’t sure how to implement it efficiently in React. I asked an AI tool to help, and it suggested using the react-spring library, providing sample code with useSpring and animated components to control opacity, scale, and position.
+>
+> I didn’t use the code as it was. I rewrote it to fit my existing component structure, adjusted the animation timing and easing so it matched our design, and connected it to my own state logic for when a pack is opened. Through this process I learned how react-spring’s hooks work in practice, and I validated the behaviour by checking the official react-spring documentation.
 
 ### Jotham
 >
