@@ -9,7 +9,7 @@ import { User, Reward, CollectionProgressResponse } from '../types/types';
 
 export interface UpdateProfileRequest {
   username?: string;
-  email?: string;
+  password?: string;
 }
 
 export const userService = {
@@ -30,7 +30,7 @@ export const userService = {
     userId: string,
     updates: UpdateProfileRequest
   ): Promise<User> => {
-    const response = await apiClient.put<User>(
+    const response = await apiClient.patch<User>(
       API_CONFIG.ENDPOINTS.USERS.UPDATE_PROFILE(userId),
       updates
     );

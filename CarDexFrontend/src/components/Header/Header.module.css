@@ -115,11 +115,11 @@
   .header {
     padding: 20px 32px;
   }
-  
+
   .nav {
     gap: 40px;
   }
-  
+
   .userInfo {
     gap: 16px;
   }
@@ -131,11 +131,104 @@
     flex-wrap: wrap;
     gap: 16px;
   }
-  
+
   .nav {
     order: 3;
     flex-basis: 100%;
     justify-content: flex-start;
     gap: 32px;
   }
+}
+
+/* Settings Dropdown Styles */
+.settingsWrapper {
+  position: relative;
+}
+
+.settingsButton {
+  background: var(--block-primary);
+  border: 1px solid var(--block-secondary);
+  color: var(--content-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settingsButton:hover {
+  background: var(--block-secondary);
+  border-color: var(--gradient-light1);
+  transform: translateY(-2px);
+}
+
+.settingsButtonActive {
+  background: var(--block-secondary);
+  border-color: var(--gradient-light1);
+  box-shadow: 0 0 10px rgba(224, 31, 95, 0.3);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: var(--block-primary);
+  border: 1px solid var(--block-secondary);
+  border-radius: 12px;
+  width: 200px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  color: var(--content-primary);
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background: var(--block-secondary);
+  color: var(--color-white);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--color-white-8);
+  margin: 0;
+}
+
+.logoutItem {
+  color: var(--color-error);
+}
+
+.logoutItem:hover {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--color-error);
 }

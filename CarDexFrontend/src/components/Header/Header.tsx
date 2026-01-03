@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.css";
-import Button from "../Button/Button";
+import { SettingsIcon, UserIcon, LogoutIcon, PenIcon } from "../Icons";
 
-export type NavItem = "OPEN" | "GARAGE" | "TRADE";
+export type NavItem = "OPEN" | "GARAGE" | "TRADE" | "PROFILE" | "EDIT_PROFILE";
 
 export type HeaderProps = {
   activeNav: NavItem;
@@ -23,7 +23,26 @@ export default function Header({
   coinIconUrl,
   onLogout,
 }: HeaderProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navItems: NavItem[] = ["OPEN", "GARAGE", "TRADE"];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleProfileClick = (mode: NavItem) => {
+    onNavChange(mode);
+    setIsDropdownOpen(false);
+  };
 
   return (
     <header className={styles.header}>
@@ -66,16 +85,39 @@ export default function Header({
           <div className={`${styles.level} header-2`}>{userLevel}</div>
         )}
 
-        {/* Logout Button */}
-        {onLogout && (
-          <Button
-            onClick={onLogout}
-            variant="secondary"
-            size="regular"
+        {/* Settings Dropdown */}
+        <div className={styles.settingsWrapper} ref={dropdownRef}>
+          <button
+            className={`${styles.settingsButton} ${isDropdownOpen ? styles.settingsButtonActive : ""}`}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-label="Settings"
           >
-            Logout
-          </Button>
-        )}
+            <SettingsIcon />
+          </button>
+
+          {isDropdownOpen && (
+            <div className={styles.dropdown}>
+              <button className={styles.dropdownItem} onClick={() => handleProfileClick("PROFILE")}>
+                <UserIcon /> Profile
+              </button>
+              <button className={styles.dropdownItem} onClick={() => handleProfileClick("EDIT_PROFILE")}>
+                <PenIcon /> Edit Profile
+              </button>
+              <div className={styles.dropdownDivider} />
+              {onLogout && (
+                <button
+                  className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                  onClick={() => {
+                    onLogout();
+                    setIsDropdownOpen(false);
+                  }}
+                >
+                  <LogoutIcon /> Logout
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

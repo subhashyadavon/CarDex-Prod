@@ -8,6 +8,7 @@ import { useAuth } from "./hooks/useAuth";
 import Open from "./pages/Open/Open";
 import GaragePage from "./pages/Garage/Garage";
 import Trade from "./pages/Trade/Trade";
+import Profile from "./pages/Profile/Profile";
 
 function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
@@ -60,12 +61,16 @@ function AppContent() {
           {activeNav === "OPEN" && "Open Packs"}
           {activeNav === "GARAGE" && "My Garage"}
           {activeNav === "TRADE" && "Trade Center"}
+          {(activeNav === "PROFILE" || activeNav === "EDIT_PROFILE") && "User Profile"}
         </div>
 
         {/* Page body / actual content */}
         {activeNav === "OPEN" && <Open />}
         {activeNav === "GARAGE" && <GaragePage />}
         {activeNav === "TRADE" && <Trade />}
+        {(activeNav === "PROFILE" || activeNav === "EDIT_PROFILE") && (
+          <Profile isEditingInitial={activeNav === "EDIT_PROFILE"} onModeChange={setActiveNav} />
+        )}
       </main>
     </div>
   );
