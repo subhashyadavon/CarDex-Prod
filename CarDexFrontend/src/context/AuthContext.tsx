@@ -44,6 +44,7 @@ interface AuthContextType {
   register: (userData: RegisterRequest) => Promise<void>; // Register function
   logout: () => Promise<void>;                             // Logout function
   updateUserCurrency: (newCurrency: number) => void;      // Update user currency after transactions
+  updateUser: (updates: Partial<User>) => void;           // Update user profile information
 }
 
 /**
@@ -79,10 +80,10 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // State: user - The current logged-in user object (or null if not logged in)
   const [user, setUser] = useState<User | null>(null);
-  
+
   // State: token - The JWT token for authenticating API requests (or null)
   const [token, setToken] = useState<string | null>(null);
-  
+
   // State: isLoading - True while we're checking if user has existing session
   // We set this to false after checking localStorage on first load
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(storedToken);
       setUser(JSON.parse(storedUser)); // Parse JSON string back to object
     }
-    
+
     // We're done loading (whether we found data or not)
     setIsLoading(false);
   }, []); // Empty array means this only runs once on mount
@@ -132,23 +133,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginRequest) => {
     try {
       console.log('[AuthContext] Starting login for:', credentials.username);
-      
+
       // Call backend API to authenticate
       const response = await authService.login(credentials);
-      
+
       console.log('[AuthContext] Login response:', response);
       console.log('[AuthContext] User:', response.user);
       console.log('[AuthContext] Token:', response.accessToken);
-      
+
       // Update React state with user and token
       // This immediately makes isAuthenticated = true
       setUser(response.user);
       setToken(response.accessToken);
-      
+
       // Save to localStorage so it persists across page refreshes
       localStorage.setItem('authToken', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
+
       console.log('[AuthContext] Login successful, saved to localStorage');
       console.log('[AuthContext] User state after login:', response.user);
     } catch (error) {
@@ -169,7 +170,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Call backend API to create account
       const response = await authService.register(userData);
-      
+
       // Log the user in immediately after registration
       setUser(response.user);
       setToken(response.accessToken);
@@ -196,14 +197,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (user) {
       // Create updated user object with new currency
       const updatedUser = { ...user, currency: newCurrency };
-      
+
       // Update React state (triggers re-render of all components using useAuth)
       setUser(updatedUser);
-      
+
       // Save to localStorage (so it persists across refreshes)
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       console.log('[AuthContext] Updated currency to:', newCurrency);
+    }
+  };
+
+  /**
+   * updateUser: Update user profile information
+   * 
+   * FLOW:
+   * 1. Merge provided updates with current user object
+   * 2. Update React state (triggers re-render)
+   * 3. Save to localStorage (persists across refreshes)
+   * 
+   * USE CASE:
+   * - After profile update (username change)
+   * - Any other user field updates from API
+   */
+  const updateUser = (updates: Partial<User>) => {
+    if (user) {
+      // Merge updates with existing user data
+      const updatedUser = { ...user, ...updates };
+
+      // Update React state (triggers re-render of all components using useAuth)
+      setUser(updatedUser);
+
+      // Save to localStorage (so it persists across refreshes)
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      console.log('[AuthContext] Updated user:', updates);
     }
   };
 
@@ -253,6 +281,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     updateUserCurrency,
+    updateUser,
   };
 
   /**

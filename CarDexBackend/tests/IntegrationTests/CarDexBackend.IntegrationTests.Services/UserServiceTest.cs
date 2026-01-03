@@ -296,6 +296,7 @@ namespace DefaultNamespace
                 _userService.UpdateUserProfile(Guid.NewGuid(), request));
         }
 
+
         [Fact]
         public async Task UpdateUserProfile_ShouldHandleEmptyUsername()
         {
@@ -322,6 +323,46 @@ namespace DefaultNamespace
             Assert.NotNull(result);
             Assert.Equal("TestUser", result.Username); // Should remain unchanged
         }
+
+        [Fact]
+        public async Task UpdateUserProfile_ShouldUpdatePassword()
+        {
+            // Arrange
+            var originalPassword = "OldPassword123";
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(originalPassword);
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = Guid.NewGuid(),
+                Username = "TestUser",
+                Password = hashedPassword,
+                Currency = 100
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var newPassword = "NewPassword456";
+            var request = new CarDexBackend.Shared.Dtos.Requests.UserUpdateRequest
+            {
+                Password = newPassword
+            };
+
+            // Act
+            var result = await _userService.UpdateUserProfile(user.Id, request);
+
+            // Assert
+            Assert.NotNull(result);
+            
+            // Verify the password was updated in the database
+            var updatedUser = await _userRepo.GetByIdAsync(user.Id);
+            Assert.NotNull(updatedUser);
+            
+            // Verify the new password is correctly hashed and matches
+            Assert.True(BCrypt.Net.BCrypt.Verify(newPassword, updatedUser.Password));
+            
+            // Verify the old password no longer works
+            Assert.False(BCrypt.Net.BCrypt.Verify(originalPassword, updatedUser.Password));
+        }
+
 
         [Fact]
         public async Task GetUserCards_ShouldThrowWhenUserNotFound()

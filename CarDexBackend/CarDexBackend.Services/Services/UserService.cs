@@ -76,6 +76,10 @@ namespace CarDexBackend.Services
             if (!string.IsNullOrWhiteSpace(request.Username)) 
                 user.Username = request.Username;
             
+            // Update password if provided (hash it first)
+            if (!string.IsNullOrWhiteSpace(request.Password))
+                user.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            
             await _userRepo.UpdateAsync(user);
             await _userRepo.SaveChangesAsync();
 

@@ -10,7 +10,7 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ isEditingInitial = false, onModeChange }) => {
-    const { user, updateUserCurrency } = useAuth();
+    const { user, updateUserCurrency, updateUser } = useAuth();
     const [isEditing, setIsEditing] = useState(isEditingInitial);
     const [username, setUsername] = useState(user?.username || "");
     const [password, setPassword] = useState("");
@@ -51,11 +51,9 @@ const Profile: React.FC<ProfileProps> = ({ isEditingInitial = false, onModeChang
 
             const updatedUser = await userService.updateProfile(user.id, updates);
 
-            // Update local storage and context if username changed
+            // Update context with new user data (this updates both state and localStorage)
             if (updates.username) {
-                const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-                const newUser = { ...storedUser, username: updatedUser.username };
-                localStorage.setItem("user", JSON.stringify(newUser));
+                updateUser({ username: updatedUser.username });
             }
 
             setSuccess("Profile updated successfully!");
