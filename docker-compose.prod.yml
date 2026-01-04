@@ -2,8 +2,8 @@ services:
   cardex-frontend:
     image: cardex-frontend:prod
     build:
-      context: ./CarDexFrontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: CarDexFrontend/Dockerfile
     container_name: cardex-frontend-prod
     ports:
       - "80:8080"
