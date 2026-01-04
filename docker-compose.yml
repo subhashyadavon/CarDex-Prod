@@ -1,8 +1,8 @@
 services:
   cardex-frontend:
     build:
-      context: .
-      dockerfile: CarDexFrontend/Dockerfile
+      context: ./CarDexFrontend
+      dockerfile: Dockerfile
       args:
         REACT_APP_API_URL: http://localhost:5009
     container_name: cardex-frontend
