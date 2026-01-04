@@ -1,9 +1,9 @@
 services:
   cardex-frontend:
     image: ghcr.io/subhashyadavon/cardex-prod-frontend:main
-    # build:
-    #   context: .
-    #   dockerfile: CarDexFrontend/Dockerfile
+    build:
+      context: .
+      dockerfile: CarDexFrontend/Dockerfile
     container_name: cardex-frontend-prod
     ports:
       - "80:8080"
@@ -15,9 +15,9 @@ services:
 
   cardex-api:
     image: ghcr.io/subhashyadavon/cardex-prod-backend:main
-    # build:
-    #   context: .
-    #   dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
+    build:
+      context: .
+      dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
     container_name: cardex-api-prod
     ports:
       - "8080:8080"
