@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: CarDexFrontend/Dockerfile
       args:
-        REACT_APP_API_URL: http://localhost:5009
+        REACT_APP_API_URL: http://localhost:5001
     container_name: cardex-frontend
     ports:
       - "3000:8080"
@@ -22,27 +22,9 @@ services:
     ports:
       - "5001:8080"
     environment:
-      - ConnectionStrings__CarDexDatabase=Host=cardex-db;Database=cardex;Username=postgres;Password=postgres
+      - ConnectionStrings__CarDexDatabase=${SUPABASE_CONNECTION_STRING}
       - Jwt__SecretKey=DevelopmentSecretKeyThatIsAtLeast32CharactersLong!123
       - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      - cardex-db
-    networks:
-      - cardex-network
-    restart: always
-
-  cardex-db:
-    image: postgres:16
-    platform: linux/amd64
-    container_name: cardex-db
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=cardex
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - cardex-network
     restart: always
@@ -50,6 +32,3 @@ services:
 networks:
   cardex-network:
     driver: bridge
-
-volumes:
-  postgres_data:
