@@ -97,7 +97,7 @@ namespace CarDexBackend.Services
             // Check if user has enough currency (use PackPrice, not BasePackValue)
             var packPrice = collection.PackPrice;
             if (user.Currency < packPrice)
-                throw new InvalidOperationException(_sr["InsufficientCurrencyError", "pack"]);
+                throw new InvalidOperationException(_sr["InsufficientCurrencyError"]);
 
             // Deduct currency from user
             user.DeductCurrency(packPrice);

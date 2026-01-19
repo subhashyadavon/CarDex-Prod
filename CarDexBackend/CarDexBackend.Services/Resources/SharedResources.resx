@@ -178,7 +178,7 @@
     <comment/>
   </data>
   <data name="InsufficientCurrencyError" xml:space="preserve">
-    <value>Insufficient currency to purchase {0}.</value>
+    <value>Insufficient currency. Play the game to earn more currency!</value>
     <comment/>
   </data>
   <data name="PackNotFoundError" xml:space="preserve">
@@ -202,7 +202,7 @@
     <comment/>
   </data>
   <data name="GenericInsufficientCurrencyError" xml:space="preserve">
-    <value>Insufficient currency.</value>
+    <value>Insufficient currency. Play the game to earn more currency!</value>
     <comment/>
   </data>
   <data name="InvalidTradeParticipantError" xml:space="preserve">
