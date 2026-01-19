@@ -75,8 +75,12 @@ const HighwayRacer: React.FC = () => {
         playerX.current = 1;
         playerY.current = 380; // Reset Y position
         scoreRef.current = 0;
-        speedRef.current = 3; // Reduced initial speed
+        speedRef.current = 2; // Start slower for easier beginning
         trafficRef.current = [];
+
+        // Spawn the first obstacle in a random lane
+        const initialLane = Math.floor(Math.random() * 3);
+        trafficRef.current.push({ x: initialLane, y: -100 });
 
         // Start Loop
         gameLoop();
@@ -131,10 +135,11 @@ const HighwayRacer: React.FC = () => {
         scoreRef.current += 0.1;
 
         // Progressive Difficulty
-        // Speed: Starts at 3. Increases by 0.002 per frame.
-        // Capped at 15 (very fast)
-        if (speedRef.current < 15) {
-            speedRef.current += 0.002;
+        // Speed: Starts at 2. Gradually increases based on score.
+        // Speed progression: 2 -> 4 (score 100) -> 6 (score 300) -> 8 (score 600) -> max 12
+        const targetSpeed = Math.min(2 + (scoreRef.current / 100), 12);
+        if (speedRef.current < targetSpeed) {
+            speedRef.current += 0.01; // Smooth acceleration
         }
 
         // Size scaling: Starts at 0.8 (smaller). Increases to 1.2 (larger) based on score.
@@ -145,10 +150,20 @@ const HighwayRacer: React.FC = () => {
         const currentCarWidth = CAR_WIDTH * scaleFactor;
         const currentCarHeight = CAR_HEIGHT * scaleFactor;
 
-
-        // Spawn Traffic
-        // Spawn rate also increases slightly with speed
-        const spawnChance = 0.015 + (scoreRef.current / 10000); // 1.5% base chance, increases slowly
+        // Spawn Traffic - Progressive spawn rate
+        // Starts very low (0.3%) and increases with score
+        // Score 0-50: 0.3% spawn chance (very rare)
+        // Score 50-200: 0.3% -> 1.5% (gradual increase)
+        // Score 200+: 1.5% -> 3% (continues increasing)
+        let spawnChance;
+        if (scoreRef.current < 50) {
+            spawnChance = 0.003; // Very low at start
+        } else if (scoreRef.current < 200) {
+            spawnChance = 0.003 + ((scoreRef.current - 50) / 150) * 0.012; // Gradual increase to 1.5%
+        } else {
+            spawnChance = 0.015 + ((scoreRef.current - 200) / 800) * 0.015; // Continue to 3% max
+        }
+        spawnChance = Math.min(spawnChance, 0.03); // Cap at 3%
 
         if (Math.random() < spawnChance) {
             const lane = Math.floor(Math.random() * 3);
