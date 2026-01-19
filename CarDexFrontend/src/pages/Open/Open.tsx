@@ -88,7 +88,7 @@ const Open: React.FC = () => {
     } catch (err: any) {
       console.error("Failed to purchase/open pack:", err);
       setPackError(
-        err?.response?.data?.message || "Could not open pack. Please try again."
+        err?.response?.data?.detail || err?.response?.data?.message || "Could not open pack. Please try again."
       );
     } finally {
       setIsOpeningPackId(null);

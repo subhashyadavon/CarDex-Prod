@@ -69,7 +69,7 @@ const Profile: React.FC<ProfileProps> = ({ isEditingInitial = false, onModeChang
             // Stay in edit mode
             setPassword("");
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to update profile");
+            setError(err.response?.data?.detail || err.response?.data?.message || "Failed to update profile");
         } finally {
             setIsLoading(false);
         }
