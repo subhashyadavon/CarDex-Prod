@@ -75,7 +75,7 @@ const HighwayRacer: React.FC = () => {
         playerX.current = 1;
         playerY.current = 380; // Reset Y position
         scoreRef.current = 0;
-        speedRef.current = 2; // Start slower for easier beginning
+        speedRef.current = 1; // Start at slowest speed for easiest beginning
         trafficRef.current = [];
 
         // Spawn the first obstacle in a random lane
@@ -135,9 +135,9 @@ const HighwayRacer: React.FC = () => {
         scoreRef.current += 0.1;
 
         // Progressive Difficulty
-        // Speed: Starts at 2. Gradually increases based on score.
-        // Speed progression: 2 -> 4 (score 100) -> 6 (score 300) -> 8 (score 600) -> max 12
-        const targetSpeed = Math.min(2 + (scoreRef.current / 100), 12);
+        // Speed: Starts at 1. Gradually increases based on score.
+        // Speed progression: 1 -> 3 (score 100) -> 5 (score 300) -> 7 (score 600) -> max 12
+        const targetSpeed = Math.min(1 + (scoreRef.current / 100), 12);
         if (speedRef.current < targetSpeed) {
             speedRef.current += 0.01; // Smooth acceleration
         }
