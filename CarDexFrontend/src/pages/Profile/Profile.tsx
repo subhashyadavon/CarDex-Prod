@@ -58,8 +58,7 @@ const Profile: React.FC<ProfileProps> = ({ isEditingInitial = false, onModeChang
 
             setSuccess("Profile updated successfully!");
             setTimeout(() => setSuccess(""), 3000);
-            setIsEditing(false);
-            if (onModeChange) onModeChange("PROFILE");
+            // Stay in edit mode
             setPassword("");
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to update profile");
