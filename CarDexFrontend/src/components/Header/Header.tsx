@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.css";
 import { SettingsIcon, UserIcon, LogoutIcon, PenIcon } from "../Icons";
 
-export type NavItem = "OPEN" | "GARAGE" | "TRADE" | "PROFILE" | "EDIT_PROFILE";
+export type NavItem = "OPEN" | "GARAGE" | "TRADE" | "GAME" | "PROFILE" | "EDIT_PROFILE";
 
 export type HeaderProps = {
   activeNav: NavItem;
@@ -25,7 +25,7 @@ export default function Header({
 }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const navItems: NavItem[] = ["OPEN", "GARAGE", "TRADE"];
+  const navItems: NavItem[] = ["OPEN", "GARAGE", "TRADE", "GAME"];
 
   // Close dropdown when clicking outside
   useEffect(() => {

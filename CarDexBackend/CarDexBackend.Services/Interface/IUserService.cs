@@ -125,5 +125,13 @@ namespace CarDexBackend.Services
         /// </remarks>
         /// <exception cref="KeyNotFoundException">Thrown if the user does not exist.</exception>
         Task<CollectionProgressResponse> GetCollectionProgress(Guid userId);
+        
+        /// <summary>
+        /// Adds a currency reward to the user's balance from game activities.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user to reward.</param>
+        /// <param name="amount">The amount of currency to add.</param>
+        /// <returns>The updated user profile.</returns>
+        Task<UserResponse> AddGameReward(Guid userId, int amount);
     }
 }

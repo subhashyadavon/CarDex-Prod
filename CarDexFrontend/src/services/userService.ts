@@ -60,4 +60,15 @@ export const userService = {
     );
     return response.data;
   },
+
+  /**
+   * Add game reward to user currency
+   */
+  addGameReward: async (userId: string, amount: number): Promise<User> => {
+    const response = await apiClient.post<User>(
+      `/users/${userId}/game-reward`,
+      { amount }
+    );
+    return response.data;
+  },
 };

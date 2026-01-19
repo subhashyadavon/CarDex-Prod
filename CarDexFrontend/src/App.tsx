@@ -10,6 +10,8 @@ import GaragePage from "./pages/Garage/Garage";
 import Trade from "./pages/Trade/Trade";
 import Profile from "./pages/Profile/Profile";
 
+import DragRace from "./pages/Game/DragRace";
+
 function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
   const [userCurrency, setUserCurrency] = useState(0);
@@ -61,6 +63,7 @@ function AppContent() {
           {activeNav === "OPEN" && "Open Packs"}
           {activeNav === "GARAGE" && "My Garage"}
           {activeNav === "TRADE" && "Trade Center"}
+          {activeNav === "GAME" && "Drag Race"}
           {(activeNav === "PROFILE" || activeNav === "EDIT_PROFILE") && "User Profile"}
         </div>
 
@@ -68,6 +71,7 @@ function AppContent() {
         {activeNav === "OPEN" && <Open />}
         {activeNav === "GARAGE" && <GaragePage />}
         {activeNav === "TRADE" && <Trade />}
+        {activeNav === "GAME" && <DragRace />}
         {(activeNav === "PROFILE" || activeNav === "EDIT_PROFILE") && (
           <Profile isEditingInitial={activeNav === "EDIT_PROFILE"} onModeChange={setActiveNav} />
         )}

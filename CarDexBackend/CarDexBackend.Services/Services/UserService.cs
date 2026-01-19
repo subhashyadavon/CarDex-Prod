@@ -391,5 +391,29 @@ namespace CarDexBackend.Services
                 TotalCollections = progressList.Count
             };
         }
+
+        /// <summary>
+        /// Adds a currency reward to the user's balance from game activities.
+        /// </summary>
+        public async Task<UserResponse> AddGameReward(Guid userId, int amount)
+        {
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
+            
+            // Increment currency
+            user.Currency += amount;
+
+            await _userRepo.UpdateAsync(user);
+            await _userRepo.SaveChangesAsync();
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Currency = user.Currency,
+                CreatedAt = user.CreatedAt
+            };
+        }
     }
 }

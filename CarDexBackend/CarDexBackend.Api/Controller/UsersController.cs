@@ -178,5 +178,20 @@ namespace CarDexBackend.Controllers
             var result = await _userService.GetCollectionProgress(userId);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Adds a reward to the user's currency balance from game activities.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="request">The reward request containing the amount.</param>
+        /// <returns>The updated user profile.</returns>
+        [HttpPost("{userId:guid}/game-reward")]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AddGameReward(Guid userId, [FromBody] GameRewardRequest request)
+        {
+            var result = await _userService.AddGameReward(userId, request.Amount);
+            return Ok(result);
+        }
     }
 }
