@@ -56,7 +56,15 @@ const Profile: React.FC<ProfileProps> = ({ isEditingInitial = false, onModeChang
                 updateUser({ username: updatedUser.username });
             }
 
-            setSuccess("Profile updated successfully!");
+            let successMsg = "Profile updated successfully!";
+            if (updates.username && updates.password) {
+                successMsg = "Username and Password updated successfully!";
+            } else if (updates.username) {
+                successMsg = "Username updated successfully!";
+            } else if (updates.password) {
+                successMsg = "Password updated successfully!";
+            }
+            setSuccess(successMsg);
             setTimeout(() => setSuccess(""), 3000);
             // Stay in edit mode
             setPassword("");
