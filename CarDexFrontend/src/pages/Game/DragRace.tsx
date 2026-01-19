@@ -268,6 +268,10 @@ const HighwayRacer: React.FC = () => {
                     ➡️
                 </button>
             </div>
+
+            <p className={styles.supportText}>
+                If you found this system cool and interesting <a href="https://github.com/subhashyadavon/CarDex-Prod" target="_blank" rel="noopener noreferrer">support the developer</a>!
+            </p>
         </div>
     );
 };

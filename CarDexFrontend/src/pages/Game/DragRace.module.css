@@ -112,3 +112,24 @@
         opacity: 0.5;
     }
 }
+
+.supportText {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #888;
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+.supportText a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.supportText a:hover {
+    color: #ffaa00;
+    text-decoration: underline;
+}

@@ -179,7 +179,11 @@ Specifically, AI assistance was used to:
 
 - Format XML documentation comments for controllers and DTOs.
 - Provide mock service structure and test case suggestions for the unit tests.
-- Helping with writing documentation markdown (md) files.  
+- Helping with writing documentation markdown (md) files.
+
+## Support
+
+If you found this system cool and interesting, [support the developer](https://github.com/subhashyadavon/CarDex-Prod) by starring the repository!
 
 
 
