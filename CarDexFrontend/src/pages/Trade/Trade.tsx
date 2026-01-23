@@ -155,7 +155,7 @@ const TradeSection: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   const {
     filteredTrades,
@@ -262,6 +262,11 @@ const TradeSection: React.FC = () => {
     try {
       await acceptTrade(tradeId);
       await refreshTrades();
+
+      // Refresh user balance and inventory state
+      if (refreshUser) {
+        await refreshUser();
+      }
     } catch (err) {
       console.error("[TradeSection] Failed to buy trade:", err);
     }
@@ -339,6 +344,7 @@ const TradeSection: React.FC = () => {
               await createTrade(request);
             } catch (err) {
               console.error("[TradeSection] Failed to create trade:", err);
+              throw err;
             }
           }}
         />

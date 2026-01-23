@@ -100,5 +100,24 @@ namespace CarDexBackend.Controllers
             var vehicles = await _cardService.GetAllVehicles();
             return Ok(vehicles);
         }
+
+        /// <summary>
+        /// Sells a card directly to the system for a fraction of its value.
+        /// </summary>
+        /// <param name="cardId">Unique identifier of the card to sell.</param>
+        /// <returns>
+        /// Result of the card sale, including the sell price and new user balance.
+        /// Returns 404 Not Found if the card does not exist.
+        /// Returns 400 Bad Request if the card does not belong to the user or is in a trade.
+        /// </returns>
+        [HttpPost("{cardId:guid}/sell")]
+        [ProducesResponseType(typeof(CardQuickSellResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> QuickSellCard(Guid cardId)
+        {
+            var result = await _cardService.QuickSellCard(cardId);
+            return Ok(result);
+        }
     }
 }

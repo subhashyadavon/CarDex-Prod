@@ -43,6 +43,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;    // Login function
   register: (userData: RegisterRequest) => Promise<void>; // Register function
   logout: () => Promise<void>;                             // Logout function
+  refreshUser: () => Promise<void>;                        // Refresh user data from API
   updateUserCurrency: (newCurrency: number) => void;      // Update user currency after transactions
   updateUser: (updates: Partial<User>) => void;           // Update user profile information
 }
@@ -263,6 +264,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   /**
+   * refreshUser: Re-fetch current user data from backend
+   * 
+   * Useful after trades or game rewards where currency/inventory might have changed
+   */
+  const refreshUser = async () => {
+    if (!user) return;
+
+    try {
+      console.log('[AuthContext] Refreshing user data...');
+      const { userService } = await import('../services/userService');
+      const updatedUser = await userService.getProfile(user.id);
+
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      console.log('[AuthContext] User data refreshed:', updatedUser);
+    } catch (error) {
+      console.error('[AuthContext] Failed to refresh user data:', error);
+    }
+  };
+
+  /**
    * Build the value object that components will receive
    * 
    * This object is what gets returned when components call useAuth()
@@ -280,6 +302,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    refreshUser,
     updateUserCurrency,
     updateUser,
   };

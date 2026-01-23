@@ -125,6 +125,17 @@ export const cardService = {
   },
 
   /**
+   * Quick sell a card to the system
+   * POST /cards/{cardId}/sell
+   */
+  quickSellCard: async (cardId: string): Promise<any> => {
+    const response = await apiClient.post<any>(
+      API_CONFIG.ENDPOINTS.CARDS.QUICK_SELL(cardId)
+    );
+    return response.data;
+  },
+
+  /**
    * NOTE:
    * - There is NO getVehicleById here anymore.
    * - There is NO usage of /cards/vehicle/{id}.

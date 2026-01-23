@@ -28,6 +28,34 @@
   gap: 20px;
 }
 
+.garageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.refreshButton {
+  padding: 8px 16px;
+  background: var(--block-secondary);
+  color: var(--content-primary);
+  border: 1px solid var(--color-white-20);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: var(--block-primary);
+  border-color: var(--color-white-40);
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* All Cards Section */
 .allCardsSection {
   display: flex;

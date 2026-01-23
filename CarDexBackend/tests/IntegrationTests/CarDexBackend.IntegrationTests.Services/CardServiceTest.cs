@@ -23,6 +23,9 @@ namespace DefaultNamespace
         private readonly CardService _cardService;
         private readonly ICardRepository _cardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IOpenTradeRepository _openTradeRepo;
+        private readonly TestCurrentUserService _currentUserService;
 
         //Used ChatGPT to set up the base code, help with seeding the data and modify the code for the test
         //for getallcards with filters and sorting
@@ -36,7 +39,17 @@ namespace DefaultNamespace
             _context = new CarDexDbContext(options);
             _cardRepo = new CardRepository(_context);
             _vehicleRepo = new Repository<Vehicle>(_context);
-            _cardService = new CardService(_cardRepo, _vehicleRepo, new NullStringLocalizer<SharedResources>());
+            _userRepo = new UserRepository(_context);
+            _openTradeRepo = new OpenTradeRepository(_context);
+            _currentUserService = new TestCurrentUserService();
+
+            _cardService = new CardService(
+                _cardRepo, 
+                _vehicleRepo, 
+                _userRepo, 
+                _openTradeRepo, 
+                _currentUserService, 
+                new NullStringLocalizer<SharedResources>());
 
             // Seed test data
             SeedTestData();
@@ -418,6 +431,68 @@ namespace DefaultNamespace
             // Assert
             Assert.NotNull(result);
             Assert.All(result.Cards, c => Assert.True(c.Value >= 50000 && c.Value <= 70000));
+        }
+        [Fact]
+        public async Task QuickSellCard_ShouldSucceedWhenOwnedByUser()
+        {
+            // Arrange
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = _currentUserService.UserId,
+                Username = "Seller",
+                Password = "Password",
+                Currency = 1000
+            };
+            _context.Users.Add(user);
+            
+            var vehicle = _context.Vehicles.First();
+            var card = new CarDexBackend.Domain.Entities.Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                VehicleId = vehicle.Id,
+                CollectionId = Guid.NewGuid(),
+                Grade = GradeEnum.FACTORY,
+                Value = 10000
+            };
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _cardService.QuickSellCard(card.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(card.Id, result.CardId);
+            Assert.Equal(5000, result.SellPrice); // 50% of 10000
+            Assert.Equal(6000, result.NewUserCurrency); // 1000 + 5000
+
+            // Verify card is deleted
+            var deletedCard = await _context.Cards.FindAsync(card.Id);
+            Assert.Null(deletedCard);
+        }
+
+        [Fact]
+        public async Task QuickSellCard_ShouldThrowWhenNotOwnedByUser()
+        {
+            // Arrange
+            var otherUserId = Guid.NewGuid();
+            var vehicle = _context.Vehicles.First();
+            var card = new CarDexBackend.Domain.Entities.Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = otherUserId,
+                VehicleId = vehicle.Id,
+                CollectionId = Guid.NewGuid(),
+                Grade = GradeEnum.FACTORY,
+                Value = 10000
+            };
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => 
+                _cardService.QuickSellCard(card.Id));
         }
     }
 }

@@ -57,5 +57,12 @@ namespace CarDexBackend.Services
         /// Retrieves a list with detailed information about all vehicles.
         /// </summary>
         Task<VehicleListResponse> GetAllVehicles();
+
+        /// <summary>
+        /// Sells a card directly to the system for a fraction of its value.
+        /// </summary>
+        /// <param name="cardId">The unique identifier of the card to sell.</param>
+        /// <returns>A <see cref="CardQuickSellResponse"/> containing the sell price and new user balance.</returns>
+        Task<CardQuickSellResponse> QuickSellCard(Guid cardId);
     }
 }

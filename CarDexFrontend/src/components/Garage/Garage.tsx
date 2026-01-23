@@ -6,6 +6,7 @@ import { CardWithVehicle, GradeEnum } from "../../types/types";
 interface GarageProps {
   cards: CardWithVehicle[];
   isLoading?: boolean;
+  onSellCard?: (cardId: string) => void;
 }
 
 /**
@@ -23,7 +24,7 @@ const gradeToRarity = (grade: string): CardRarity => {
   }
 };
 
-const Garage: React.FC<GarageProps> = ({ cards, isLoading = false }) => {
+const Garage: React.FC<GarageProps> = ({ cards, isLoading = false, onSellCard }) => {
   if (isLoading) {
     return (
       <section className={styles.garage}>
@@ -59,6 +60,7 @@ const Garage: React.FC<GarageProps> = ({ cards, isLoading = false }) => {
               grade={card.grade}
               value={card.value.toLocaleString()}
               rarity={gradeToRarity(card.grade)}
+              onSell={onSellCard ? () => onSellCard(card.id) : undefined}
             />
           ))
         )}

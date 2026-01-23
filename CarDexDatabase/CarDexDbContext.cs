@@ -248,6 +248,11 @@ namespace CarDexDatabase
                 entity.Property(e => e.WantCardId)
                     .HasColumnName("want_card_id");
 
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasColumnType("timestamp with time zone")
+                    .HasDefaultValueSql("timezone('utc', now())");
+
                 // Foreign keys
                 entity.HasOne<User>()
                     .WithMany(u => u.OpenTrades)

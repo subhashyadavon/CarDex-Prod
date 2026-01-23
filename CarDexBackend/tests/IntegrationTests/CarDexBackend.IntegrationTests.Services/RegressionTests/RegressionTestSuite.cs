@@ -93,7 +93,13 @@ namespace DefaultNamespace.RegressionTests
                 packCurrentUserService,
                 new NullStringLocalizer<SharedResources>());
             
-            _cardService = new CardService(cardRepo, vehicleRepo, new NullStringLocalizer<SharedResources>());
+            _cardService = new CardService(
+                cardRepo, 
+                vehicleRepo, 
+                userRepo, 
+                openTradeRepo, 
+                tradeCurrentUserService, 
+                new NullStringLocalizer<SharedResources>());
             
             _userService = new UserService(
                 userRepo, 

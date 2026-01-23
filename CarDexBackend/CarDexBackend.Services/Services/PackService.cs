@@ -11,10 +11,6 @@ namespace CarDexBackend.Services
     /// <summary>
     /// Production implementation of <see cref="IPackService"/> using Repositories.
     /// </summary>
-    /// <remarks>
-    /// NOTE: This implementation uses a hardcoded test user ID for development.
-    /// In production, this should be replaced with proper authentication/authorization.
-    /// </remarks>
     public class PackService : IPackService
     {
         private readonly IStringLocalizer<SharedResources> _sr;

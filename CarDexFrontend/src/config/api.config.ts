@@ -49,6 +49,7 @@ export const API_CONFIG = {
       GET_ALL: "/cards", // GET: Fetch all cards
       GET_BY_ID: (id: string) => `/cards/${id}`, // GET: Fetch specific card
       GET_USER_CARDS: (userId: string) => `/cards/user/${userId}`, // GET: User's cards
+      QUICK_SELL: (id: string) => `/cards/${id}/sell`, // POST: Sell card
 
       // Vehicle stats endpoints from backend (Swagger: /cards/vehicles and /cards/vehicle/{vehicleId})
       GET_ALL_VEHICLES: "/cards/vehicles", // GET: Fetch all vehicles

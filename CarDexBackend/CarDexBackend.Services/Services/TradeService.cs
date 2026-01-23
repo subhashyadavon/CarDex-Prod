@@ -4,18 +4,14 @@ using CarDexBackend.Shared.Dtos.Requests;
 using CarDexBackend.Shared.Dtos.Responses;
 using CarDexBackend.Repository.Interfaces;
 using Microsoft.Extensions.Localization;
-using Microsoft.Win32.SafeHandles;
 using CarDexBackend.Services.Resources;
+using System.Collections.Concurrent;
 
 namespace CarDexBackend.Services
 {
     /// <summary>
     /// Production implementation of <see cref="ITradeService"/> using Repositories.
     /// </summary>
-    /// <remarks>
-    /// NOTE: This implementation uses a hardcoded test user ID for development.
-    /// In production, this should be replaced with proper authentication/authorization.
-    /// </remarks>
     public class TradeService : ITradeService
     {
         private readonly IStringLocalizer<SharedResources> _sr;
@@ -26,6 +22,8 @@ namespace CarDexBackend.Services
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly IRewardRepository _rewardRepo;
         private readonly ICurrentUserService _currentUserService;
+
+        private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _tradeLocks = new();
         
 
 
@@ -90,7 +88,7 @@ namespace CarDexBackend.Services
                 CardId = t.CardId,
                 Price = t.Type == TradeEnum.FOR_PRICE ? t.Price : null,
                 WantCardId = t.Type == TradeEnum.FOR_CARD ? t.WantCardId : null,
-                CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                CreatedAt = t.CreatedAt
             }).ToList();
 
             return new TradeListResponse
@@ -124,7 +122,7 @@ namespace CarDexBackend.Services
                 CardId = trade.CardId,
                 Price = trade.Type == TradeEnum.FOR_PRICE ? trade.Price : null,
                 WantCardId = trade.Type == TradeEnum.FOR_CARD ? trade.WantCardId : null,
-                CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                CreatedAt = trade.CreatedAt
             };
 
             // Populate Card property if card exists
@@ -213,7 +211,7 @@ namespace CarDexBackend.Services
                 CardId = trade.CardId,
                 Price = trade.Type == TradeEnum.FOR_PRICE ? trade.Price : null,
                 WantCardId = trade.Type == TradeEnum.FOR_CARD ? trade.WantCardId : null,
-                CreatedAt = DateTime.UtcNow  // Not in DB, using current time
+                CreatedAt = trade.CreatedAt
             };
         }
 
@@ -222,18 +220,23 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<(CompletedTradeResponse CompletedTrade, RewardResponse SellerReward, RewardResponse BuyerReward)> ExecuteTrade(Guid tradeId, TradeExecuteRequest? request)
         {
-            var buyerId = _currentUserService.UserId;
+            var semaphore = _tradeLocks.GetOrAdd(tradeId, _ => new SemaphoreSlim(1, 1));
+            await semaphore.WaitAsync();
 
-            var trade = await _openTradeRepo.GetByIdAsync(tradeId);
-            if (trade == null)
-                throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
+            try
+            {
+                var buyerId = _currentUserService.UserId;
 
-            var seller = await _userRepo.GetByIdAsync(trade.UserId);
-            var buyer = await _userRepo.GetByIdAsync(buyerId);
-            var sellerCard = await _cardRepo.GetCardByIdRawAsync(trade.CardId);
+                var trade = await _openTradeRepo.GetByIdAsync(tradeId);
+                if (trade == null)
+                    throw new KeyNotFoundException(_sr["TradeNotFoundError"]);
 
-            if (seller == null || buyer == null || sellerCard == null)
-                throw new InvalidOperationException(_sr["InvalidTradeParticipantError"]);
+                var seller = await _userRepo.GetByIdAsync(trade.UserId);
+                var buyer = await _userRepo.GetByIdAsync(buyerId);
+                var sellerCard = await _cardRepo.GetCardByIdRawAsync(trade.CardId);
+
+                if (seller == null || buyer == null || sellerCard == null)
+                    throw new InvalidOperationException(_sr["InvalidTradeParticipantError"]);
 
             if (buyer.Id == seller.Id)
                 throw new InvalidOperationException(_sr["SelfTradeError"]);
@@ -359,6 +362,16 @@ namespace CarDexBackend.Services
             };
 
             return (completedTradeResponse, sellerRewardResponse, buyerRewardResponse);
+            }
+            finally
+            {
+                semaphore.Release();
+                // Clean up the dictionary if no one else is waiting
+                if (semaphore.CurrentCount == 1)
+                {
+                    _tradeLocks.TryRemove(tradeId, out _);
+                }
+            }
         }
 
         /// <summary>

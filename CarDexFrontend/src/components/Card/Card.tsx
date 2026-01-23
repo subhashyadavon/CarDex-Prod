@@ -1,7 +1,7 @@
 // src/components/Card/Card.tsx
 import React from "react";
 import styles from "./Card.module.css";
-import "../../App.css"; 
+import "../../App.css";
 import coinIcon from "../../assets/coin.png";
 
 export type CardRarity = "factory" | "limited" | "nismo";
@@ -22,6 +22,7 @@ export interface CarCardProps {
   value?: string;
   rarity?: CardRarity;
   collectionImageUrl?: string;
+  onSell?: () => void;
 }
 
 const Card: React.FC<CarCardProps> = ({
@@ -40,9 +41,21 @@ const Card: React.FC<CarCardProps> = ({
   value = "115,999",
   rarity = "factory",
   collectionImageUrl,
+  onSell,
 }) => {
   return (
     <div className={`${styles.card} ${styles[rarity]}`}>
+      {onSell && (
+        <button
+          className={styles.sellButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSell();
+          }}
+        >
+          Sell
+        </button>
+      )}
       {/* HEADER */}
       <div className={styles.header}>
         <div>

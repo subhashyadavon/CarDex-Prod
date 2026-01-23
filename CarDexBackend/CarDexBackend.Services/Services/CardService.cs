@@ -15,11 +15,23 @@ namespace CarDexBackend.Services
         private readonly IStringLocalizer<SharedResources> _sr;
         private readonly ICardRepository _cardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
+        private readonly IUserRepository _userRepo;
+        private readonly IOpenTradeRepository _openTradeRepo;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CardService(ICardRepository cardRepo, IRepository<Vehicle> vehicleRepo, IStringLocalizer<SharedResources> sr)
+        public CardService(
+            ICardRepository cardRepo, 
+            IRepository<Vehicle> vehicleRepo, 
+            IUserRepository userRepo,
+            IOpenTradeRepository openTradeRepo,
+            ICurrentUserService currentUserService,
+            IStringLocalizer<SharedResources> sr)
         {
             _cardRepo = cardRepo;
             _vehicleRepo = vehicleRepo;
+            _userRepo = userRepo;
+            _openTradeRepo = openTradeRepo;
+            _currentUserService = currentUserService;
             _sr = sr;
         }
 
@@ -141,6 +153,46 @@ namespace CarDexBackend.Services
             return new VehicleListResponse
             {
                 Vehicles = vehicleResponses
+            };
+        }
+
+        /// <summary>
+        /// Sells a card directly to the system for a fraction of its value.
+        /// </summary>
+        public async Task<CardQuickSellResponse> QuickSellCard(Guid cardId)
+        {
+            var userId = _currentUserService.UserId;
+            
+            var card = await _cardRepo.GetCardByIdRawAsync(cardId);
+            if (card == null)
+                throw new KeyNotFoundException(_sr["CardNotFoundError"]);
+
+            if (card.UserId != userId)
+                throw new InvalidOperationException(_sr["OnlySellYourCardsError"]);
+
+            // Check if card is in an open trade
+            var openTrades = await _openTradeRepo.FindAsync(t => t.CardId == cardId);
+            if (openTrades.Any())
+                throw new InvalidOperationException(_sr["CardInTradeError"]);
+
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
+
+            // Sell price is 50% of card value
+            int sellPrice = (int)(card.Value * 0.5);
+            
+            user.AddCurrency(sellPrice);
+            await _userRepo.UpdateAsync(user);
+
+            await _cardRepo.DeleteAsync(card);
+            await _cardRepo.SaveChangesAsync();
+
+            return new CardQuickSellResponse
+            {
+                CardId = cardId,
+                SellPrice = sellPrice,
+                NewUserCurrency = user.Currency
             };
         }
     }

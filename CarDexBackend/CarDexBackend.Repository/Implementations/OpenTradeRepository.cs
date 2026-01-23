@@ -26,8 +26,8 @@ namespace CarDexBackend.Repository.Implementations
         {
             var query = _dbSet.AsQueryable();
 
-            if (!string.IsNullOrEmpty(type))
-                query = query.Where(t => t.Type.ToString() == type);
+            if (!string.IsNullOrEmpty(type) && Enum.TryParse<TradeEnum>(type, true, out var enumType))
+                query = query.Where(t => t.Type == enumType);
 
             if (collectionId.HasValue)
             {
@@ -37,10 +37,10 @@ namespace CarDexBackend.Repository.Implementations
                 query = query.Where(t => cardIds.Contains(t.CardId));
             }
 
-            if (!string.IsNullOrEmpty(grade))
+            if (!string.IsNullOrEmpty(grade) && Enum.TryParse<GradeEnum>(grade, true, out var enumGrade))
             {
                 var cardIds = _context.Cards
-                    .Where(c => c.Grade.ToString() == grade)
+                    .Where(c => c.Grade == enumGrade)
                     .Select(c => c.Id);
                 query = query.Where(t => cardIds.Contains(t.CardId));
             }
@@ -66,9 +66,9 @@ namespace CarDexBackend.Repository.Implementations
             {
                 "price_asc" => query.OrderBy(t => t.Price),
                 "price_desc" => query.OrderByDescending(t => t.Price),
-                "date_asc" => query.OrderBy(t => t.Id),
-                "date_desc" => query.OrderByDescending(t => t.Id),
-                _ => query.OrderByDescending(t => t.Id)
+                "date_asc" => query.OrderBy(t => t.CreatedAt),
+                "date_desc" => query.OrderByDescending(t => t.CreatedAt),
+                _ => query.OrderByDescending(t => t.CreatedAt)
             };
 
             var total = await query.CountAsync();

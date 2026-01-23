@@ -22,7 +22,7 @@ export interface CreateTradePayload {
 
 interface CreateTradeModalProps {
   onClose: () => void;
-  onSubmit: (payload: CreateTradePayload) => void;
+  onSubmit: (payload: CreateTradePayload) => Promise<void>;
 }
 
 interface PlayerCard {
@@ -102,6 +102,8 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
   );
 
   const [price, setPrice] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserCards = async () => {
@@ -128,8 +130,8 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
   const allOpenTrades: OpenTrade[] = Array.isArray(filteredTrades)
     ? filteredTrades
     : Array.isArray(trades)
-    ? trades
-    : [];
+      ? trades
+      : [];
 
   const userOwnedCardIdsInOpenTrades = new Set(
     allOpenTrades
@@ -143,17 +145,26 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
     .filter((pc) => !userOwnedCardIdsInOpenTrades.has(pc.cardId));
 
   const canSubmit =
-    !!offeredCardId && price.trim().length > 0;
+    !!offeredCardId && price.trim().length > 0 && !isSubmitting;
 
-  const handleSubmit = () => {
-    if (!offeredCardId) return;
+  const handleSubmit = async () => {
+    if (!offeredCardId || isSubmitting) return;
 
-    onSubmit({
-      offeredCardId,
-      price: Number(price),
-    });
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    onClose();
+    try {
+      await onSubmit({
+        offeredCardId,
+        price: Number(price),
+      });
+      onClose();
+    } catch (err) {
+      console.error("[CreateTradeModal] Submit failed:", err);
+      setSubmitError("Failed to create trade. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -161,10 +172,16 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
       <div className={styles.modal}>
         <div className={styles.header}>
           <div className="header-1">Create Trade</div>
-          <Button size="regular" variant="secondary" onClick={onClose}>
+          <Button size="regular" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Close
           </Button>
         </div>
+
+        {submitError && (
+          <div className={styles.submitError}>
+            {submitError}
+          </div>
+        )}
 
         <div className={styles.section}>
           <div className="card-2">Select Card to Sell</div>
@@ -184,9 +201,8 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
               {ownedCards.map((item) => (
                 <div
                   key={item.id}
-                  className={`${styles.cardWrapper} ${
-                    selectedOfferedUiId === item.id ? styles.selected : ""
-                  }`}
+                  className={`${styles.cardWrapper} ${selectedOfferedUiId === item.id ? styles.selected : ""
+                    }`}
                   onClick={() => {
                     setOfferedCardId(item.cardId);
                     setSelectedOfferedUiId(item.id);
@@ -220,7 +236,7 @@ const CreateTradeModal: React.FC<CreateTradeModalProps> = ({
             disabled={!canSubmit}
             onClick={handleSubmit}
           >
-            Create Trade
+            {isSubmitting ? "Creating..." : "Create Trade"}
           </Button>
         </div>
       </div>
