@@ -1102,5 +1102,88 @@ namespace DefaultNamespace
             Assert.Equal(1, result.Offset);
             Assert.True(result.Trades.Count() <= 2);
         }
+
+        [Fact]
+        public async Task ExecuteTrade_ShouldBeThreadSafe()
+        {
+            // Arrange
+            var seller = _context.Users.First();
+            var sellerCard = _context.Cards.First(c => c.UserId == seller.Id);
+            
+            // Create open trade
+            var openTrade = new CarDexBackend.Domain.Entities.OpenTrade(
+                Guid.NewGuid(),
+                TradeEnum.FOR_PRICE,
+                seller.Id,
+                sellerCard.Id,
+                100,
+                null
+            );
+            _context.OpenTrades.Add(openTrade);
+            _context.SaveChanges();
+
+            // We need multiple instances of TradeService (or at least different CurrentUserServices)
+            // to simulate different users attempting to execute the same trade.
+            // But since TradeService._tradeLocks is static, it should work even with same instance.
+            // However, ExecuteTrade uses _currentUserService.UserId, so we need different services.
+
+            var buyer1Id = Guid.NewGuid();
+            var buyer2Id = Guid.NewGuid();
+
+            _context.Users.AddRange(
+                new User { Id = buyer1Id, Username = "Buyer1", Password = "pw", Currency = 1000 },
+                new User { Id = buyer2Id, Username = "Buyer2", Password = "pw", Currency = 1000 }
+            );
+            _context.SaveChanges();
+
+            var service1 = CreateTradeService(buyer1Id);
+            var service2 = CreateTradeService(buyer2Id);
+
+            // Act
+            // Start both tasks WITHOUT awaiting them yet
+            var task1 = service1.ExecuteTrade(openTrade.Id, null);
+            var task2 = service2.ExecuteTrade(openTrade.Id, null);
+
+            // Wait for both to complete
+            await Task.WhenAll(
+                task1.ContinueWith(_ => {}), 
+                task2.ContinueWith(_ => {})
+            );
+
+            // Assert
+            int successCount = 0;
+            int failureCount = 0;
+
+            if (task1.Status == TaskStatus.RanToCompletion) successCount++;
+            else if (task1.IsFaulted && task1.Exception?.InnerException is KeyNotFoundException) failureCount++;
+
+            if (task2.Status == TaskStatus.RanToCompletion) successCount++;
+            else if (task2.IsFaulted && task2.Exception?.InnerException is KeyNotFoundException) failureCount++;
+
+            // With SemaphoreSlim, one must succeed and one must fail with KeyNotFoundException
+            Assert.Equal(1, successCount);
+            Assert.Equal(1, failureCount);
+
+            // Verify seller only got currency once
+            var updatedSeller = await _context.Users.FindAsync(seller.Id);
+            Assert.Equal(600, updatedSeller.Currency);
+
+            // Verify trade is gone
+            Assert.Null(await _context.OpenTrades.FindAsync(openTrade.Id));
+        }
+
+        private TradeService CreateTradeService(Guid userId)
+        {
+            var currentUserService = new TestCurrentUserService { UserId = userId };
+            return new TradeService(
+                _openTradeRepo,
+                _completedTradeRepo,
+                _userRepo,
+                _cardRepo,
+                _vehicleRepo,
+                _rewardRepo,
+                currentUserService,
+                new NullStringLocalizer<SharedResources>());
+        }
     }
 }

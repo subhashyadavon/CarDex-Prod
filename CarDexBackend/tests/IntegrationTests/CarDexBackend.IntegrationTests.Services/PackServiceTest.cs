@@ -378,5 +378,85 @@ namespace DefaultNamespace
             // Assert - Should have variety of grades
             Assert.Contains("FACTORY", allGrades);
         }
+
+        [Fact]
+        public async Task PurchasePack_ShouldBeThreadSafe()
+        {
+            // Arrange
+            var collection = _context.Collections.First();
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var user = _context.Users.First(u => u.Id == testUserId);
+            user.Currency = 400; // Enough for only 1 pack (price is 300)
+            _context.SaveChanges();
+
+            var request = new PackPurchaseRequest { CollectionId = collection.Id };
+
+            // Act
+            var task1 = _packService.PurchasePack(request);
+            var task2 = _packService.PurchasePack(request);
+
+            await Task.WhenAll(
+                task1.ContinueWith(_ => {}),
+                task2.ContinueWith(_ => {})
+            );
+
+            // Assert
+            int successCount = 0;
+            int failureCount = 0;
+
+            if (task1.Status == TaskStatus.RanToCompletion) successCount++;
+            else failureCount++;
+
+            if (task2.Status == TaskStatus.RanToCompletion) successCount++;
+            else failureCount++;
+
+            // Verify currency only deducted once
+            var updatedUser = await _context.Users.FindAsync(testUserId);
+            Assert.Equal(1, successCount);
+            Assert.Equal(1, failureCount);
+            Assert.Equal(100, updatedUser.Currency);
+        }
+
+        [Fact]
+        public async Task OpenPack_ShouldBeThreadSafe()
+        {
+            // Arrange
+            var collection = _context.Collections.First();
+            var testUserId = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            
+            var pack = new CarDexBackend.Domain.Entities.Pack(
+                Guid.NewGuid(),
+                testUserId,
+                collection.Id,
+                500); 
+            _context.Packs.Add(pack);
+            _context.SaveChanges();
+
+            // Act
+            var task1 = _packService.OpenPack(pack.Id);
+            var task2 = _packService.OpenPack(pack.Id);
+
+            await Task.WhenAll(
+                task1.ContinueWith(_ => {}),
+                task2.ContinueWith(_ => {})
+            );
+
+            // Assert
+            int successCount = 0;
+            int failureCount = 0;
+
+            if (task1.Status == TaskStatus.RanToCompletion) successCount++;
+            else failureCount++;
+
+            if (task2.Status == TaskStatus.RanToCompletion) successCount++;
+            else failureCount++;
+
+            // Verify only 5 cards created (not 10)
+            var cardsCount = await _context.Cards.CountAsync(c => c.UserId == testUserId);
+
+            Assert.Equal(1, successCount);
+            Assert.Equal(1, failureCount);
+            Assert.Equal(5, cardsCount);
+        }
     }
 }

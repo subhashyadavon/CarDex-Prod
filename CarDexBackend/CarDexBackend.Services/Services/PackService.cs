@@ -5,6 +5,7 @@ using CarDexBackend.Shared.Dtos.Responses;
 using CarDexBackend.Repository.Interfaces;
 using Microsoft.Extensions.Localization;
 using CarDexBackend.Services.Resources;
+using System.Collections.Concurrent;
 
 namespace CarDexBackend.Services
 {
@@ -21,6 +22,9 @@ namespace CarDexBackend.Services
         private readonly ICardRepository _cardRepo;
         private readonly Random _random = new Random();
         private readonly ICurrentUserService _currentUserService;
+
+        private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _userLocks = new();
+        private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _packLocks = new();
 
         public PackService(
             IPackRepository packRepo,
@@ -80,46 +84,60 @@ namespace CarDexBackend.Services
         {
             var userId = _currentUserService.UserId;    //grab authenticated user's ID
             
-            // Get the collection
-            var collection = await _collectionRepo.GetByIdAsync(request.CollectionId);
-            if (collection == null)
-                throw new ArgumentException(_sr["CollectionNotFoundError"]);
+            var semaphore = _userLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
+            await semaphore.WaitAsync();
 
-            // Get the user
-            var user = await _userRepo.GetByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException(_sr["UserNotFoundError"]);
-
-            // Check if user has enough currency (use PackPrice, not BasePackValue)
-            var packPrice = collection.PackPrice;
-            if (user.Currency < packPrice)
-                throw new InvalidOperationException(_sr["InsufficientCurrencyError"]);
-
-            // Deduct currency from user
-            user.DeductCurrency(packPrice);
-            await _userRepo.UpdateAsync(user);
-
-            // Create the pack using constructor: Pack(Guid id, Guid userId, Guid collectionId, int value)
-            var packId = Guid.NewGuid();
-            var pack = new Pack(packId, userId, request.CollectionId, packPrice);
-
-            await _packRepo.AddAsync(pack);
-            await _packRepo.SaveChangesAsync();
-
-            // PackPurchaseResponse: {Pack: PackResponse, UserCurrency: int}
-            // PackResponse: {Id, CollectionId, CollectionName, PurchasedAt, IsOpened}
-            return new PackPurchaseResponse
+            try
             {
-                Pack = new PackResponse
+                // Get the collection
+                var collection = await _collectionRepo.GetByIdAsync(request.CollectionId);
+                if (collection == null)
+                    throw new ArgumentException(_sr["CollectionNotFoundError"]);
+
+                // Get the user
+                var user = await _userRepo.GetByIdAsync(userId);
+                if (user == null)
+                    throw new KeyNotFoundException(_sr["UserNotFoundError"]);
+
+                // Check if user has enough currency (use PackPrice, not BasePackValue)
+                var packPrice = collection.PackPrice;
+                if (user.Currency < packPrice)
+                    throw new InvalidOperationException(_sr["InsufficientCurrencyError"]);
+
+                // Deduct currency from user
+                user.DeductCurrency(packPrice);
+                await _userRepo.UpdateAsync(user);
+
+                // Create the pack using constructor: Pack(Guid id, Guid userId, Guid collectionId, int value)
+                var packId = Guid.NewGuid();
+                var pack = new Pack(packId, userId, request.CollectionId, packPrice);
+
+                await _packRepo.AddAsync(pack);
+                await _packRepo.SaveChangesAsync();
+
+                // PackPurchaseResponse: {Pack: PackResponse, UserCurrency: int}
+                // PackResponse: {Id, CollectionId, CollectionName, PurchasedAt, IsOpened}
+                return new PackPurchaseResponse
                 {
-                    Id = pack.Id,
-                    CollectionId = pack.CollectionId,
-                    CollectionName = collection.Name,
-                    PurchasedAt = DateTime.UtcNow,
-                    IsOpened = false
-                },
-                UserCurrency = user.Currency
-            };
+                    Pack = new PackResponse
+                    {
+                        Id = pack.Id,
+                        CollectionId = pack.CollectionId,
+                        CollectionName = collection.Name,
+                        PurchasedAt = DateTime.UtcNow,
+                        IsOpened = false
+                    },
+                    UserCurrency = user.Currency
+                };
+            }
+            finally
+            {
+                semaphore.Release();
+                if (semaphore.CurrentCount == 1)
+                {
+                    _userLocks.TryRemove(userId, out _);
+                }
+            }
         }
 
         /// <summary>
@@ -169,79 +187,96 @@ namespace CarDexBackend.Services
         /// </summary>
         public async Task<PackOpenResponse> OpenPack(Guid packId)
         {
-            var pack = await _packRepo.GetByIdAsync(packId);
-            if (pack == null)
-                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
+            var semaphore = _packLocks.GetOrAdd(packId, _ => new SemaphoreSlim(1, 1));
+            await semaphore.WaitAsync();
 
-            var collection = await _collectionRepo.GetByIdAsync(pack.CollectionId);
-            if (collection == null)
-                throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
-            
-            // if attempting to open a pack they do not own, throw a Pack not found error
-            if (pack.UserId != _currentUserService.UserId)
-                throw new KeyNotFoundException(_sr["PackNotFoundError"]);
-
-            // Get all vehicles from this collection using the Vehicles array
-            var vehicles = (await _vehicleRepo.FindAsync(v => collection.Vehicles.Contains(v.Id))).ToList();
-
-            if (!vehicles.Any())
-                throw new InvalidOperationException(_sr["EmptyCollectionError"]);
-
-            // Generate 5 random cards (typical pack size)
-            var cards = new List<Card>();
-            var cardDetailedResponses = new List<CardDetailedResponse>();
-
-            for (int i = 0; i < 5; i++)
+            try
             {
-                var randomVehicle = vehicles[_random.Next(vehicles.Count)];
-                var grade = GenerateRandomGrade();
-                var value = CalculateCardValue(pack.Value, grade);
+                var pack = await _packRepo.GetByIdAsync(packId);
+                if (pack == null)
+                    throw new KeyNotFoundException(_sr["PackNotFoundError"]);
 
-                // Card constructor: Card(Guid id, Guid userId, Guid vehicleId, Guid collectionId, GradeEnum grade, int value)
-                var cardId = Guid.NewGuid();
-                var card = new Card(cardId, pack.UserId, randomVehicle.Id, pack.CollectionId, grade, value);
+                if (pack.IsOpened)
+                    throw new InvalidOperationException(_sr["PackAlreadyOpenedError"] ?? "Pack already opened");
 
-                cards.Add(card);
+                var collection = await _collectionRepo.GetByIdAsync(pack.CollectionId);
+                if (collection == null)
+                    throw new KeyNotFoundException(_sr["CollectionNotFoundError"]);
                 
-                // PackOpenResponse needs CardDetailedResponse, not CardResponse
-                cardDetailedResponses.Add(new CardDetailedResponse
+                // if attempting to open a pack they do not own, throw a Pack not found error
+                if (pack.UserId != _currentUserService.UserId)
+                    throw new KeyNotFoundException(_sr["PackNotFoundError"]);
+
+                // Get all vehicles from this collection using the Vehicles array
+                var vehicles = (await _vehicleRepo.FindAsync(v => collection.Vehicles.Contains(v.Id))).ToList();
+
+                if (!vehicles.Any())
+                    throw new InvalidOperationException(_sr["EmptyCollectionError"]);
+
+                // Generate 5 random cards (typical pack size)
+                var cards = new List<Card>();
+                var cardDetailedResponses = new List<CardDetailedResponse>();
+
+                for (int i = 0; i < 5; i++)
                 {
-                    Id = card.Id,
-                    Name = $"{randomVehicle.Year} {randomVehicle.Make} {randomVehicle.Model}",
-                    Grade = card.Grade.ToString(),
-                    Value = card.Value,
-                    CreatedAt = DateTime.UtcNow,
-                    Description = $"{randomVehicle.Make} {randomVehicle.Model} - {grade} grade",
-                    VehicleId = card.VehicleId.ToString(),
-                    CollectionId = card.CollectionId.ToString(),
-                    OwnerId = card.UserId.ToString(),
-                    ImageUrl = randomVehicle.Image
+                    var randomVehicle = vehicles[_random.Next(vehicles.Count)];
+                    var grade = GenerateRandomGrade();
+                    var value = CalculateCardValue(pack.Value, grade);
 
-                });
-            }
+                    // Card constructor: Card(Guid id, Guid userId, Guid vehicleId, Guid collectionId, GradeEnum grade, int value)
+                    var cardId = Guid.NewGuid();
+                    var card = new Card(cardId, pack.UserId, randomVehicle.Id, pack.CollectionId, grade, value);
 
-            // Add cards to database
-            await _cardRepo.AddRangeAsync(cards);
+                    cards.Add(card);
+                    
+                    // PackOpenResponse needs CardDetailedResponse, not CardResponse
+                    cardDetailedResponses.Add(new CardDetailedResponse
+                    {
+                        Id = card.Id,
+                        Name = $"{randomVehicle.Year} {randomVehicle.Make} {randomVehicle.Model}",
+                        Grade = card.Grade.ToString(),
+                        Value = card.Value,
+                        CreatedAt = DateTime.UtcNow,
+                        Description = $"{randomVehicle.Make} {randomVehicle.Model} - {grade} grade",
+                        VehicleId = card.VehicleId.ToString(),
+                        CollectionId = card.CollectionId.ToString(),
+                        OwnerId = card.UserId.ToString(),
+                        ImageUrl = randomVehicle.Image
 
-            // Mark pack as opened
-            pack.Open(); // Use domain behavior
-            await _packRepo.UpdateAsync(pack);
-
-            await _packRepo.SaveChangesAsync();
-
-            // PackOpenResponse: {Cards: IEnumerable<CardDetailedResponse>, Pack: PackResponse}
-            return new PackOpenResponse
-            {
-                Cards = cardDetailedResponses,
-                Pack = new PackResponse
-                {
-                    Id = pack.Id,
-                    CollectionId = pack.CollectionId,
-                    CollectionName = collection?.Name ?? "Unknown",
-                    PurchasedAt = DateTime.UtcNow,
-                    IsOpened = pack.IsOpened
+                    });
                 }
-            };
+
+                // Add cards to database
+                await _cardRepo.AddRangeAsync(cards);
+
+                // Mark pack as opened
+                pack.Open(); // Use domain behavior
+                await _packRepo.UpdateAsync(pack);
+
+                await _packRepo.SaveChangesAsync();
+
+                // PackOpenResponse: {Cards: IEnumerable<CardDetailedResponse>, Pack: PackResponse}
+                return new PackOpenResponse
+                {
+                    Cards = cardDetailedResponses,
+                    Pack = new PackResponse
+                    {
+                        Id = pack.Id,
+                        CollectionId = pack.CollectionId,
+                        CollectionName = collection?.Name ?? "Unknown",
+                        PurchasedAt = DateTime.UtcNow,
+                        IsOpened = pack.IsOpened
+                    }
+                };
+            }
+            finally
+            {
+                semaphore.Release();
+                if (semaphore.CurrentCount == 1)
+                {
+                    _packLocks.TryRemove(packId, out _);
+                }
+            }
         }
 
         /// <summary>
