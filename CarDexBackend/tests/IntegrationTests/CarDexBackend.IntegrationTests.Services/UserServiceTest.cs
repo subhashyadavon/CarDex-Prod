@@ -29,6 +29,7 @@ namespace DefaultNamespace
         private readonly IRewardRepository _rewardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly ICollectionRepository _collectionRepo;
+        private readonly TestCurrentUserService _currentUserService;
         
         //Used ChatGPT to set up the base code
         public UserServiceTest()
@@ -47,6 +48,7 @@ namespace DefaultNamespace
             _rewardRepo = new RewardRepository(_context);
             _vehicleRepo = new Repository<Vehicle>(_context);
             _collectionRepo = new CollectionRepository(_context);
+            _currentUserService = new TestCurrentUserService();
 
             _userService = new UserService(
                 _userRepo, 
@@ -57,6 +59,7 @@ namespace DefaultNamespace
                 _rewardRepo, 
                 _vehicleRepo, 
                 _collectionRepo,
+                _currentUserService,
                 new NullStringLocalizer<SharedResources>());
         }
 
@@ -81,13 +84,43 @@ namespace DefaultNamespace
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            // Set current user as the profile owner
+            _currentUserService.UserId = user.Id;
+
             // Act: Call the service method to get the user profile
             var result = await _userService.GetUserProfile(user.Id);
 
-            // Assert: Check that the user profile returned matches the test user
+            // Assert: Check that the user profile returned matches the test user and includes currency
             Assert.NotNull(result);
             Assert.Equal(user.Id, result.Id);
             Assert.Equal("TestUser", result.Username);
+            Assert.Equal(100, result.Currency);
+        }
+
+        [Fact]
+        public async Task GetUserProfile_ShouldNotReturnCurrencyForNonOwner()
+        {
+            // Arrange: Create a test user in the database
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = Guid.NewGuid(),
+                Username = "OtherUser",
+                Password = "Password123",
+                Currency = 500,
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Set current user as a different user
+            _currentUserService.UserId = Guid.NewGuid();
+
+            // Act: Call the service method to get the user profile
+            var result = await _userService.GetUserProfile(user.Id);
+
+            // Assert: Check that currency is null for non-owner
+            Assert.NotNull(result);
+            Assert.Equal(user.Id, result.Id);
+            Assert.Null(result.Currency);
         }
 
         // Test for updating user profile

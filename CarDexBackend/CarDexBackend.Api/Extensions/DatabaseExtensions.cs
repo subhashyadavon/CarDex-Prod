@@ -1,4 +1,5 @@
 using CarDexDatabase;
+using CarDexBackend.Domain.Entities;
 using CarDexBackend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -82,6 +83,18 @@ namespace CarDexBackend.Api.Extensions
                         context.Database.ExecuteSqlRaw(sql);
 
                         context.Database.EnsureCreated();
+
+                        // Seed System User if it doesn't exist
+                        // Using raw SQL to ensure it bypasses EF Core metadata issues and works better with existing schemas
+                        var systemUserId = "00000000-0000-0000-0000-000000000001";
+                        var seedSql = $@"
+                            INSERT INTO users (id, username, password, currency, created_at)
+                            VALUES ('{systemUserId}', 'SystemUser_CardHistory', 'SYSTEM_USER_NO_LOGIN', 0, NOW())
+                            ON CONFLICT (id) DO NOTHING;
+                        ";
+                        context.Database.ExecuteSqlRaw(seedSql);
+                        logger.LogInformation("✓ System User ensured in database.");
+
                         logger.LogInformation("✓ Database connection established successfully!");
                         return app;
                     }

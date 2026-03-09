@@ -79,9 +79,10 @@ const GarageSection: React.FC = () => {
       }
 
       console.log(`Successfully sold card ${cardId}. New currency: ${response.newUserCurrency}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to sell card:", err);
-      alert("Failed to sell card. It might be listed in a trade.");
+      const errorMessage = err.response?.data?.detail || err.message || "Failed to sell card. Please try again.";
+      alert(errorMessage);
     }
   };
 

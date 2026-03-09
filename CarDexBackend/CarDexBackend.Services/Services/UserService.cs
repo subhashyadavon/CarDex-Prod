@@ -23,6 +23,7 @@ namespace CarDexBackend.Services
         private readonly IRewardRepository _rewardRepo;
         private readonly IRepository<Vehicle> _vehicleRepo;
         private readonly ICollectionRepository _collectionRepo;
+        private readonly ICurrentUserService _currentUserService;
 
         public UserService(
             IUserRepository userRepo,
@@ -33,6 +34,7 @@ namespace CarDexBackend.Services
             IRewardRepository rewardRepo,
             IRepository<Vehicle> vehicleRepo,
             ICollectionRepository collectionRepo,
+            ICurrentUserService currentUserService,
             IStringLocalizer<SharedResources> sr)
         {
             _userRepo = userRepo;
@@ -43,6 +45,7 @@ namespace CarDexBackend.Services
             _rewardRepo = rewardRepo;
             _vehicleRepo = vehicleRepo;
             _collectionRepo = collectionRepo;
+            _currentUserService = currentUserService;
             _sr = sr;
         }
 
@@ -55,11 +58,14 @@ namespace CarDexBackend.Services
             if (user == null)
                 throw new KeyNotFoundException(_sr["UserNotFoundError"]);
 
+            var isOwner = _currentUserService.IsAuthenticated && _currentUserService.UserId == userId;
+
             return new UserPublicResponse
             {
                 Id = user.Id,
                 Username = user.Username,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                Currency = isOwner ? user.Currency : null
             };
         }
 

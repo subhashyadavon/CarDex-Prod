@@ -170,10 +170,12 @@ namespace CarDexBackend.Services
             if (card.UserId != userId)
                 throw new InvalidOperationException(_sr["OnlySellYourCardsError"]);
 
-            // Check if card is in an open trade
+            // Cancel any open trades for this card
             var openTrades = await _openTradeRepo.FindAsync(t => t.CardId == cardId);
-            if (openTrades.Any())
-                throw new InvalidOperationException(_sr["CardInTradeError"]);
+            foreach (var trade in openTrades)
+            {
+                await _openTradeRepo.DeleteAsync(trade);
+            }
 
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null)
@@ -185,7 +187,28 @@ namespace CarDexBackend.Services
             user.AddCurrency(sellPrice);
             await _userRepo.UpdateAsync(user);
 
-            await _cardRepo.DeleteAsync(card);
+            // "Soft-delete" by moving to a system user
+            // This avoids breaking foreign key constraints in completed_trade
+            // while removing it from the user's collection.
+            var systemUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            
+            // Ensure system user exists (redundancy check for startup seeding)
+            var systemUser = await _userRepo.GetByIdAsync(systemUserId);
+            if (systemUser == null)
+            {
+                systemUser = new User
+                {
+                    Id = systemUserId,
+                    Username = "SystemUser_CardHistory",
+                    Password = "SYSTEM_USER_NO_LOGIN",
+                    Currency = 0
+                };
+                await _userRepo.AddAsync(systemUser);
+                await _userRepo.SaveChangesAsync();
+            }
+
+            card.UserId = systemUserId;
+            await _cardRepo.UpdateAsync(card);
             await _cardRepo.SaveChangesAsync();
 
             return new CardQuickSellResponse

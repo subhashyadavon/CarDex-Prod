@@ -110,6 +110,7 @@ namespace DefaultNamespace.RegressionTests
                 rewardRepo, 
                 vehicleRepo, 
                 collectionRepo,
+                tradeCurrentUserService,
                 new NullStringLocalizer<SharedResources>());
             
             _collectionService = new CollectionService(collectionRepo, cardRepo, new NullStringLocalizer<SharedResources>());

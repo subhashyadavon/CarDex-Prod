@@ -27,5 +27,13 @@ namespace CarDexBackend.Shared.Dtos.Responses
         /// The timestamp when the user account was originally created.
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// The current currency balance of the user.
+        /// </summary>
+        /// <remarks>
+        /// This is only populated when the user is viewing their own profile.
+        /// </remarks>
+        public int? Currency { get; set; }
     }
 }

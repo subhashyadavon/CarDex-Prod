@@ -86,6 +86,17 @@ namespace DefaultNamespace
 
             _context.Vehicles.Add(vehicle1);
             _context.Vehicles.Add(vehicle2);
+            
+            // Seed System User
+            var systemUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            _context.Users.Add(new User
+            {
+                Id = systemUserId,
+                Username = "SystemUser_CardHistory",
+                Password = "Password",
+                Currency = 0
+            });
+
             _context.SaveChanges();
 
             // Add test cards
@@ -467,9 +478,65 @@ namespace DefaultNamespace
             Assert.Equal(5000, result.SellPrice); // 50% of 10000
             Assert.Equal(6000, result.NewUserCurrency); // 1000 + 5000
 
-            // Verify card is deleted
+            // Verify card is "soft-deleted" (moved to system user)
             var deletedCard = await _context.Cards.FindAsync(card.Id);
-            Assert.Null(deletedCard);
+            Assert.NotNull(deletedCard);
+            var systemUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            Assert.Equal(systemUserId, deletedCard.UserId);
+        }
+
+        [Fact]
+        public async Task QuickSellCard_ShouldCancelOpenTrades_WhenSellingCard()
+        {
+            // Arrange
+            var userId = _currentUserService.UserId;
+            var user = new CarDexBackend.Domain.Entities.User
+            {
+                Id = userId,
+                Username = "Seller",
+                Password = "Password",
+                Currency = 1000
+            };
+            _context.Users.Add(user);
+            
+            var vehicle = _context.Vehicles.First();
+            var card = new CarDexBackend.Domain.Entities.Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                VehicleId = vehicle.Id,
+                CollectionId = Guid.NewGuid(),
+                Grade = GradeEnum.FACTORY,
+                Value = 10000
+            };
+            _context.Cards.Add(card);
+
+            var trade = new CarDexBackend.Domain.Entities.OpenTrade(
+                Guid.NewGuid(),
+                TradeEnum.FOR_PRICE,
+                userId,
+                card.Id,
+                5000,
+                null
+            );
+            _context.OpenTrades.Add(trade);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _cardService.QuickSellCard(card.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            
+            // Verify trade is deleted
+            var deletedTrade = await _context.OpenTrades.FindAsync(trade.Id);
+            Assert.Null(deletedTrade);
+
+            // Verify card is soft-deleted
+            var deletedCard = await _context.Cards.FindAsync(card.Id);
+            Assert.NotNull(deletedCard);
+            var systemUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            Assert.Equal(systemUserId, deletedCard.UserId);
         }
 
         [Fact]
