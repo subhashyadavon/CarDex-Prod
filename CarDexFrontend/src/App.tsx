@@ -16,7 +16,15 @@ function AppContent() {
   const [activeNav, setActiveNav] = useState<NavItem>("OPEN");
   const [userCurrency, setUserCurrency] = useState(0);
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated, isLoading } = useAuth();
+
+  // AUTH GUARD: If not logged in, send back to login page
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      console.log('[App] Not authenticated, redirecting to /login');
+      navigate("/login");
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   // Load user currency when component mounts or user changes
   useEffect(() => {
