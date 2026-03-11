@@ -25,7 +25,7 @@ resource "azurerm_service_plan" "plan" {
 }
 
 resource "azurerm_app_service" "app" {
-  name                = "app-cardex-prod-${var.unique_id}"
+  name                = "app-cardex"
   resource_group_name = azurerm_resource_group.cardex.name
   location            = azurerm_resource_group.cardex.location
   app_service_plan_id = azurerm_service_plan.plan.id

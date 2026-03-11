@@ -76,7 +76,9 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseHttpsRedirection();
+    // HTTPS redirection is handled by the Azure App Service/Nginx layer.
+    // Explicitly disabling it here to prevent proxy loops when running behind Nginx on port 8080.
+    // app.UseHttpsRedirection();
 }
 
 app.UseCors();
