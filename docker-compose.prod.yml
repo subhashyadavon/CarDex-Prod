@@ -1,12 +1,10 @@
 services:
   cardex-frontend:
     image: ghcr.io/subhashyadavon/cardex-prod-frontend:main
-    build:
-      context: .
-      dockerfile: CarDexFrontend/Dockerfile
-    container_name: cardex-frontend-prod
     ports:
       - "80:8080"
+    environment:
+      - REACT_APP_API_URL=/
     depends_on:
       - cardex-api
     restart: always
@@ -15,16 +13,11 @@ services:
 
   cardex-api:
     image: ghcr.io/subhashyadavon/cardex-prod-backend:main
-    build:
-      context: .
-      dockerfile: CarDexBackend/CarDexBackend.Api/Dockerfile
-    container_name: cardex-api-prod
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
-      # you will have to have this in your .env file
       - ConnectionStrings__CarDexDatabase=${SUPABASE_CONNECTION_STRING}
       - Jwt__SecretKey=${JWT_SECRET_KEY}
     restart: always

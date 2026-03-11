@@ -526,3 +526,11 @@ CarDexFrontend/test-results/
 # Ignore JetBrains IDE project settings
 .idea/
 .vscode/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+tfplan
+infrastructure/terraform/terraform.tfvars
+infrastructure/terraform/DEPLOY_TERRAFORM.md
