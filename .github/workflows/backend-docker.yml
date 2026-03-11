@@ -60,3 +60,12 @@ jobs:
 
       - name: Image digest
         run: echo "Image pushed with digest ${{ steps.build-push.outputs.digest }}"
+      - name: Login to Azure
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Restart Azure Web App
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: az webapp restart --name app-cardex --resource-group rg-cardex-prod
