@@ -157,7 +157,7 @@ Frontend (Web): **React**
 
 Backend API: **ASP.NET Core** (or Fastify/Node.js as fallback)
 
-Database: **PostgreSQL + Prisma**
+Database: **PostgreSQL + Entity Framework Core (EF Core)**
 
 Deployment/DevOps: **Docker**
 
@@ -169,7 +169,7 @@ This architecture works well because it separates concerns cleanly between mobil
 - **React (Web):** Great for building rich, responsive websites; it lets us show high-resolution car cards and makes comparing collections on desktop smooth and fast.  
 - **ASP.NET Core / Fastify (Backend API):** Provides a secure, high-performance backend that keeps trades instant, updates collections in real time, and scales as more collectors join.  
 - **Swagger / OpenAPI:** Enables live, interactive API documentation so web and mobile teams can test trading and racing features without guesswork.  
-- **PostgreSQL + Prisma (Database):** A rock-solid database to store every car card, user garage, and trade history safely, while Prisma simplifies database interactions and schema evolution.  
+- **PostgreSQL + Entity Framework Core (Database):** A rock-solid database to store every car card, user garage, and trade history safely, while Entity Framework Core simplifies database interactions and provides a robust migration system for schema evolution.
 - **Docker:** Ensures consistent development environments and simplifies local testing and future deployment.  
 
 # Work Division & Coordination
@@ -180,7 +180,7 @@ Frontend (Flutter & React): 2 members will focus on mobile and web UI/UX.
 
 Backend (API & Logic): 2 members will implement API endpoints, authentication, and racing/trading logic.
 
-Database & DevOps: 2 members will design schemas, manage migrations with Prisma, and handle Docker setup/deployment.
+Database & DevOps: 2 members will design schemas, manage migrations with Entity Framework Core, and handle Docker setup/deployment.
 
 
 We will coordinate work using weekly meetings, short sprint cycles, and GitHub pull requests with code reviews. Communication will be managed through a team chat (e.g., Discord/Slack) and task tracking in GitHub Projects or Jira.

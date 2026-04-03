@@ -57,7 +57,7 @@ Players can:
 - **Frontend (Web):** React  
 - **Frontend (CLI):** Python  
 - **Backend API:** ASP.NET Core 8 + Swagger/OpenAPI  
-- **Database:** PostgreSQL + Prisma, hosted on Supabase  
+- **Database:** PostgreSQL + Entity Framework Core (EF Core), hosted on Supabase  
 - **DevOps:** Docker + GitHub Actions (CI/CD)  
 
 </br>
